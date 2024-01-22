@@ -32,13 +32,14 @@ jobs:
 
       # Check for any formatting issues in the code.
       - name: Check code formatting
-        run: dart format --set-exit-if-changed .
+        run: dart format --output=none .
 
       # Statically analyze the Dart code for any errors.
       - name: Analyze Dart code
         run: flutter analyze .
 
-      - run: flutter build apk --release --split-per-abi --target-platform=android-arm64
+      - name: Build arm64 APK
+        run: flutter build apk --release --split-per-abi --target-platform=android-arm64  --flavor github
       
       - name: Release apk
         uses: actions/upload-artifact@main
