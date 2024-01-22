@@ -1,8 +1,11 @@
-name: Test, Build and Release apk
+name: Build and Release apk
 
 on:
   workflow_dispatch:
-
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 jobs:
   process:
     name: all process
@@ -12,21 +15,22 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup Java JDK
-        uses: actions/setup-java@v1.3.0
+        uses: actions/setup-java@v2
         with:
-          java-version: "12.x"
+          distribution: 'zulu'
+          java-version: 17
+
 
       - name: Flutter action
-        uses: subosito/flutter-action@v1.1.1
+        uses: subosito/flutter-action@v1
         with:
-          channel: "stable"
-          flutter-version: "1.12.x"
+          flutter-version: '3.16.0'
 
       - run: flutter pub get
 
       - run: flutter test
 
-      - run: flutter build apk --release
+      - run: flutter build apk --release --target-platform=android-arm64
       
       - name: Release apk
         uses: actions/upload-artifact@main
