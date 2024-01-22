@@ -32,9 +32,9 @@ jobs:
 
       - name: Set key
         run: |
-          echo keyPassword=\${{ secrets.KEY_STORE }} > ${{env.PROPERTIES_PATH}}
-          echo storePassword=\${{ secrets.KEY_PASSWORD }} >> ${{env.PROPERTIES_PATH}}
-          echo keyAlias=\${{ secrets.KEY_ALIAS }} >> ${{env.PROPERTIES_PATH}}
+          echo keyPassword=\${{ secrets.STOREPASSWORD }} > ${{env.PROPERTIES_PATH}}
+          echo storePassword=\${{ secrets.STOREPASSWORD }} >> ${{env.PROPERTIES_PATH}}
+          echo keyAlias=\${{ secrets.KEYALIAS }} >> ${{env.PROPERTIES_PATH}}
           echo storeFile=key.jks >> ${{env.PROPERTIES_PATH}}
           echo "${{ secrets.KEYSTORE2 }}" | base64 --decode > android/app/key.jks
 
