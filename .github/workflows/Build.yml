@@ -21,16 +21,24 @@ jobs:
           java-version: 17
 
 
-      - name: Flutter action
-        uses: subosito/flutter-action@v1
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.0'
+          channel: 'stable'
 
-      - run: flutter pub get
+      # Get Flutter dependencies.
+      - name: Get Flutter dependencies
+        run: flutter pub get
 
-      - run: flutter test
+      # Check for any formatting issues in the code.
+      - name: Check code formatting
+        run: dart format --set-exit-if-changed .
 
-      - run: flutter build apk --release --target-platform=android-arm64
+      # Statically analyze the Dart code for any errors.
+      - name: Analyze Dart code
+        run: flutter analyze .
+
+      - run: flutter build apk --release --split-per-abi --target-platform=android-arm64
       
       - name: Release apk
         uses: actions/upload-artifact@main
