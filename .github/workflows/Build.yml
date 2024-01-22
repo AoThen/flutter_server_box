@@ -6,6 +6,10 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+
+env:
+  PROPERTIES_PATH: './android/key.properties'
+
 jobs:
   process:
     name: all process
@@ -25,6 +29,15 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+
+      - name: Set key
+        run: |
+          echo keyPassword=\${{ secrets.KEY_STORE }} > ${{env.PROPERTIES_PATH}}
+          echo storePassword=\${{ secrets.KEY_PASSWORD }} >> ${{env.PROPERTIES_PATH}}
+          echo keyAlias=\${{ secrets.KEY_ALIAS }} >> ${{env.PROPERTIES_PATH}}
+          echo storeFile=key.jks >> ${{env.PROPERTIES_PATH}}
+          echo "${{ secrets.KEYSTORE2 }}" | base64 --decode > android/app/key.jks
+
 
       # Get Flutter dependencies.
       - name: Get Flutter dependencies
