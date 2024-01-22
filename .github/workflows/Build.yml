@@ -39,7 +39,7 @@ jobs:
         run: flutter analyze .
 
       - name: Build arm64 APK
-        run: flutter build apk --release --target-platform=android-arm64  --flavor github
+        run: flutter build apk --release --target-platform=android-arm64
       
       - name: Release apk
         uses: actions/upload-artifact@main
