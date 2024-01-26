@@ -21,23 +21,26 @@ jobs:
 
       - name: Clone repo
         run: |
-          git clone --depth 1 https://github.com/lollipopkit/flutter_server_box.git /flutter_server_boxx
-          mv -f flutter_server_boxx/* .
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
+          cd workdir
+          git clone --depth 1 https://github.com/lollipopkit/flutter_server_box.git /apk
 
 
       - name: Setup Java JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@main
         with:
           distribution: 'zulu'
           java-version: 17
 
 
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@main
         with:
           channel: 'stable'
 
       - name: Set key
+        working-directory: /workdir/apk
         run: |
           echo keyPassword=\${{ secrets.STOREPASSWORD }} > ${{env.PROPERTIES_PATH}}
           echo storePassword=\${{ secrets.STOREPASSWORD }} >> ${{env.PROPERTIES_PATH}}
@@ -48,24 +51,28 @@ jobs:
 
       # Get Flutter dependencies.
       - name: Get Flutter dependencies
+        working-directory: /workdir/apk
         run: flutter pub get
 
       # Check for any formatting issues in the code.
       - name: Check code formatting
+        working-directory: /workdir/apk
         run: dart format --output=none .
 
       # Statically analyze the Dart code for any errors.
       - name: Analyze Dart code
+        working-directory: /workdir/apk
         run: flutter analyze .
 
       - name: Build arm64 APK
+        working-directory: /workdir/apk
         run: flutter build apk --release --target-platform=android-arm64
       
       - name: Release apk
         uses: actions/upload-artifact@main
         with:
           name: flutter_server_box
-          path: "build/app/outputs/apk/release/*.apk"
+          path: "/workdir/apk/build/app/outputs/apk/release/*.apk"
 
       - name: Delete workflow runs
         uses: AoThen/delete-workflow-runs@main
