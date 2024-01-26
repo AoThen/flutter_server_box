@@ -17,12 +17,12 @@ jobs:
 
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@main
 
       - name: Clone repo
         run: |
-          git clone --depth 1 https://github.com/lollipopkit/flutter_server_box.git /flutter_server_box
-          mv -f flutter_server_box/* .
+          git clone --depth 1 https://github.com/lollipopkit/flutter_server_box.git /flutter_server_boxx
+          mv -f flutter_server_boxx/* .
 
 
       - name: Setup Java JDK
