@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@main
 
       - name: Clone repo
+        id: repo
         run: |
           echo $PWD
           echo $GITHUB_WORKSPACE
@@ -28,6 +29,7 @@ jobs:
           git clone --depth 1 https://github.com/lollipopkit/flutter_server_box.git /workdir
           cd /workdir
           echo $PWD
+          echo "action_dir=$PWD" >> "$GITHUB_OUTPUT"
           echo "action_dir=$PWD" >> "$GITHUB_ENV"
 
 
@@ -46,6 +48,7 @@ jobs:
       - name: Set key
         run: |
           cd "$action_dir"
+          echo $PWD
           echo keyPassword=\${{ secrets.STOREPASSWORD }} > ${{env.PROPERTIES_PATH}}
           echo storePassword=\${{ secrets.STOREPASSWORD }} >> ${{env.PROPERTIES_PATH}}
           echo keyAlias=\${{ secrets.KEYALIAS }} >> ${{env.PROPERTIES_PATH}}
@@ -57,30 +60,34 @@ jobs:
       - name: Get Flutter dependencies
         run: |
           cd "$action_dir"
+          echo $PWD
           flutter pub get
 
       # Check for any formatting issues in the code.
       - name: Check code formatting
         run: |
           cd "$action_dir"
+          echo $PWD
           dart format --output=none .
 
       # Statically analyze the Dart code for any errors.
       - name: Analyze Dart code
         run: |
           cd "$action_dir"
+          echo $PWD
           flutter analyze .
 
       - name: Build arm64 APK
         run: |
           cd "$action_dir"
+          echo $PWD
           flutter build apk --release --target-platform=android-arm64
       
       - name: Release apk
         uses: actions/upload-artifact@main
         with:
           name: flutter_server_box
-          path: "$action_dir/build/app/outputs/apk/release/*.apk"
+          path: ${{ steps.repo.outputs.action_dir }}/build/app/outputs/apk/release/*.apk
 
       - name: Delete workflow runs
         uses: AoThen/delete-workflow-runs@main
