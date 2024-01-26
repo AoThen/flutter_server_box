@@ -42,7 +42,7 @@ jobs:
 
       - name: Set key
         run: |
-          cd workdir
+          cd $GITHUB_WORKSPACE/workdir
           echo keyPassword=\${{ secrets.STOREPASSWORD }} > ${{env.PROPERTIES_PATH}}
           echo storePassword=\${{ secrets.STOREPASSWORD }} >> ${{env.PROPERTIES_PATH}}
           echo keyAlias=\${{ secrets.KEYALIAS }} >> ${{env.PROPERTIES_PATH}}
@@ -53,24 +53,24 @@ jobs:
       # Get Flutter dependencies.
       - name: Get Flutter dependencies
         run: |
-          cd workdir
+          cd $GITHUB_WORKSPACE/workdir
           flutter pub get
 
       # Check for any formatting issues in the code.
       - name: Check code formatting
         run: |
-          cd workdir
+          cd $GITHUB_WORKSPACE/workdir
           dart format --output=none .
 
       # Statically analyze the Dart code for any errors.
       - name: Analyze Dart code
         run: |
-          cd workdir
+          cd $GITHUB_WORKSPACE/workdir
           flutter analyze .
 
       - name: Build arm64 APK
         run: |
-          cd workdir
+          cd $GITHUB_WORKSPACE/workdir
           flutter build apk --release --target-platform=android-arm64
       
       - name: Release apk
