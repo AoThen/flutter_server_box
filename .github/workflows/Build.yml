@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
+permissions:
+  actions: write
 env:
   PROPERTIES_PATH: './android/key.properties'
 
@@ -16,7 +16,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Clone repo
+        run: |
+          git clone --depth 1 https://github.com/lollipopkit/flutter_server_box.git /flutter_server_box
+          mv -f flutter_server_box/* .
+
 
       - name: Setup Java JDK
         uses: actions/setup-java@v2
@@ -60,3 +67,8 @@ jobs:
           name: flutter_server_box
           path: "build/app/outputs/apk/release/*.apk"
 
+      - name: Delete workflow runs
+        uses: AoThen/delete-workflow-runs@main
+        with:
+          retain_days: 1
+          keep_minimum_runs: 5
