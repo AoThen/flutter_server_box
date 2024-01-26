@@ -21,10 +21,9 @@ jobs:
 
       - name: Clone repo
         run: |
-          sudo mkdir -p /workdir
-          sudo chown $USER:$GROUPS /workdir
-          cd workdir
-          git clone --depth 1 https://github.com/lollipopkit/flutter_server_box.git /apk
+          echo $PWD
+          echo $GITHUB_WORKSPACE
+          git clone --depth 1 https://github.com/lollipopkit/flutter_server_box.git /workdir
 
 
       - name: Setup Java JDK
@@ -40,8 +39,8 @@ jobs:
           channel: 'stable'
 
       - name: Set key
-        working-directory: /workdir/apk
         run: |
+          cd workdir
           echo keyPassword=\${{ secrets.STOREPASSWORD }} > ${{env.PROPERTIES_PATH}}
           echo storePassword=\${{ secrets.STOREPASSWORD }} >> ${{env.PROPERTIES_PATH}}
           echo keyAlias=\${{ secrets.KEYALIAS }} >> ${{env.PROPERTIES_PATH}}
@@ -51,28 +50,32 @@ jobs:
 
       # Get Flutter dependencies.
       - name: Get Flutter dependencies
-        working-directory: /workdir/apk
-        run: flutter pub get
+        run: |
+          cd workdir
+          flutter pub get
 
       # Check for any formatting issues in the code.
       - name: Check code formatting
-        working-directory: /workdir/apk
-        run: dart format --output=none .
+        run: |
+          cd workdir
+          dart format --output=none .
 
       # Statically analyze the Dart code for any errors.
       - name: Analyze Dart code
-        working-directory: /workdir/apk
-        run: flutter analyze .
+        run: |
+          cd workdir
+          flutter analyze .
 
       - name: Build arm64 APK
-        working-directory: /workdir/apk
-        run: flutter build apk --release --target-platform=android-arm64
+        run: |
+          cd workdir
+          flutter build apk --release --target-platform=android-arm64
       
       - name: Release apk
         uses: actions/upload-artifact@main
         with:
           name: flutter_server_box
-          path: "/workdir/apk/build/app/outputs/apk/release/*.apk"
+          path: "/workdir/build/app/outputs/apk/release/*.apk"
 
       - name: Delete workflow runs
         uses: AoThen/delete-workflow-runs@main
