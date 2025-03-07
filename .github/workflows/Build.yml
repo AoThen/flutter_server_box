@@ -81,13 +81,17 @@ jobs:
         run: |
           cd "$action_dir"
           echo $PWD
-          flutter build apk --release --target-platform=android-arm64
+          #flutter build apk --release --target-platform=android-arm64
+          flutter build apk --release --split-per-abi
+          cd build/app/outputs/flutter-apk/
+          mv app-armeabi-v7a-release.apk flutter_server_box-armeabi-v7a.apk
+          mv app-arm64-v8a-release.apk flutter_server_box-arm64-v8a.apk
       
       - name: Release apk
         uses: actions/upload-artifact@main
         with:
           name: flutter_server_box
-          path: ${{ steps.repo.outputs.action_dir }}/build/app/outputs/apk/release/*.apk
+          path: ${{ steps.repo.outputs.action_dir }}/build/app/outputs/flutter-apk/*.apk
 
       - name: Delete workflow runs
         uses: AoThen/delete-workflow-runs@main
