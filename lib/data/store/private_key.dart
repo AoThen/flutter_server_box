@@ -1,11 +1,14 @@
-import '../../core/persistant_store.dart';
-import '../model/server/private_key_info.dart';
+import 'package:fl_lib/fl_lib.dart';
 
-class PrivateKeyStore extends PersistentStore {
-  PrivateKeyStore() : super('key');
+import 'package:server_box/data/model/server/private_key_info.dart';
+
+class PrivateKeyStore extends HiveStore {
+  PrivateKeyStore._() : super('key');
+
+  static final instance = PrivateKeyStore._();
 
   void put(PrivateKeyInfo info) {
-    box.put(info.id, info);
+    set(info.id, info);
   }
 
   List<PrivateKeyInfo> fetch() {
@@ -20,12 +23,12 @@ class PrivateKeyStore extends PersistentStore {
     return ps;
   }
 
-  PrivateKeyInfo? get(String? id) {
+  PrivateKeyInfo? fetchOne(String? id) {
     if (id == null) return null;
     return box.get(id);
   }
 
   void delete(PrivateKeyInfo s) {
-    box.delete(s.id);
+    remove(s.id);
   }
 }

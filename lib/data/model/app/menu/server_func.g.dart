@@ -21,12 +21,12 @@ class ServerFuncBtnAdapter extends TypeAdapter<ServerFuncBtn> {
         return ServerFuncBtn.container;
       case 3:
         return ServerFuncBtn.process;
-      case 4:
-        return ServerFuncBtn.pkg;
       case 5:
         return ServerFuncBtn.snippet;
       case 6:
         return ServerFuncBtn.iperf;
+      case 8:
+        return ServerFuncBtn.systemd;
       default:
         return ServerFuncBtn.terminal;
     }
@@ -47,14 +47,14 @@ class ServerFuncBtnAdapter extends TypeAdapter<ServerFuncBtn> {
       case ServerFuncBtn.process:
         writer.writeByte(3);
         break;
-      case ServerFuncBtn.pkg:
-        writer.writeByte(4);
-        break;
       case ServerFuncBtn.snippet:
         writer.writeByte(5);
         break;
       case ServerFuncBtn.iperf:
         writer.writeByte(6);
+        break;
+      case ServerFuncBtn.systemd:
+        writer.writeByte(8);
         break;
     }
   }

@@ -1,29 +1,16 @@
-import 'dart:convert';
-
+import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
-import 'package:toolbox/core/extension/context/dialog.dart';
-import 'package:toolbox/core/extension/context/locale.dart';
-import 'package:toolbox/core/extension/context/snackbar.dart';
-import 'package:toolbox/core/route.dart';
-import 'package:toolbox/core/utils/misc.dart';
-import 'package:toolbox/core/utils/platform/auth.dart';
-import 'package:toolbox/core/utils/share.dart';
-import 'package:toolbox/data/res/logger.dart';
-import 'package:toolbox/data/res/misc.dart';
-import 'package:toolbox/data/res/store.dart';
-import 'package:toolbox/data/res/ui.dart';
-import 'package:toolbox/view/page/setting/platform/platform_pub.dart';
-import 'package:toolbox/view/widget/appbar.dart';
-import 'package:toolbox/view/widget/future_widget.dart';
-import 'package:toolbox/view/widget/cardx.dart';
-import 'package:toolbox/view/widget/store_switch.dart';
+import 'package:server_box/core/extension/context/locale.dart';
+import 'package:server_box/core/utils/misc.dart';
+import 'package:server_box/data/res/store.dart';
+import 'package:server_box/view/page/setting/platform/platform_pub.dart';
 import 'package:watch_connectivity/watch_connectivity.dart';
 
 class IOSSettingsPage extends StatefulWidget {
   const IOSSettingsPage({super.key});
 
   @override
-  _IOSSettingsPageState createState() => _IOSSettingsPageState();
+  State<IOSSettingsPage> createState() => _IOSSettingsPageState();
 }
 
 class _IOSSettingsPageState extends State<IOSSettingsPage> {
@@ -32,11 +19,15 @@ class _IOSSettingsPageState extends State<IOSSettingsPage> {
   final wc = WatchConnectivity();
 
   @override
+  void dispose() {
+    super.dispose();
+    _pushToken.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: Text('iOS'),
-      ),
+      appBar: AppBar(title: const Text('iOS')),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 17),
         children: [
@@ -58,22 +49,23 @@ class _IOSSettingsPageState extends State<IOSSettingsPage> {
         alignment: Alignment.centerRight,
         padding: EdgeInsets.zero,
         onPressed: () {
-          if (_pushToken.value != null) {
-            Shares.copy(_pushToken.value!);
-            context.showSnackBar(l10n.success);
+          final val = _pushToken.value;
+          if (val != null) {
+            Pfs.copy(val);
+            context.showSnackBar(libL10n.success);
           } else {
-            context.showSnackBar(l10n.getPushTokenFailed);
+            context.showSnackBar(libL10n.fail);
           }
         },
       ),
       subtitle: FutureWidget<String?>(
         future: getToken(),
-        loading: Text(l10n.gettingToken),
-        error: (error, trace) => Text('${l10n.error}: $error'),
+        loading: const Text('...'),
+        error: (error, trace) => Text('${libL10n.error}: $error'),
         success: (text) {
           _pushToken.value = text;
           return Text(
-            text ?? l10n.nullToken,
+            text ?? 'null',
             style: UIs.textGrey,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
@@ -92,11 +84,9 @@ class _IOSSettingsPageState extends State<IOSSettingsPage> {
   }
 
   Widget _buildWatchApp() {
-    return FutureWidget<Map<String, dynamic>?>(
+    return FutureWidget(
       future: () async {
-        if (!await wc.isPaired) {
-          return null;
-        }
+        if (!await wc.isPaired) return null;
         return await wc.applicationContext;
       }(),
       loading: UIs.centerLoading,
@@ -104,7 +94,7 @@ class _IOSSettingsPageState extends State<IOSSettingsPage> {
         Loggers.app.warning('WatchOS error', e, trace);
         return ListTile(
           title: const Text('Watch app'),
-          subtitle: Text('${l10n.error}: $e', style: UIs.textGrey),
+          subtitle: Text('${libL10n.error}: $e', style: UIs.textGrey),
         );
       },
       success: (ctx) {
@@ -124,25 +114,18 @@ class _IOSSettingsPageState extends State<IOSSettingsPage> {
   }
 
   void _onTapWatchApp(Map<String, dynamic> map) async {
-    /// Encode [map] to String with indent `\t`
-    final text = Miscs.jsonEncoder.convert(map);
-    final result = await AppRoute.editor(
-      text: text,
-      langCode: 'json',
-      title: 'Watch app',
-    ).go<String>(context);
-    if (result == null) {
-      return;
-    }
-    try {
-      final newCtx = json.decode(result) as Map<String, dynamic>;
-      await wc.updateApplicationContext(newCtx);
-    } catch (e, trace) {
-      context.showRoundDialog(
-        title: Text(l10n.error),
-        child: Text('${l10n.save}:\n$e'),
-      );
-      Loggers.app.warning('Update watch config failed', e, trace);
+    final urls = Map<String, String>.from(map['urls'] as Map? ?? {});
+    final result = await KvEditor.route.go(
+      context,
+      KvEditorArgs(data: urls),
+    );
+    if (result == null) return;
+
+    final (_, err) = await context.showLoadingDialog(fn: () async {
+      await wc.updateApplicationContext({'urls': result});
+    });
+    if (err == null) {
+      context.showSnackBar(libL10n.success);
     }
   }
 }

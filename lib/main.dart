@@ -3,54 +3,33 @@
 import 'dart:async';
 
 import 'package:computer/computer.dart';
+import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toolbox/core/build_mode.dart';
-import 'package:toolbox/core/channel/bg_run.dart';
-import 'package:toolbox/core/utils/sync/icloud.dart';
-import 'package:toolbox/core/utils/platform/base.dart';
-import 'package:toolbox/core/utils/sync/webdav.dart';
-import 'package:toolbox/core/utils/ui.dart';
-import 'package:toolbox/data/model/app/menu/server_func.dart';
-import 'package:toolbox/data/res/logger.dart';
-import 'package:toolbox/data/res/provider.dart';
-import 'package:toolbox/data/res/store.dart';
-import 'package:window_manager/window_manager.dart';
-
-import 'app.dart';
-import 'core/analysis.dart';
-import 'data/model/app/net_view.dart';
-import 'data/model/server/private_key_info.dart';
-import 'data/model/server/server_private_info.dart';
-import 'data/model/server/snippet.dart';
-import 'data/model/ssh/virtual_key.dart';
-import 'data/provider/app.dart';
-import 'data/provider/private_key.dart';
-import 'data/provider/server.dart';
-import 'data/provider/sftp.dart';
-import 'data/provider/snippet.dart';
-import 'locator.dart';
-import 'view/widget/appbar.dart';
+import 'package:server_box/app.dart';
+import 'package:server_box/core/sync.dart';
+import 'package:server_box/data/model/app/menu/server_func.dart';
+import 'package:server_box/data/model/app/net_view.dart';
+import 'package:server_box/data/model/app/server_detail_card.dart';
+import 'package:server_box/data/model/server/custom.dart';
+import 'package:server_box/data/model/server/private_key_info.dart';
+import 'package:server_box/data/model/server/server_private_info.dart';
+import 'package:server_box/data/model/server/snippet.dart';
+import 'package:server_box/data/model/server/wol_cfg.dart';
+import 'package:server_box/data/model/ssh/virtual_key.dart';
+import 'package:server_box/data/provider/private_key.dart';
+import 'package:server_box/data/provider/server.dart';
+import 'package:server_box/data/provider/sftp.dart';
+import 'package:server_box/data/provider/snippet.dart';
+import 'package:server_box/data/res/build_data.dart';
+import 'package:server_box/data/res/store.dart';
 
 Future<void> main() async {
   _runInZone(() async {
     await _initApp();
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => locator<AppProvider>()),
-          ChangeNotifierProvider(create: (_) => locator<ServerProvider>()),
-          ChangeNotifierProvider(create: (_) => locator<SnippetProvider>()),
-          ChangeNotifierProvider(create: (_) => locator<PrivateKeyProvider>()),
-          ChangeNotifierProvider(create: (_) => locator<SftpProvider>()),
-        ],
-        child: const MyApp(),
-      ),
-    );
+    runApp(const MyApp());
   });
 }
 
@@ -63,90 +42,96 @@ void _runInZone(void Function() body) {
 
   runZonedGuarded(
     body,
-    (obj, trace) {
-      Analysis.recordException(trace);
-      Loggers.root.warning(obj, null, trace);
-    },
+    (e, s) => print('[ZONE] $e\n$s'),
     zoneSpecification: zoneSpec,
   );
 }
 
 Future<void> _initApp() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await _initDesktopWindow();
 
-  // Base of all data.
-  await _initDb();
-  await setupLocator();
-  Computer.shared.turnOn(
-    // Plus 1 to avoid 0.
-    workersCount: (Stores.server.box.keys.length / 3).round() + 1,
-    verbose: !BuildMode.isRelease,
-  );
-  _setupLogger();
-  _setupProviders();
+  await Paths.init(BuildData.name, bakName: 'srvbox_bak.json');
+  await _initData();
+  _setupDebug();
+  await _initWindow();
+  FontUtils.loadFrom(Stores.setting.fontPath.fetch());
 
-  // Load font
-  loadFontFile(Stores.setting.fontPath.fetch());
-
-  if (isAndroid) {
-    // Only start service when [bgRun] is true.
-    if (Stores.setting.bgRun.fetch()) {
-      BgRunMC.startService();
-    }
-    // SharedPreferences is only used on Android for saving home widgets settings.
-    SharedPreferences.setPrefix('');
-    // try switch to highest refresh rate
-    await FlutterDisplayMode.setHighRefreshRate();
-  }
-  if (isIOS || isMacOS) {
-    if (Stores.setting.icloudSync.fetch()) ICloud.sync();
-  }
-  if (Stores.setting.webdavSync.fetch()) Webdav.sync();
+  _doPlatformRelated();
 }
 
-void _setupProviders() {
-  Pros.snippet.load();
-  Pros.key.load();
-}
-
-Future<void> _initDb() async {
-  // await SecureStore.init();
+Future<void> _initData() async {
   await Hive.initFlutter();
+
   // Ordered by typeId
   Hive.registerAdapter(PrivateKeyInfoAdapter()); // 1
   Hive.registerAdapter(SnippetAdapter()); // 2
-  Hive.registerAdapter(ServerPrivateInfoAdapter()); // 3
+  Hive.registerAdapter(SpiAdapter()); // 3
   Hive.registerAdapter(VirtKeyAdapter()); // 4
   Hive.registerAdapter(NetViewTypeAdapter()); // 5
   Hive.registerAdapter(ServerFuncBtnAdapter()); // 6
+  Hive.registerAdapter(ServerCustomAdapter()); // 7
+  Hive.registerAdapter(WakeOnLanCfgAdapter()); // 8
+
+  await PrefStore.shared.init(); // Call this before accessing any store
+  await Stores.init();
+
+  // DO NOT change the order of these providers.
+  PrivateKeyProvider.instance.load();
+  SnippetProvider.instance.load();
+  ServerProvider.instance.load();
+  SftpProvider.instance.load();
+
+  if (Stores.setting.betaTest.fetch()) AppUpdate.chan = AppUpdateChan.beta;
+
+  // It may effect the following logic, so await it.
+  await _doVersionRelated();
 }
 
-void _setupLogger() {
+void _setupDebug() {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
-    Pros.debug.addLog(record);
+    DebugProvider.addLog(record);
     print(record);
     if (record.error != null) print(record.error);
     if (record.stackTrace != null) print(record.stackTrace);
   });
 }
 
-Future<void> _initDesktopWindow() async {
+void _doPlatformRelated() async {
+  if (isAndroid) {
+    // try switch to highest refresh rate
+    FlutterDisplayMode.setHighRefreshRate();
+  }
+
+  final serversCount = Stores.server.keys().length;
+  // Plus 1 to avoid 0.
+  Computer.shared.turnOn(workersCount: (serversCount / 3).round() + 1);
+
+  bakSync.sync();
+}
+
+// It may contains some async heavy funcs.
+Future<void> _doVersionRelated() async {
+  final lastVer = Stores.setting.lastVer.fetch();
+  const newVer = BuildData.build;
+  // It's only the version upgrade trigger logic.
+  // How to upgrade the data is inside each own func.
+  if (lastVer < newVer) {
+    ServerDetailCards.autoAddNewCards(newVer);
+    ServerFuncBtn.autoAddNewFuncs(newVer);
+    Stores.setting.lastVer.put(newVer);
+  }
+}
+
+Future<void> _initWindow() async {
   if (!isDesktop) return;
-
-  await windowManager.ensureInitialized();
-  await CustomAppBar.updateTitlebarHeight();
-
-  const windowOptions = WindowOptions(
-    size: Size(400, 777),
-    center: true,
-    backgroundColor: Colors.transparent,
-    skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.hidden,
+  final windowStateProp = Stores.setting.windowState;
+  final windowState = windowStateProp.fetch();
+  final hideTitleBar = Stores.setting.hideTitleBar.fetch();
+  await SystemUIs.initDesktopWindow(
+    hideTitleBar: hideTitleBar,
+    size: windowState?.size,
+    position: windowState?.position,
+    listener: WindowStateListener(windowStateProp),
   );
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
 }

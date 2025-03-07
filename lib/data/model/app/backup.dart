@@ -1,29 +1,34 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:toolbox/core/persistant_store.dart';
-import 'package:toolbox/data/model/server/private_key_info.dart';
-import 'package:toolbox/data/model/server/server_private_info.dart';
-import 'package:toolbox/data/model/server/snippet.dart';
-import 'package:toolbox/data/res/logger.dart';
-import 'package:toolbox/data/res/path.dart';
-import 'package:toolbox/data/res/provider.dart';
-import 'package:toolbox/data/res/rebuild.dart';
-import 'package:toolbox/data/res/store.dart';
+import 'package:fl_lib/fl_lib.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:logging/logging.dart';
+import 'package:server_box/data/model/server/private_key_info.dart';
+import 'package:server_box/data/model/server/server_private_info.dart';
+import 'package:server_box/data/model/server/snippet.dart';
+import 'package:server_box/data/res/misc.dart';
+import 'package:server_box/data/res/rebuild.dart';
+import 'package:server_box/data/res/store.dart';
+
+part 'backup.g.dart';
 
 const backupFormatVersion = 1;
 
-class Backup {
+final _logger = Logger('Backup');
+
+@JsonSerializable()
+class Backup implements Mergeable {
   // backup format version
   final int version;
   final String date;
-  final List<ServerPrivateInfo> spis;
+  final List<Spi> spis;
   final List<Snippet> snippets;
   final List<PrivateKeyInfo> keys;
   final Map<String, dynamic> container;
-  final Map<String, dynamic> settings;
   final Map<String, dynamic> history;
   final int? lastModTime;
+  final Map<String, dynamic>? settings;
 
   const Backup({
     required this.version,
@@ -32,102 +37,185 @@ class Backup {
     required this.snippets,
     required this.keys,
     required this.container,
-    required this.settings,
     required this.history,
+    required this.settings,
     this.lastModTime,
   });
 
-  Backup.fromJson(Map<String, dynamic> json)
-      : version = json['version'] as int,
-        date = json['date'],
-        spis = (json['spis'] as List)
-            .map((e) => ServerPrivateInfo.fromJson(e))
-            .toList(),
-        snippets =
-            (json['snippets'] as List).map((e) => Snippet.fromJson(e)).toList(),
-        keys = (json['keys'] as List)
-            .map((e) => PrivateKeyInfo.fromJson(e))
-            .toList(),
-        container = json['container'] ?? {},
-        settings = json['settings'] ?? {},
-        lastModTime = json['lastModTime'],
-        history = json['history'] ?? {};
+  factory Backup.fromJson(Map<String, dynamic> json) => _$BackupFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        'version': version,
-        'date': date,
-        'spis': spis,
-        'snippets': snippets,
-        'keys': keys,
-        'container': container,
-        'settings': settings,
-        'lastModTime': lastModTime,
-        'history': history,
-      };
+  Map<String, dynamic> toJson() => _$BackupToJson(this);
 
-  Backup.loadFromStore()
-      : version = backupFormatVersion,
-        date = DateTime.now().toString().split('.').first,
-        spis = Stores.server.fetch(),
-        snippets = Stores.snippet.fetch(),
-        keys = Stores.key.fetch(),
-        container = Stores.docker.box.toJson(),
-        settings = Stores.setting.box.toJson(),
-        lastModTime = Stores.lastModTime,
-        history = Stores.history.box.toJson();
+  static Future<Backup> loadFromStore() async {
+    final lastModTime = Stores.lastModTime?.millisecondsSinceEpoch;
+    return Backup(
+      version: backupFormatVersion,
+      date: DateTime.now().toString().split('.').firstOrNull ?? '',
+      spis: Stores.server.fetch(),
+      snippets: Stores.snippet.fetch(),
+      keys: Stores.key.fetch(),
+      container: await Stores.container.getAllMap(),
+      lastModTime: lastModTime,
+      history: await Stores.history.getAllMap(),
+      settings: await Stores.setting.getAllMap(),
+    );
+  }
 
   static Future<String> backup([String? name]) async {
-    final result = _diyEncrypt(json.encode(Backup.loadFromStore()));
-    final path = '${await Paths.doc}/${name ?? Paths.bakName}';
+    final bak = await Backup.loadFromStore();
+    final result = _diyEncrypt(json.encode(bak.toJson()));
+    final path = Paths.doc.joinPath(name ?? Miscs.bakFileName);
     await File(path).writeAsString(result);
     return path;
   }
 
-  /// - Return null if same time
-  /// - Return false if local is newer
-  /// - Return true if restore success
-  Future<bool?> restore({bool force = false}) async {
-    final curTime = Stores.lastModTime ?? 0;
+  @override
+  Future<void> merge({bool force = false}) async {
+    final curTime = Stores.lastModTime?.millisecondsSinceEpoch ?? 0;
     final bakTime = lastModTime ?? 0;
-    if (curTime == bakTime && !force) {
-      return null;
+    final shouldRestore = force || curTime < bakTime;
+    if (!shouldRestore) {
+      _logger.info('No need to restore, local is newer');
+      return;
     }
-    if (curTime > bakTime && !force) {
-      return false;
-    }
-    for (final s in settings.keys) {
-      Stores.setting.box.put(s, settings[s]);
-    }
-    for (final s in snippets) {
-      Stores.snippet.put(s);
-    }
-    for (final s in spis) {
-      Stores.server.put(s);
-    }
-    for (final s in keys) {
-      Stores.key.put(s);
-    }
-    for (final s in history.keys) {
-      Stores.history.box.put(s, history[s]);
-    }
-    for (final k in container.keys) {
-      final val = container[k];
-      if (val != null && val is String && val.isNotEmpty) {
-        Stores.docker.put(k, val);
+
+    // Snippets
+    if (force) {
+      for (final s in snippets) {
+        Stores.snippet.box.put(s.name, s);
+      }
+    } else {
+      final nowSnippets = Stores.snippet.box.keys.toSet();
+      final bakSnippets = snippets.map((e) => e.name).toSet();
+      final newSnippets = bakSnippets.difference(nowSnippets);
+      final delSnippets = nowSnippets.difference(bakSnippets);
+      final updateSnippets = nowSnippets.intersection(bakSnippets);
+      for (final s in newSnippets) {
+        Stores.snippet.box.put(s, snippets.firstWhere((e) => e.name == s));
+      }
+      for (final s in delSnippets) {
+        Stores.snippet.box.delete(s);
+      }
+      for (final s in updateSnippets) {
+        Stores.snippet.box.put(s, snippets.firstWhere((e) => e.name == s));
       }
     }
 
-    // update last modified time, avoid restore again
-    Stores.setting.box.updateLastModified(lastModTime);
+    // ServerPrivateInfo
+    if (force) {
+      for (final s in spis) {
+        Stores.server.box.put(s.id, s);
+      }
+    } else {
+      final nowSpis = Stores.server.box.keys.toSet();
+      final bakSpis = spis.map((e) => e.id).toSet();
+      final newSpis = bakSpis.difference(nowSpis);
+      final delSpis = nowSpis.difference(bakSpis);
+      final updateSpis = nowSpis.intersection(bakSpis);
+      for (final s in newSpis) {
+        Stores.server.box.put(s, spis.firstWhere((e) => e.id == s));
+      }
+      for (final s in delSpis) {
+        Stores.server.box.delete(s);
+      }
+      for (final s in updateSpis) {
+        Stores.server.box.put(s, spis.firstWhere((e) => e.id == s));
+      }
+    }
 
-    Pros.reload();
-    RebuildNodes.app.rebuild();
+    // PrivateKeyInfo
+    if (force) {
+      for (final s in keys) {
+        Stores.key.box.put(s.id, s);
+      }
+    } else {
+      final nowKeys = Stores.key.box.keys.toSet();
+      final bakKeys = keys.map((e) => e.id).toSet();
+      final newKeys = bakKeys.difference(nowKeys);
+      final delKeys = nowKeys.difference(bakKeys);
+      final updateKeys = nowKeys.intersection(bakKeys);
+      for (final s in newKeys) {
+        Stores.key.box.put(s, keys.firstWhere((e) => e.id == s));
+      }
+      for (final s in delKeys) {
+        Stores.key.box.delete(s);
+      }
+      for (final s in updateKeys) {
+        Stores.key.box.put(s, keys.firstWhere((e) => e.id == s));
+      }
+    }
 
-    return true;
+    // History
+    if (force) {
+      Stores.history.box.putAll(history);
+    } else {
+      final nowHistory = Stores.history.box.keys.toSet();
+      final bakHistory = history.keys.toSet();
+      final newHistory = bakHistory.difference(nowHistory);
+      final delHistory = nowHistory.difference(bakHistory);
+      final updateHistory = nowHistory.intersection(bakHistory);
+      for (final s in newHistory) {
+        Stores.history.box.put(s, history[s]);
+      }
+      for (final s in delHistory) {
+        Stores.history.box.delete(s);
+      }
+      for (final s in updateHistory) {
+        Stores.history.box.put(s, history[s]);
+      }
+    }
+
+    // Container
+    if (force) {
+      Stores.container.box.putAll(container);
+    } else {
+      final nowContainer = Stores.container.box.keys.toSet();
+      final bakContainer = container.keys.toSet();
+      final newContainer = bakContainer.difference(nowContainer);
+      final delContainer = nowContainer.difference(bakContainer);
+      final updateContainer = nowContainer.intersection(bakContainer);
+      for (final s in newContainer) {
+        Stores.container.box.put(s, container[s]);
+      }
+      for (final s in delContainer) {
+        Stores.container.box.delete(s);
+      }
+      for (final s in updateContainer) {
+        Stores.container.box.put(s, container[s]);
+      }
+    }
+
+    // Settings
+    final settings_ = settings;
+    if (settings_ != null) {
+      if (force) {
+        Stores.setting.box.putAll(settings_);
+      } else {
+        final nowSettings = Stores.setting.box.keys.toSet();
+        final bakSettings = settings_.keys.toSet();
+        final newSettings = bakSettings.difference(nowSettings);
+        final delSettings = nowSettings.difference(bakSettings);
+        final updateSettings = nowSettings.intersection(bakSettings);
+        for (final s in newSettings) {
+          Stores.setting.box.put(s, settings_[s]);
+        }
+        for (final s in delSettings) {
+          Stores.setting.box.delete(s);
+        }
+        for (final s in updateSettings) {
+          Stores.setting.box.put(s, settings_[s]);
+        }
+      }
+    }
+
+    Provider.reload();
+    RNodes.app.notify();
+
+    _logger.info('Restore success');
   }
 
-  Backup.fromJsonString(String raw)
-      : this.fromJson(json.decode(_diyDecrypt(raw)));
+  factory Backup.fromJsonString(String raw) =>
+      Backup.fromJson(json.decode(_diyDecrypt(raw)));
 }
 
 String _diyEncrypt(String raw) => json.encode(

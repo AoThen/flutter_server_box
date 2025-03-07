@@ -1,6 +1,6 @@
-import 'package:toolbox/core/extension/numx.dart';
+import 'package:fl_lib/fl_lib.dart';
 
-import 'time_seq.dart';
+import 'package:server_box/data/model/server/time_seq.dart';
 
 class NetSpeedPart extends TimeSeqIface<NetSpeedPart> {
   final String device;
@@ -14,11 +14,52 @@ class NetSpeedPart extends TimeSeqIface<NetSpeedPart> {
   bool same(NetSpeedPart other) => device == other.device;
 }
 
-class NetSpeed extends TimeSeq<NetSpeedPart> {
-  NetSpeed(super.pre, super.now);
+typedef CachedNetVals = ({
+  String sizeIn,
+  String sizeOut,
+  String speedIn,
+  String speedOut,
+});
 
-  List<String> get devices => now.map((e) => e.device).toList();
+class NetSpeed extends TimeSeq<List<NetSpeedPart>> {
+  NetSpeed(super.init1, super.init2);
 
+  @override
+  void onUpdate() {
+    devices.clear();
+    devices.addAll(now.map((e) => e.device).toList());
+
+    realIfaces.clear();
+    realIfaces.addAll(devices
+        .where((e) => realIfacePrefixs.any((prefix) => e.startsWith(prefix))));
+
+    final sizeIn = this.sizeIn();
+    final sizeOut = this.sizeOut();
+    final speedIn = this.speedIn();
+    final speedOut = this.speedOut();
+
+    cachedVals = (
+      sizeIn: sizeIn,
+      sizeOut: sizeOut,
+      speedIn: speedIn,
+      speedOut: speedOut,
+    );
+  }
+
+  /// Cached network device list
+  final devices = <String>[];
+
+  /// Issue #295
+  /// Non-virtual network device prefix
+  static const realIfacePrefixs = ['eth', 'wlan', 'en', 'ww', 'wl'];
+
+  /// Cached non-virtual network device prefix
+  final realIfaces = <String>[];
+
+  CachedNetVals cachedVals =
+      (sizeIn: '0kb', sizeOut: '0kb', speedIn: '0kb/s', speedOut: '0kb/s');
+
+  /// Time diff between [pre] and [now]
   BigInt get _timeDiff => BigInt.from(now[0].time - pre[0].time);
 
   double speedInBytes(int i) => (now[i].bytesIn - pre[i].bytesIn) / _timeDiff;
@@ -27,12 +68,17 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
   BigInt sizeInBytes(int i) => now[i].bytesIn;
   BigInt sizeOutBytes(int i) => now[i].bytesOut;
 
-  String speedIn({String? device, bool all = false}) {
-    if (pre[0].device == '' || now[0].device == '') return '0kb/s';
-    if (all) {
+  String speedIn({String? device}) {
+    if (pre.isEmpty || now.isEmpty) return 'N/A';
+    if (pre.length != now.length) return 'N/A';
+    if (device == null) {
       var speed = 0.0;
-      for (var i = 0; i < now.length; i++) {
-        speed += speedInBytes(i);
+      for (final device in devices) {
+        for (final prefix in realIfacePrefixs) {
+          if (device.startsWith(prefix)) {
+            speed += speedInBytes(devices.indexOf(device));
+          }
+        }
       }
       return buildStandardOutput(speed);
     }
@@ -40,12 +86,17 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
     return buildStandardOutput(speedInBytes(idx));
   }
 
-  String sizeIn({String? device, bool all = false}) {
-    if (pre[0].device == '' || now[0].device == '') return '0kb';
-    if (all) {
+  String sizeIn({String? device}) {
+    if (pre.isEmpty || now.isEmpty) return 'N/A';
+    if (pre.length != now.length) return 'N/A';
+    if (device == null) {
       var size = BigInt.from(0);
-      for (var i = 0; i < now.length; i++) {
-        size += sizeInBytes(i);
+      for (final device in devices) {
+        for (final prefix in realIfacePrefixs) {
+          if (device.startsWith(prefix)) {
+            size += sizeInBytes(devices.indexOf(device));
+          }
+        }
       }
       return size.bytes2Str;
     }
@@ -53,12 +104,17 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
     return sizeInBytes(idx).bytes2Str;
   }
 
-  String speedOut({String? device, bool all = false}) {
-    if (pre[0].device == '' || now[0].device == '') return '0kb/s';
-    if (all) {
+  String speedOut({String? device}) {
+    if (pre.isEmpty || now.isEmpty) return 'N/A';
+    if (pre.length != now.length) return 'N/A';
+    if (device == null) {
       var speed = 0.0;
-      for (var i = 0; i < now.length; i++) {
-        speed += speedOutBytes(i);
+      for (final device in devices) {
+        for (final prefix in realIfacePrefixs) {
+          if (device.startsWith(prefix)) {
+            speed += speedOutBytes(devices.indexOf(device));
+          }
+        }
       }
       return buildStandardOutput(speed);
     }
@@ -66,12 +122,17 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
     return buildStandardOutput(speedOutBytes(idx));
   }
 
-  String sizeOut({String? device, bool all = false}) {
-    if (pre[0].device == '' || now[0].device == '') return '0kb';
-    if (all) {
+  String sizeOut({String? device}) {
+    if (pre.isEmpty || now.isEmpty) return 'N/A';
+    if (pre.length != now.length) return 'N/A';
+    if (device == null) {
       var size = BigInt.from(0);
-      for (var i = 0; i < now.length; i++) {
-        size += sizeOutBytes(i);
+      for (final device in devices) {
+        for (final prefix in realIfacePrefixs) {
+          if (device.startsWith(prefix)) {
+            size += sizeOutBytes(devices.indexOf(device));
+          }
+        }
       }
       return size.bytes2Str;
     }
@@ -107,7 +168,8 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
     for (final item in split.sublist(2)) {
       try {
         final data = item.trim().split(':');
-        final device = data.first;
+        final device = data.firstOrNull;
+        if (device == null) continue;
         final bytes = data.last.trim().split(' ');
         bytes.removeWhere((element) => element == '');
         final bytesIn = BigInt.parse(bytes.first);

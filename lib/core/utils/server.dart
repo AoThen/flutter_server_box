@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:computer/computer.dart';
 import 'package:dartssh2/dartssh2.dart';
+import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/foundation.dart';
-import 'package:toolbox/data/model/app/error.dart';
-import 'package:toolbox/data/res/store.dart';
+import 'package:server_box/data/model/app/error.dart';
+import 'package:server_box/data/res/store.dart';
 
-import '../../data/model/server/server_private_info.dart';
+import 'package:server_box/data/model/server/server_private_info.dart';
 
 /// Must put this func out of any Class.
 ///
@@ -32,7 +32,7 @@ enum GenSSHClientStatus {
 }
 
 String getPrivateKey(String id) {
-  final pki = Stores.key.get(id);
+  final pki = Stores.key.fetchOne(id);
   if (pki == null) {
     throw SSHErr(
       type: SSHErrType.noPrivateKey,
@@ -43,46 +43,48 @@ String getPrivateKey(String id) {
 }
 
 Future<SSHClient> genClient(
-  ServerPrivateInfo spi, {
+  Spi spi, {
   void Function(GenSSHClientStatus)? onStatus,
 
-  /// Must pass this param when use multi-thread and key login
+  /// Only pass this param if using multi-threading and key login
   String? privateKey,
 
-  /// Must pass this param when use multi-thread and key login
+  /// Only pass this param if using multi-threading and key login
   String? jumpPrivateKey,
   Duration timeout = const Duration(seconds: 5),
 
-  /// [ServerPrivateInfo] of the jump server
+  /// [Spi] of the jump server
   ///
-  /// Must pass this param when use multi-thread and key login
-  ServerPrivateInfo? jumpSpi,
+  /// Must pass this param if using multi-threading and key login
+  Spi? jumpSpi,
+
+  /// Handle keyboard-interactive authentication
+  FutureOr<List<String>?> Function(SSHUserInfoRequest)? onKeyboardInteractive,
 }) async {
   onStatus?.call(GenSSHClientStatus.socket);
 
+  String? alterUser;
+
   final socket = await () async {
-    /// Issues #210
-    /// Temporarily comment out the proxy function
-
     // Proxy
-    // final jumpSpi_ = () {
-    //   // Multi-thread or key login
-    //   if (jumpSpi != null) return jumpSpi;
-    //   // Main thread
-    //   if (spi.jumpId != null) return Stores.server.box.get(spi.jumpId);
-    // }();
-    // if (jumpSpi_ != null) {
-    //   final jumpClient = await genClient(
-    //     jumpSpi_,
-    //     privateKey: jumpPrivateKey,
-    //     timeout: timeout,
-    //   );
+    final jumpSpi_ = () {
+      // Multi-thread or key login
+      if (jumpSpi != null) return jumpSpi;
+      // Main thread
+      if (spi.jumpId != null) return Stores.server.box.get(spi.jumpId);
+    }();
+    if (jumpSpi_ != null) {
+      final jumpClient = await genClient(
+        jumpSpi_,
+        privateKey: jumpPrivateKey,
+        timeout: timeout,
+      );
 
-    //   return await jumpClient.forwardLocal(
-    //     spi.ip,
-    //     spi.port,
-    //   );
-    // }
+      return await jumpClient.forwardLocal(
+        spi.ip,
+        spi.port,
+      );
+    }
 
     // Direct
     try {
@@ -92,15 +94,18 @@ Future<SSHClient> genClient(
         timeout: timeout,
       );
     } catch (e) {
+      Loggers.app.warning('genClient', e);
       if (spi.alterUrl == null) rethrow;
       try {
-        final ipPort = spi.fromStringUrl();
+        final res = spi.fromStringUrl();
+        alterUser = res.$2;
         return await SSHSocket.connect(
-          ipPort.ip,
-          ipPort.port,
+          res.$1,
+          res.$3,
           timeout: timeout,
         );
       } catch (e) {
+        Loggers.app.warning('genClient alterUrl', e);
         rethrow;
       }
     }
@@ -111,8 +116,11 @@ Future<SSHClient> genClient(
     onStatus?.call(GenSSHClientStatus.pwd);
     return SSHClient(
       socket,
-      username: spi.user,
+      username: alterUser ?? spi.user,
       onPasswordRequest: () => spi.pwd,
+      onUserInfoRequest: onKeyboardInteractive,
+      // printDebug: debugPrint,
+      // printTrace: debugPrint,
     );
   }
   privateKey ??= getPrivateKey(keyId);
@@ -121,6 +129,10 @@ Future<SSHClient> genClient(
   return SSHClient(
     socket,
     username: spi.user,
-    identities: await Computer.shared.start(loadIndentity, privateKey),
+    // Must use [compute] here, instead of [Computer.shared.start]
+    identities: await compute(loadIndentity, privateKey),
+    onUserInfoRequest: onKeyboardInteractive,
+    // printDebug: debugPrint,
+    // printTrace: debugPrint,
   );
 }

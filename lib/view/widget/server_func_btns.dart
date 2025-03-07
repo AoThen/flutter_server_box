@@ -1,31 +1,22 @@
 import 'dart:io';
 
+import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
-import 'package:toolbox/core/extension/context/common.dart';
-import 'package:toolbox/core/extension/context/dialog.dart';
-import 'package:toolbox/core/extension/context/locale.dart';
-import 'package:toolbox/core/extension/context/snackbar.dart';
-import 'package:toolbox/core/extension/ssh_client.dart';
-import 'package:toolbox/core/extension/uint8list.dart';
-import 'package:toolbox/core/utils/platform/base.dart';
-import 'package:toolbox/core/utils/platform/path.dart';
-import 'package:toolbox/data/model/app/menu/server_func.dart';
-import 'package:toolbox/data/model/app/shell_func.dart';
-import 'package:toolbox/data/model/pkg/manager.dart';
-import 'package:toolbox/data/model/server/dist.dart';
-import 'package:toolbox/data/model/server/snippet.dart';
-import 'package:toolbox/data/res/path.dart';
-import 'package:toolbox/data/res/provider.dart';
-import 'package:toolbox/data/res/store.dart';
+import 'package:server_box/core/extension/context/locale.dart';
+import 'package:server_box/data/model/app/menu/base.dart';
+import 'package:server_box/data/model/app/menu/server_func.dart';
+import 'package:server_box/data/model/server/snippet.dart';
+import 'package:server_box/data/provider/server.dart';
+import 'package:server_box/data/provider/snippet.dart';
+import 'package:server_box/data/res/store.dart';
+import 'package:server_box/view/page/systemd.dart';
 
-import '../../core/route.dart';
-import '../../core/utils/server.dart';
-import '../../data/model/pkg/upgrade_info.dart';
-import '../../data/model/server/server_private_info.dart';
-import 'popup_menu.dart';
+import 'package:server_box/core/route.dart';
+import 'package:server_box/core/utils/server.dart';
+import 'package:server_box/data/model/server/server_private_info.dart';
 
 class ServerFuncBtnsTopRight extends StatelessWidget {
-  final ServerPrivateInfo spi;
+  final Spi spi;
 
   const ServerFuncBtnsTopRight({
     super.key,
@@ -36,18 +27,7 @@ class ServerFuncBtnsTopRight extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopupMenu<ServerFuncBtn>(
       items: ServerFuncBtn.values
-          .map((e) => PopupMenuItem<ServerFuncBtn>(
-                value: e,
-                child: Row(
-                  children: [
-                    Icon(e.icon),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Text(e.toStr),
-                  ],
-                ),
-              ))
+          .map((e) => PopMenu.build(e, e.icon, e.toStr))
           .toList(),
       padding: const EdgeInsets.symmetric(horizontal: 10),
       onSelected: (val) => _onTapMoreBtns(val, spi, context),
@@ -59,50 +39,50 @@ class ServerFuncBtns extends StatelessWidget {
   const ServerFuncBtns({
     super.key,
     required this.spi,
-    this.iconSize,
   });
 
-  final ServerPrivateInfo spi;
-  final double? iconSize;
+  final Spi spi;
 
   @override
   Widget build(BuildContext context) {
-    // return Row(
-    //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-    //   children: ServerTabMenuType.values
-    //       .map(
-    //         (e) => Stores.setting.serverFuncBtnsDisplayName.fetch()
-    //             ? Column(
-    //                 mainAxisSize: MainAxisSize.min,
-    //                 children: [
-    //                   IconButton(
-    //                     onPressed: () => _onTapMoreBtns(e, spi, context),
-    //                     padding: EdgeInsets.zero,
-    //                     tooltip: e.name,
-    //                     icon: Icon(e.icon, size: iconSize ?? 15),
-    //                   ),
-    //                   Text(e.toStr, style: UIs.textSize9Grey)
-    //                 ],
-    //               )
-    //             : IconButton(
-    //                 onPressed: () => _onTapMoreBtns(e, spi, context),
-    //                 padding: EdgeInsets.zero,
-    //                 tooltip: e.name,
-    //                 icon: Icon(e.icon, size: iconSize ?? 15),
-    //               ),
-    //       )
-    //       .toList(),
-    // );
+    final btns = () {
+      try {
+        final vals = <ServerFuncBtn>[];
+        final list = Stores.setting.serverFuncBtns.fetch();
+        for (final idx in list) {
+          if (idx < 0 || idx >= ServerFuncBtn.values.length) continue;
+          vals.add(ServerFuncBtn.values[idx]);
+        }
+        return vals;
+      } catch (e) {
+        return ServerFuncBtn.values;
+      }
+    }();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: Stores.setting.serverFuncBtns.fetch()
+      children: btns
           .map(
-            (e) => IconButton(
-              onPressed: () => _onTapMoreBtns(e, spi, context),
-              padding: EdgeInsets.zero,
-              tooltip: e.toStr,
-              icon: Icon(e.icon, size: iconSize ?? 15),
-            ),
+            (e) => Stores.setting.moveServerFuncs.fetch()
+                ? IconButton(
+                    onPressed: () => _onTapMoreBtns(e, spi, context),
+                    padding: EdgeInsets.zero,
+                    tooltip: e.toStr,
+                    icon: Icon(e.icon, size: 15),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.only(bottom: 13),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () => _onTapMoreBtns(e, spi, context),
+                          padding: EdgeInsets.zero,
+                          icon: Icon(e.icon, size: 17),
+                        ),
+                        Text(e.toStr, style: UIs.text11Grey)
+                      ],
+                    ),
+                  ),
           )
           .toList(),
     );
@@ -111,39 +91,68 @@ class ServerFuncBtns extends StatelessWidget {
 
 void _onTapMoreBtns(
   ServerFuncBtn value,
-  ServerPrivateInfo spi,
+  Spi spi,
   BuildContext context,
 ) async {
   switch (value) {
-    case ServerFuncBtn.pkg:
-      _onPkg(context, spi);
-      break;
+    // case ServerFuncBtn.pkg:
+    //   _onPkg(context, spi);
+    //   break;
     case ServerFuncBtn.sftp:
-      AppRoute.sftp(spi: spi).checkGo(
+      AppRoutes.sftp(spi: spi).checkGo(
         context: context,
         check: () => _checkClient(context, spi.id),
       );
       break;
     case ServerFuncBtn.snippet:
-      final snippet = await context.showPickSingleDialog<Snippet>(
-        items: Pros.snippet.snippets,
-        name: (e) => e.name,
+      if (SnippetProvider.snippets.value.isEmpty) {
+        context.showSnackBar(libL10n.empty);
+        return;
+      }
+      final snippets = await context.showPickWithTagDialog<Snippet>(
+        title: l10n.snippet,
+        tags: SnippetProvider.tags,
+        itemsBuilder: (e) {
+          if (e == TagSwitcher.kDefaultTag) {
+            return SnippetProvider.snippets.value;
+          }
+          return SnippetProvider.snippets.value
+              .where((element) => element.tags?.contains(e) ?? false)
+              .toList();
+        },
+        display: (e) => e.name,
       );
+      if (snippets == null || snippets.isEmpty) return;
+      final snippet = snippets.firstOrNull;
       if (snippet == null) return;
-
-      AppRoute.ssh(spi: spi, initCmd: snippet.fmtWith(spi)).checkGo(
+      final fmted = snippet.fmtWithSpi(spi);
+      final sure = await context.showRoundDialog<bool>(
+        title: libL10n.attention,
+        child: SingleChildScrollView(
+          child: SimpleMarkdown(data: '```shell\n$fmted\n```'),
+        ),
+        actions: [
+          CountDownBtn(
+            onTap: () => context.pop(true),
+            text: l10n.run,
+            afterColor: Colors.red,
+          ),
+        ],
+      );
+      if (sure != true) return;
+      AppRoutes.ssh(spi: spi, initSnippet: snippet).checkGo(
         context: context,
         check: () => _checkClient(context, spi.id),
       );
       break;
     case ServerFuncBtn.container:
-      AppRoute.docker(spi: spi).checkGo(
+      AppRoutes.docker(spi: spi).checkGo(
         context: context,
         check: () => _checkClient(context, spi.id),
       );
       break;
     case ServerFuncBtn.process:
-      AppRoute.process(spi: spi).checkGo(
+      AppRoutes.process(spi: spi).checkGo(
         context: context,
         check: () => _checkClient(context, spi.id),
       );
@@ -152,18 +161,21 @@ void _onTapMoreBtns(
       _gotoSSH(spi, context);
       break;
     case ServerFuncBtn.iperf:
-      AppRoute.iperf(spi: spi).checkGo(
+      AppRoutes.iperf(spi: spi).checkGo(
         context: context,
         check: () => _checkClient(context, spi.id),
       );
       break;
+    case ServerFuncBtn.systemd:
+      SystemdPage.route.go(context, SystemdPageArgs(spi: spi));
+      break;
   }
 }
 
-void _gotoSSH(ServerPrivateInfo spi, BuildContext context) async {
+void _gotoSSH(Spi spi, BuildContext context) async {
   // run built-in ssh on macOS due to incompatibility
   if (isMobile || isMacOS) {
-    AppRoute.ssh(spi: spi).go(context);
+    AppRoutes.ssh(spi: spi).go(context);
     return;
   }
   final extraArgs = <String>[];
@@ -175,7 +187,7 @@ void _gotoSSH(ServerPrivateInfo spi, BuildContext context) async {
     final tempKeyFileName = 'srvbox_pk_${spi.keyId}';
 
     /// For security reason, save the private key file to app doc path
-    return joinPath(await Paths.doc, tempKeyFileName);
+    return Paths.doc.joinPath(tempKeyFileName);
   }();
   final file = File(path);
   final shouldGenKey = spi.keyId != null;
@@ -184,17 +196,17 @@ void _gotoSSH(ServerPrivateInfo spi, BuildContext context) async {
       await file.delete();
     }
     await file.writeAsString(getPrivateKey(spi.keyId!));
-    extraArgs.addAll(["-i", path]);
+    extraArgs.addAll(['-i', path]);
   }
 
-  final sshCommand = ["ssh", "${spi.user}@${spi.ip}"] + extraArgs;
-  final system = OS.type;
+  final sshCommand = ['ssh', '${spi.user}@${spi.ip}'] + extraArgs;
+  final system = Pfs.type;
   switch (system) {
-    case OS.windows:
-      await Process.start("cmd", ["/c", "start"] + sshCommand);
+    case Pfs.windows:
+      await Process.start('cmd', ['/c', 'start'] + sshCommand);
       break;
-    case OS.linux:
-      await Process.start("x-terminal-emulator", ["-e"] + sshCommand);
+    case Pfs.linux:
+      await Process.start('x-terminal-emulator', ['-e'] + sshCommand);
       break;
     default:
       context.showSnackBar('Mismatch system: $system');
@@ -207,80 +219,10 @@ void _gotoSSH(ServerPrivateInfo spi, BuildContext context) async {
 }
 
 bool _checkClient(BuildContext context, String id) {
-  final server = Pros.server.pick(id: id);
+  final server = ServerProvider.pick(id: id)?.value;
   if (server == null || server.client == null) {
     context.showSnackBar(l10n.waitConnection);
     return false;
   }
   return true;
-}
-
-Future<void> _onPkg(BuildContext context, ServerPrivateInfo spi) async {
-  final server = spi.server;
-  if (server == null) {
-    context.showSnackBar(l10n.noClient);
-    return;
-  }
-  final sys = server.status.more[StatusCmdType.sys];
-  if (sys == null) {
-    context.showSnackBar(l10n.noResult);
-    return;
-  }
-  final pkg = PkgManager.fromDist(sys.dist);
-
-  // Update pkg list
-  context.showLoadingDialog();
-  final updateCmd = pkg?.update;
-  if (updateCmd != null) {
-    await server.client!.execWithPwd(
-      updateCmd,
-      context: context,
-    );
-  }
-  context.pop();
-
-  final listCmd = pkg?.listUpdate;
-  if (listCmd == null) {
-    context.showSnackBar('Unsupported dist: $sys');
-    return;
-  }
-
-  // Get upgrade list
-  context.showLoadingDialog();
-  final result = await server.client?.run(listCmd).string;
-  context.pop();
-  if (result == null) {
-    context.showSnackBar(l10n.noResult);
-    return;
-  }
-  final list = pkg?.updateListRemoveUnused(result.split('\n'));
-  final upgradeable = list?.map((e) => UpgradePkgInfo(e, pkg)).toList();
-  if (upgradeable == null || upgradeable.isEmpty) {
-    context.showSnackBar(l10n.noUpdateAvailable);
-    return;
-  }
-  final args = upgradeable.map((e) => e.package).join(' ');
-  final isSU = server.spi.user == 'root';
-  final upgradeCmd = isSU ? pkg?.upgrade(args) : 'sudo ${pkg?.upgrade(args)}';
-
-  // Confirm upgrade
-  final gotoUpgrade = await context.showRoundDialog<bool>(
-    title: Text(l10n.attention),
-    child: SingleChildScrollView(
-      child: Text('${l10n.foundNUpdate(upgradeable.length)}\n\n$upgradeCmd'),
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => context.pop(true),
-        child: Text(l10n.update),
-      ),
-    ],
-  );
-
-  if (gotoUpgrade != true) return;
-
-  AppRoute.ssh(spi: spi, initCmd: upgradeCmd).checkGo(
-    context: context,
-    check: () => _checkClient(context, spi.id),
-  );
 }

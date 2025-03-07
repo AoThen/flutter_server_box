@@ -1,45 +1,27 @@
-import 'dart:convert';
-
+import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toolbox/core/extension/context/common.dart';
-import 'package:toolbox/core/extension/context/dialog.dart';
-import 'package:toolbox/core/extension/context/locale.dart';
-import 'package:toolbox/core/extension/context/snackbar.dart';
-import 'package:toolbox/core/utils/platform/auth.dart';
-import 'package:toolbox/data/res/store.dart';
-import 'package:toolbox/data/res/ui.dart';
-import 'package:toolbox/view/page/setting/platform/platform_pub.dart';
-import 'package:toolbox/view/widget/appbar.dart';
-import 'package:toolbox/view/widget/input_field.dart';
-import 'package:toolbox/view/widget/cardx.dart';
-import 'package:toolbox/view/widget/store_switch.dart';
+import 'package:server_box/core/extension/context/locale.dart';
+import 'package:server_box/data/res/store.dart';
+import 'package:server_box/view/page/setting/platform/platform_pub.dart';
 
 class AndroidSettingsPage extends StatefulWidget {
   const AndroidSettingsPage({super.key});
 
   @override
-  _AndroidSettingsPageState createState() => _AndroidSettingsPageState();
+  State<AndroidSettingsPage> createState() => _AndroidSettingsPageState();
 }
 
+const _homeWidgetPrefPrefix = 'widget_';
+
 class _AndroidSettingsPageState extends State<AndroidSettingsPage> {
-  late SharedPreferences _sp;
-
-  @override
-  void initState() {
-    super.initState();
-    SharedPreferences.getInstance().then((value) => _sp = value);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: Text('Android'),
-      ),
+      appBar: AppBar(title: const Text('Android')),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 17),
         children: [
+          // _buildFgService(),
           _buildBgRun(),
           _buildAndroidWidgetSharedPreference(),
           if (BioAuth.isPlatformSupported)
@@ -49,26 +31,32 @@ class _AndroidSettingsPageState extends State<AndroidSettingsPage> {
     );
   }
 
+  // Widget _buildFgService() {
+  //   return ListTile(
+  //     title: TipText(l10n.fgService, l10n.fgServiceTip),
+  //     trailing: StoreSwitch(prop: Stores.setting.fgService),
+  //   );
+  // }
+
   Widget _buildBgRun() {
     return ListTile(
-      title: Text(l10n.bgRun),
-      subtitle: Text(l10n.bgRunTip, style: UIs.textGrey),
+      title: TipText(l10n.bgRun, l10n.bgRunTip),
       trailing: StoreSwitch(prop: Stores.setting.bgRun),
     );
   }
 
-  void _saveWidgetSP(String data, Map<String, String> old) {
-    context.pop();
+  void _saveWidgetSP(Map<String, String> map, Map<String, String> old) {
     try {
-      final map = Map<String, String>.from(json.decode(data));
       final keysDel = old.keys.toSet().difference(map.keys.toSet());
       for (final key in keysDel) {
-        _sp.remove(key);
+        if (!key.startsWith(_homeWidgetPrefPrefix)) continue;
+        PrefStore.shared.remove(key);
       }
-      map.forEach((key, value) {
-        _sp.setString(key, value);
-      });
-      context.showSnackBar(l10n.success);
+      for (final entry in map.entries) {
+        if (!entry.key.startsWith(_homeWidgetPrefPrefix)) continue;
+        PrefStore.shared.set(entry.key, entry.value);
+      }
+      context.showSnackBar(libL10n.success);
     } catch (e) {
       context.showSnackBar(e.toString());
     }
@@ -78,35 +66,61 @@ class _AndroidSettingsPageState extends State<AndroidSettingsPage> {
     return ListTile(
       title: Text(l10n.homeWidgetUrlConfig),
       trailing: const Icon(Icons.keyboard_arrow_right),
-      onTap: () {
+      onTap: () async {
         final data = <String, String>{};
-        _sp.getKeys().forEach((key) {
-          final val = _sp.getString(key);
+        final keys = await PrefStore.shared.keys();
+
+        for (final key in keys) {
+          final val = PrefStore.shared.get<String>(key);
           if (val != null) {
             data[key] = val;
           }
-        });
-        final ctrl = TextEditingController(text: json.encode(data));
-        context.showRoundDialog(
-          title: Text(l10n.homeWidgetUrlConfig),
-          child: Input(
-            autoFocus: true,
-            controller: ctrl,
-            label: 'JSON',
-            type: TextInputType.visiblePassword,
-            maxLines: 7,
-            onSubmitted: (p0) => _saveWidgetSP(p0, data),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _saveWidgetSP(ctrl.text, data);
-              },
-              child: Text(l10n.ok),
-            ),
-          ],
+        }
+        final result = await KvEditor.route.go(
+          context,
+          KvEditorArgs(data: data, prefix: _homeWidgetPrefPrefix),
         );
+        if (result != null) {
+          _saveWidgetSP(result, data);
+        }
       },
     );
   }
+
+  /// It's removed due to Issue #381
+  // Widget _buildWatch() {
+  //   return FutureWidget(
+  //     future: wc.isReachable,
+  //     error: (e, s) {
+  //       Loggers.app.warning('WatchOS error', e, s);
+  //       return ListTile(
+  //         title: const Text('Watch app'),
+  //         subtitle: Text(l10n.viewErr, style: UIs.textGrey),
+  //         trailing: const Icon(Icons.keyboard_arrow_right),
+  //         onTap: () {
+  //           context.showRoundDialog(
+  //             title: l10n.error,
+  //             child: SingleChildScrollView(
+  //               child: SimpleMarkdown(data: '${e.toString()}\n```$s```'),
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //     success: (val) {
+  //       if (val == null) {
+  //         return ListTile(
+  //           title: const Text('Watch app'),
+  //           subtitle: Text(l10n.watchNotPaired, style: UIs.textGrey),
+  //         );
+  //       }
+  //       return ListTile(
+  //         title: const Text('Watch app'),
+  //         subtitle: Text(l10n.sync, style: UIs.textGrey),
+  //         trailing: const Icon(Icons.keyboard_arrow_right),
+  //         onTap: () async {},
+  //       );
+  //     },
+  //   );
+  // }
 }
