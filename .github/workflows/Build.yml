@@ -58,11 +58,11 @@ jobs:
 
 
       # Get Flutter dependencies.
-      - name: Get Flutter dependencies
-        run: |
-          cd "$action_dir"
-          echo $PWD
-          flutter pub get
+      # - name: Get Flutter dependencies
+      #   run: |
+      #     cd "$action_dir"
+      #     echo $PWD
+      #     flutter pub get
 
       # Check for any formatting issues in the code.
       # - name: Check code formatting
