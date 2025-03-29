@@ -44,7 +44,7 @@ jobs:
         uses: subosito/flutter-action@main
         with:
           channel: 'stable'
-          flutter-version: "3.27.3"
+          flutter-version: "3.27.2"
 
       - name: Set key
         run: |
