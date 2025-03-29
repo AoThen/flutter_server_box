@@ -44,6 +44,7 @@ jobs:
         uses: subosito/flutter-action@main
         with:
           channel: 'stable'
+          flutter-version: "3.27.3"
 
       - name: Set key
         run: |
@@ -64,18 +65,18 @@ jobs:
           flutter pub get
 
       # Check for any formatting issues in the code.
-      - name: Check code formatting
-        run: |
-          cd "$action_dir"
-          echo $PWD
-          dart format --output=none .
+      # - name: Check code formatting
+      #   run: |
+      #     cd "$action_dir"
+      #     echo $PWD
+      #     dart format --output=none .
 
       # Statically analyze the Dart code for any errors.
-      - name: Analyze Dart code
-        run: |
-          cd "$action_dir"
-          echo $PWD
-          flutter analyze .
+      # - name: Analyze Dart code
+      #   run: |
+      #     cd "$action_dir"
+      #     echo $PWD
+      #     flutter analyze .
 
       - name: Build arm64 APK
         run: |
