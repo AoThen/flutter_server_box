@@ -92,13 +92,13 @@ jobs:
           # dart run fl_build -p android
           # cd build/app/outputs/flutter-apk/
           # mv app-armeabi-v7a-release.apk flutter_server_box-armeabi-v7a.apk
-          # mv app-arm64-v8a-release.apk flutter_server_box-arm64-v8a.apk
+          mv app-arm64-v8a-release.apk flutter_server_box-arm64-v8a.apk
       
       - name: Release apk
         uses: actions/upload-artifact@main
         with:
           name: flutter_server_box
-          path: ${{ steps.repo.outputs.action_dir }}/build/app/outputs/flutter-apk/*.apk
+          path: ${{ steps.repo.outputs.action_dir }}/build/app/outputs/flutter-apk/flutter_server_box*.apk
 
       - name: Delete workflow runs
         uses: AoThen/delete-workflow-runs@main
