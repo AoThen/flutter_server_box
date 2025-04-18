@@ -98,7 +98,7 @@ jobs:
         uses: actions/upload-artifact@main
         with:
           name: flutter_server_box
-          path: ${{ steps.repo.outputs.action_dir }}/build/app/outputs/flutter-apk/flutter_server_box*.apk
+          path: ${{ steps.repo.outputs.action_dir }}/build/app/outputs/flutter-apk/*.apk
 
       - name: Delete workflow runs
         uses: AoThen/delete-workflow-runs@main
