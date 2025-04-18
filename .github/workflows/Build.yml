@@ -92,7 +92,7 @@ jobs:
           # dart run fl_build -p android
           # cd build/app/outputs/flutter-apk/
           # mv app-armeabi-v7a-release.apk flutter_server_box-armeabi-v7a.apk
-          mv app-arm64-v8a-release.apk flutter_server_box-arm64-v8a.apk
+          # mv app-arm64-v8a-release.apk flutter_server_box-arm64-v8a.apk
       
       - name: Release apk
         uses: actions/upload-artifact@main
