@@ -10,13 +10,18 @@ class SftpMissionPage extends StatefulWidget {
 
   @override
   State<SftpMissionPage> createState() => _SftpMissionPageState();
+
+  static const route = AppRouteNoArg(
+    page: SftpMissionPage.new,
+    path: '/sftp/mission',
+  );
 }
 
 class _SftpMissionPageState extends State<SftpMissionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
         title: Text(l10n.mission, style: UIs.text18),
       ),
       body: _buildBody(),

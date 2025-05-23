@@ -142,7 +142,7 @@ extension _Server on _AppSettingsPageState {
       leading: const Icon(OctIcons.sort_desc, size: _kIconSize),
       title: Text(l10n.serverOrder),
       trailing: const Icon(Icons.keyboard_arrow_right),
-      onTap: () => AppRoutes.serverOrder().go(context),
+      onTap: () => ServerOrderPage.route.go(context),
     );
   }
 
@@ -151,7 +151,7 @@ extension _Server on _AppSettingsPageState {
       leading: const Icon(OctIcons.sort_desc, size: _kIconSize),
       title: Text(l10n.serverDetailOrder),
       trailing: const Icon(Icons.keyboard_arrow_right),
-      onTap: () => AppRoutes.serverDetailOrder().go(context),
+      onTap: () => ServerDetailOrderPage.route.go(context),
     );
   }
 
@@ -206,10 +206,10 @@ extension _Server on _AppSettingsPageState {
   }
 
   Future<void> _editRawSettings() async {
-    final map = await Stores.setting.getAllMap(includeInternalKeys: true);
+    final map = Stores.setting.getAllMap(includeInternalKeys: true);
     final keys = map.keys;
 
-    void onSave(BuildContext context, EditorPageRet ret) {
+    void onSave(EditorPageRet ret) {
       if (ret.typ != EditorPageRetType.text) {
         context.showRoundDialog(
           title: libL10n.fail,
@@ -240,9 +240,12 @@ extension _Server on _AppSettingsPageState {
       context,
       args: EditorPageArgs(
         text: text,
-        langCode: 'json',
+        lang: ProgLang.json,
         title: libL10n.setting,
         onSave: onSave,
+        closeAfterSave: SettingStore.instance.closeAfterSave.fetch(),
+        softWrap: SettingStore.instance.editorSoftWrap.fetch(),
+        enableHighlight: SettingStore.instance.editorHighlight.fetch(),
       ),
     );
   }

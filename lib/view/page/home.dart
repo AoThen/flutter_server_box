@@ -1,5 +1,6 @@
 import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:server_box/core/chan.dart';
 import 'package:server_box/data/model/app/tab.dart';
 import 'package:server_box/data/provider/app.dart';
@@ -7,26 +8,26 @@ import 'package:server_box/data/provider/server.dart';
 import 'package:server_box/data/res/build_data.dart';
 import 'package:server_box/data/res/store.dart';
 import 'package:server_box/data/res/url.dart';
+import 'package:server_box/view/page/setting/entry.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-
-part 'appbar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
+
+  static const route = AppRouteNoArg(
+    page: HomePage.new,
+    path: '/',
+  );
 }
 
 class _HomePageState extends State<HomePage>
-    with
-        AutomaticKeepAliveClientMixin,
-        AfterLayoutMixin,
-        WidgetsBindingObserver {
+    with AutomaticKeepAliveClientMixin, AfterLayoutMixin, WidgetsBindingObserver {
   late final PageController _pageController;
 
   final _selectIndex = ValueNotifier(0);
-  final _isLandscape = ValueNotifier(false);
 
   bool _switchingPage = false;
   bool _shouldAuth = false;
@@ -40,7 +41,6 @@ class _HomePageState extends State<HomePage>
     WakelockPlus.disable();
 
     _selectIndex.dispose();
-    _isLandscape.dispose();
   }
 
   @override
@@ -56,13 +56,6 @@ class _HomePageState extends State<HomePage>
     if (Stores.setting.generalWakeLock.fetch()) {
       WakelockPlus.enable();
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _isLandscape.value =
-        MediaQuery.of(context).orientation == Orientation.landscape;
   }
 
   @override
@@ -100,58 +93,80 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     super.build(context);
     AppProvider.ctx = context;
-    final sysPadding = MediaQuery.of(context).padding;
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
 
     return Scaffold(
-      appBar: _AppBar(sysPadding.top),
-      body: PageView.builder(
-        controller: _pageController,
-        itemCount: AppTab.values.length,
-        physics: const NeverScrollableScrollPhysics(),
-        itemBuilder: (_, index) => AppTab.values[index].page,
-        onPageChanged: (value) {
-          FocusScope.of(context).unfocus();
-          if (!_switchingPage) {
-            _selectIndex.value = value;
-          }
-        },
+      appBar: _AppBar(MediaQuery.paddingOf(context).top),
+      body: Row(
+        children: [
+          if (!isMobile) _buildRailBar(),
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: AppTab.values.length,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (_, index) => AppTab.values[index].page,
+              onPageChanged: (value) {
+                FocusScope.of(context).unfocus();
+                if (!_switchingPage) {
+                  _selectIndex.value = value;
+                }
+              },
+            ),
+          ),
+        ],
       ),
-      bottomNavigationBar: ValBuilder(
-        listenable: _isLandscape,
-        builder: (ls) {
-          return Stores.setting.fullScreen.fetch()
-              ? UIs.placeholder
-              : ListenableBuilder(
-                  listenable: _selectIndex,
-                  builder: (_, __) => _buildBottomBar(ls),
-                );
-        },
+      bottomNavigationBar: isMobile ? _buildBottomBar() : null,
+    );
+  }
+
+  Widget _buildBottomBar() {
+    if (Stores.setting.fullScreen.fetch()) return UIs.placeholder;
+    return ListenableBuilder(
+      listenable: _selectIndex,
+      builder: (context, child) => NavigationBar(
+        selectedIndex: _selectIndex.value,
+        height: kBottomNavigationBarHeight * 1.1,
+        animationDuration: const Duration(milliseconds: 250),
+        onDestinationSelected: _onDestinationSelected,
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+        destinations: AppTab.navDestinations,
       ),
     );
   }
 
-  Widget _buildBottomBar(bool ls) {
-    return NavigationBar(
-      selectedIndex: _selectIndex.value,
-      height: kBottomNavigationBarHeight * (ls ? 0.75 : 1.1),
-      animationDuration: const Duration(milliseconds: 250),
-      onDestinationSelected: (int index) {
-        if (_selectIndex.value == index) return;
-        _selectIndex.value = index;
-        _switchingPage = true;
-        _pageController.animateToPage(
-          index,
-          duration: const Duration(milliseconds: 677),
-          curve: Curves.fastLinearToSlowEaseIn,
-        );
-        Future.delayed(const Duration(milliseconds: 677), () {
-          _switchingPage = false;
-        });
-      },
-      labelBehavior: ls
-          ? NavigationDestinationLabelBehavior.alwaysHide
-          : NavigationDestinationLabelBehavior.onlyShowSelected,
-      destinations: AppTab.navDestinations,
+  Widget _buildRailBar({bool extended = false}) {
+    final fullscreen = Stores.setting.fullScreen.fetch();
+    if (fullscreen) return UIs.placeholder;
+
+    return Stack(
+      children: [
+        _selectIndex.listenVal(
+          (idx) => NavigationRail(
+            extended: extended,
+            minExtendedWidth: 150,
+            leading: extended ? const SizedBox(height: 20) : null,
+            trailing: extended ? const SizedBox(height: 20) : null,
+            labelType: extended ? NavigationRailLabelType.none : NavigationRailLabelType.all,
+            selectedIndex: idx,
+            destinations: AppTab.navRailDestinations,
+            onDestinationSelected: _onDestinationSelected,
+          ),
+        ),
+        // Settings Btn
+        Positioned(
+          bottom: 10,
+          left: 0,
+          right: 0,
+          child: IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: libL10n.setting,
+            onPressed: () {
+              SettingsPage.route.go(context);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -200,11 +215,43 @@ class _HomePageState extends State<HomePage>
 
   void _goAuth() {
     if (Stores.setting.useBioAuth.fetch()) {
-      if (BioAuthPage.route.isAlreadyIn) return;
+      if (BioAuthPage.route.alreadyIn) return;
       BioAuthPage.route.go(
         context,
         args: BioAuthPageArgs(onAuthSuccess: () => _shouldAuth = false),
       );
     }
+  }
+
+  void _onDestinationSelected(int index) {
+    if (_selectIndex.value == index) return;
+    _selectIndex.value = index;
+    _switchingPage = true;
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 677),
+      curve: Curves.fastLinearToSlowEaseIn,
+    );
+    Future.delayed(const Duration(milliseconds: 677), () {
+      _switchingPage = false;
+    });
+  }
+}
+
+final class _AppBar extends StatelessWidget implements PreferredSizeWidget {
+  final double paddingTop;
+
+  const _AppBar(this.paddingTop);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: preferredSize.height,
+    );
+  }
+
+  @override
+  Size get preferredSize {
+    return Size.fromHeight(paddingTop);
   }
 }

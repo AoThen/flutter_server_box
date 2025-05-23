@@ -9,6 +9,11 @@ class AndroidSettingsPage extends StatefulWidget {
 
   @override
   State<AndroidSettingsPage> createState() => _AndroidSettingsPageState();
+
+  static const route = AppRouteNoArg(
+    page: AndroidSettingsPage.new,
+    path: '/settings/android',
+  );
 }
 
 const _homeWidgetPrefPrefix = 'widget_';
@@ -17,15 +22,14 @@ class _AndroidSettingsPageState extends State<AndroidSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Android')),
+      appBar: CustomAppBar(title: const Text('Android')),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 17),
         children: [
           // _buildFgService(),
           _buildBgRun(),
           _buildAndroidWidgetSharedPreference(),
-          if (BioAuth.isPlatformSupported)
-            PlatformPublicSettings.buildBioAuth(),
+          if (BioAuth.isPlatformSupported) PlatformPublicSettings.buildBioAuth(),
         ].map((e) => CardX(child: e)).toList(),
       ),
     );
@@ -68,7 +72,7 @@ class _AndroidSettingsPageState extends State<AndroidSettingsPage> {
       trailing: const Icon(Icons.keyboard_arrow_right),
       onTap: () async {
         final data = <String, String>{};
-        final keys = await PrefStore.shared.keys();
+        final keys = PrefStore.shared.keys();
 
         for (final key in keys) {
           final val = PrefStore.shared.get<String>(key);

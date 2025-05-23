@@ -6,7 +6,6 @@ import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/core/extension/sftpfile.dart';
-import 'package:server_box/core/route.dart';
 import 'package:server_box/core/utils/comparator.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/model/sftp/browser_status.dart';
@@ -14,33 +13,47 @@ import 'package:server_box/data/model/sftp/worker.dart';
 import 'package:server_box/data/provider/sftp.dart';
 import 'package:server_box/data/res/misc.dart';
 import 'package:server_box/data/res/store.dart';
-import 'package:server_box/view/page/editor.dart';
+import 'package:server_box/data/store/setting.dart';
+import 'package:server_box/view/page/ssh/page/page.dart';
 import 'package:server_box/view/page/storage/local.dart';
+import 'package:server_box/view/page/storage/sftp_mission.dart';
 import 'package:server_box/view/widget/omit_start_text.dart';
-import 'package:server_box/view/widget/two_line_text.dart';
 import 'package:server_box/view/widget/unix_perm.dart';
 
 import 'package:icons_plus/icons_plus.dart';
 
-class SftpPage extends StatefulWidget {
+final class SftpPageArgs {
   final Spi spi;
-  final String? initPath;
   final bool isSelect;
+  final String? initPath;
+
+  const SftpPageArgs({
+    required this.spi,
+    this.isSelect = false,
+    this.initPath,
+  });
+}
+
+class SftpPage extends StatefulWidget {
+  final SftpPageArgs args;
 
   const SftpPage({
     super.key,
-    required this.spi,
-    required this.isSelect,
-    this.initPath,
+    required this.args,
   });
 
   @override
   State<SftpPage> createState() => _SftpPageState();
+
+  static const route = AppRouteArg<String, SftpPageArgs>(
+    page: SftpPage.new,
+    path: '/sftp',
+  );
 }
 
 class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
   late final _status = SftpBrowserStatus(_client);
-  late final _client = widget.spi.server!.value.client!;
+  late final _client = widget.args.spi.server!.value.client!;
   final _sortOption = _SortOption().vn;
 
   @override
@@ -54,7 +67,7 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
     final children = [
       Btn.icon(
         icon: const Icon(Icons.downloading),
-        onTap: () => AppRoutes.sftpMission().go(context),
+        onTap: () => SftpMissionPage.route.go(context),
       ),
       _buildSortMenu(),
       _buildSearchBtn(),
@@ -62,8 +75,8 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
     if (isDesktop) children.add(_buildRefreshBtn());
 
     return Scaffold(
-      appBar: AppBar(
-        title: TwoLineText(up: 'SFTP', down: widget.spi.name),
+      appBar: CustomAppBar(
+        title: TwoLineText(up: 'SFTP', down: widget.args.spi.name),
         actions: children,
       ),
       body: _buildFileView(),
@@ -75,13 +88,13 @@ class _SftpPageState extends State<SftpPage> with AfterLayoutMixin {
   FutureOr<void> afterFirstLayout(BuildContext context) {
     var initPath = '/';
     if (Stores.setting.sftpOpenLastPath.fetch()) {
-      final history = Stores.history.sftpLastPath.fetch(widget.spi.id);
+      final history = Stores.history.sftpLastPath.fetch(widget.args.spi.id);
       if (history != null) {
         initPath = history;
       }
     }
 
-    _status.path.path = widget.initPath ?? initPath;
+    _status.path.path = widget.args.initPath ?? initPath;
     _listDir();
   }
 }
@@ -93,17 +106,15 @@ extension _UI on _SftpPageState {
       (_SortType.size, l10n.size),
       (_SortType.time, l10n.time),
     ];
-    return ValBuilder(
-      listenable: _sortOption,
-      builder: (value) {
+    return _sortOption.listenVal(
+      (value) {
         return PopupMenuButton<_SortType>(
           icon: const Icon(Icons.sort),
           itemBuilder: (context) {
             return options.map((r) {
               final (type, name) = r;
               final selected = type == value.sortBy;
-              final title =
-                  selected ? "$name (${value.reversed ? '-' : '+'})" : name;
+              final title = selected ? "$name (${value.reversed ? '-' : '+'})" : name;
               return PopupMenuItem(
                 value: type,
                 child: Text(
@@ -130,7 +141,7 @@ extension _UI on _SftpPageState {
   }
 
   Widget _buildBottom() {
-    final children = widget.isSelect
+    final children = widget.args.isSelect
         ? [
             IconButton(
               onPressed: () => context.pop(_status.path.path),
@@ -168,7 +179,7 @@ extension _UI on _SftpPageState {
     return RefreshIndicator(
       onRefresh: _listDir,
       child: FadeIn(
-        key: Key(widget.spi.name + _status.path.path),
+        key: Key(widget.args.spi.name + _status.path.path),
         child: ValBuilder(
           listenable: _sortOption,
           builder: (sortOption) {
@@ -305,7 +316,8 @@ extension _Actions on _SftpPageState {
     if (editor.isNotEmpty) {
       // Use single quote to avoid escape
       final cmd = "$editor '${_getRemotePath(name)}'";
-      await AppRoutes.ssh(spi: widget.spi, initCmd: cmd).go(context);
+      final args = SshPageArgs(spi: widget.args.spi, initCmd: cmd);
+      await SSHPage.route.go(context, args);
       await _listDir();
       return;
     }
@@ -324,7 +336,7 @@ extension _Actions on _SftpPageState {
     final localPath = _getLocalPath(remotePath);
     final completer = Completer();
     final req = SftpReq(
-      widget.spi,
+      widget.args.spi,
       remotePath,
       localPath,
       SftpReqType.download,
@@ -339,7 +351,7 @@ extension _Actions on _SftpPageState {
       context,
       args: EditorPageArgs(
         path: localPath,
-        onSave: (context, _) {
+        onSave: (_) {
           SftpProvider.add(SftpReq(
             req.spi,
             remotePath,
@@ -348,6 +360,9 @@ extension _Actions on _SftpPageState {
           ));
           context.showSnackBar(l10n.added2List);
         },
+        closeAfterSave: SettingStore.instance.closeAfterSave.fetch(),
+        softWrap: SettingStore.instance.editorSoftWrap.fetch(),
+        enableHighlight: SettingStore.instance.editorHighlight.fetch(),
       ),
     );
   }
@@ -368,7 +383,7 @@ extension _Actions on _SftpPageState {
 
             SftpProvider.add(
               SftpReq(
-                widget.spi,
+                widget.args.spi,
                 remotePath,
                 _getLocalPath(remotePath),
                 SftpReqType.download,
@@ -604,7 +619,8 @@ extension _Actions on _SftpPageState {
     );
     if (confirm != true) return;
 
-    await AppRoutes.ssh(spi: widget.spi, initCmd: cmd).go(context);
+    final args = SshPageArgs(spi: widget.args.spi, initCmd: cmd);
+    await SSHPage.route.go(context, args);
     _listDir();
   }
 
@@ -616,7 +632,7 @@ extension _Actions on _SftpPageState {
 
   /// Local file dir + server id + remote path
   String _getLocalPath(String remotePath) {
-    return Paths.file.joinPath(widget.spi.id).joinPath(remotePath);
+    return Paths.file.joinPath(widget.args.spi.id).joinPath(remotePath);
   }
 
   /// Only return true if the path is changed
@@ -638,9 +654,7 @@ extension _Actions on _SftpPageState {
           fs.removeAt(0);
         }
 
-        if (fs.isNotEmpty &&
-            fs.firstOrNull?.filename == '..' &&
-            _status.path.path == '/') {
+        if (fs.isNotEmpty && fs.firstOrNull?.filename == '..' && _status.path.path == '/') {
           fs.removeAt(0);
         }
         if (mounted) {
@@ -653,7 +667,7 @@ extension _Actions on _SftpPageState {
 
           // Only update history when success
           if (Stores.setting.sftpOpenLastPath.fetch()) {
-            Stores.history.sftpLastPath.put(widget.spi.id, listPath);
+            Stores.history.sftpLastPath.put(widget.args.spi.id, listPath);
           }
 
           return true;
@@ -735,7 +749,7 @@ extension _Actions on _SftpPageState {
         final remotePath = '$remoteDir/$fileName';
         Loggers.app.info('SFTP upload local: $path, remote: $remotePath');
         SftpProvider.add(
-          SftpReq(widget.spi, remotePath, path, SftpReqType.upload),
+          SftpReq(widget.args.spi, remotePath, path, SftpReqType.upload),
         );
       },
       icon: const Icon(Icons.upload_file),
@@ -817,7 +831,7 @@ extension _Actions on _SftpPageState {
   Widget _buildHomeBtn() {
     return IconButton(
       onPressed: () {
-        final user = widget.spi.user;
+        final user = widget.args.spi.user;
         _status.path.path = user != 'root' ? '/home/$user' : '/root';
         _listDir();
       },
@@ -894,9 +908,7 @@ const _extCmdMap = {
 
 /// Return fmt: 2021-01-01 00:00:00
 String _getTime(int? unixMill) {
-  return DateTime.fromMillisecondsSinceEpoch((unixMill ?? 0) * 1000)
-      .toString()
-      .replaceFirst('.000', '');
+  return DateTime.fromMillisecondsSinceEpoch((unixMill ?? 0) * 1000).toString().replaceFirst('.000', '');
 }
 
 enum _SortType {
@@ -915,8 +927,7 @@ enum _SortType {
         files.sort(
           comparator
               .thenWithComparator(
-                (a, b) => Comparators.compareStringCaseInsensitive()(
-                    a.filename, b.filename),
+                (a, b) => Comparators.compareStringCaseInsensitive()(a.filename, b.filename),
                 reversed: reversed,
               )
               .compare,

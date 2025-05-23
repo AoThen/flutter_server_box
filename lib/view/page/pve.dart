@@ -8,7 +8,6 @@ import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/provider/pve.dart';
 import 'package:server_box/data/res/store.dart';
 import 'package:server_box/view/widget/percent_circle.dart';
-import 'package:server_box/view/widget/two_line_text.dart';
 
 final class PvePageArgs {
   final Spi spi;
@@ -24,10 +23,13 @@ final class PvePage extends StatefulWidget {
     required this.args,
   });
 
-  static const route = AppRouteArg<void, PvePageArgs>(page: PvePage.new, path: '/pve');
-
   @override
   State<PvePage> createState() => _PvePageState();
+
+  static const route = AppRouteArg<void, PvePageArgs>(
+    page: PvePage.new,
+    path: '/pve',
+  );
 }
 
 const _kHorziPadding = 11.0;
@@ -60,7 +62,7 @@ final class _PvePageState extends State<PvePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
         title: TwoLineText(up: 'PVE', down: widget.args.spi.name),
         actions: [
           ValBuilder(
@@ -454,9 +456,7 @@ extension on _PvePageState {
   }
 
   void _initRefreshTimer() {
-    _timer = Timer.periodic(
-        Duration(seconds: Stores.setting.serverStatusUpdateInterval.fetch()),
-        (_) {
+    _timer = Timer.periodic(Duration(seconds: Stores.setting.serverStatusUpdateInterval.fetch()), (_) {
       if (mounted) {
         _pve.list();
       }

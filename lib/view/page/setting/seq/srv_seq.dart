@@ -10,13 +10,18 @@ class ServerOrderPage extends StatefulWidget {
 
   @override
   State<ServerOrderPage> createState() => _ServerOrderPageState();
+
+  static const route = AppRouteNoArg(
+    page: ServerOrderPage.new,
+    path: '/settings/order/server',
+  );
 }
 
 class _ServerOrderPageState extends State<ServerOrderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.serverOrder)),
+      appBar: CustomAppBar(title: Text(l10n.serverOrder)),
       body: _buildBody(),
     );
   }

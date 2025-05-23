@@ -9,6 +9,11 @@ class ServerDetailOrderPage extends StatefulWidget {
 
   @override
   State<ServerDetailOrderPage> createState() => _ServerDetailOrderPageState();
+
+  static const route = AppRouteNoArg(
+    page: ServerDetailOrderPage.new,
+    path: '/settings/order/server_detail',
+  );
 }
 
 class _ServerDetailOrderPageState extends State<ServerDetailOrderPage> {
@@ -17,7 +22,7 @@ class _ServerDetailOrderPageState extends State<ServerDetailOrderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.serverDetailOrder)),
+      appBar: CustomAppBar(title: Text(l10n.serverDetailOrder)),
       body: _buildBody(),
     );
   }

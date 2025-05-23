@@ -6,14 +6,19 @@ import 'package:server_box/data/res/store.dart';
 import 'package:server_box/view/page/setting/platform/platform_pub.dart';
 import 'package:watch_connectivity/watch_connectivity.dart';
 
-class IOSSettingsPage extends StatefulWidget {
-  const IOSSettingsPage({super.key});
+class IosSettingsPage extends StatefulWidget {
+  const IosSettingsPage({super.key});
 
   @override
-  State<IOSSettingsPage> createState() => _IOSSettingsPageState();
+  State<IosSettingsPage> createState() => _IosSettingsPageState();
+
+  static const route = AppRouteNoArg(
+    page: IosSettingsPage.new,
+    path: '/settings/ios',
+  );
 }
 
-class _IOSSettingsPageState extends State<IOSSettingsPage> {
+class _IosSettingsPageState extends State<IosSettingsPage> {
   final _pushToken = ValueNotifier<String?>(null);
 
   final wc = WatchConnectivity();
@@ -27,7 +32,7 @@ class _IOSSettingsPageState extends State<IOSSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('iOS')),
+      appBar: CustomAppBar(title: const Text('iOS')),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 17),
         children: [
