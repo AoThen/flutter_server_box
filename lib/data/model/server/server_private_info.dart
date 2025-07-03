@@ -2,17 +2,15 @@ import 'dart:convert';
 
 import 'package:fl_lib/fl_lib.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:server_box/data/model/app/error.dart';
 import 'package:server_box/data/model/server/custom.dart';
 import 'package:server_box/data/model/server/server.dart';
 import 'package:server_box/data/model/server/wol_cfg.dart';
 import 'package:server_box/data/provider/server.dart';
-
-import 'package:server_box/data/model/app/error.dart';
 import 'package:server_box/data/store/server.dart';
 
-part 'server_private_info.g.dart';
 part 'server_private_info.freezed.dart';
+part 'server_private_info.g.dart';
 
 /// In the first version, it's called `ServerPrivateInfo` which was designed to
 /// store the private information of a server.
@@ -21,31 +19,31 @@ part 'server_private_info.freezed.dart';
 ///
 /// Nowaday, more fields are added to this class, and it's renamed to `Spi`.
 @freezed
-@HiveType(typeId: 3)
-class Spi with _$Spi {
+abstract class Spi with _$Spi {
   const Spi._();
 
+  @JsonSerializable(includeIfNull: false)
   const factory Spi({
-    @HiveField(0) required String name,
-    @HiveField(1) required String ip,
-    @HiveField(2) required int port,
-    @HiveField(3) required String user,
-    @HiveField(4) String? pwd,
+    required String name,
+    required String ip,
+    required int port,
+    required String user,
+    String? pwd,
 
     /// [id] of private key
-    @JsonKey(name: 'pubKeyId') @HiveField(5) String? keyId,
-    @HiveField(6) List<String>? tags,
-    @HiveField(7) String? alterUrl,
-    @HiveField(8, defaultValue: true) @Default(true) bool autoConnect,
+    @JsonKey(name: 'pubKeyId') String? keyId,
+    List<String>? tags,
+    String? alterUrl,
+    @Default(true) bool autoConnect,
 
     /// [id] of the jump server
-    @HiveField(9) String? jumpId,
-    @HiveField(10) ServerCustom? custom,
-    @HiveField(11) WakeOnLanCfg? wolCfg,
+    String? jumpId,
+    ServerCustom? custom,
+    WakeOnLanCfg? wolCfg,
 
     /// It only applies to SSH terminal.
-    @HiveField(12) Map<String, String>? envs,
-    @JsonKey(fromJson: Spi.parseId) @HiveField(13, defaultValue: '') required String id,
+    Map<String, String>? envs,
+    @Default('') @JsonKey(fromJson: Spi.parseId) String id,
   }) = _Spi;
 
   factory Spi.fromJson(Map<String, dynamic> json) => _$SpiFromJson(json);
@@ -86,7 +84,9 @@ extension Spix on Spi {
   VNode<Server>? get jumpServer => ServerProvider.pick(id: jumpId);
 
   bool shouldReconnect(Spi old) {
-    return id != old.id ||
+    return user != old.user ||
+        ip != old.ip ||
+        port != old.port ||
         pwd != old.pwd ||
         keyId != old.keyId ||
         alterUrl != old.alterUrl ||
