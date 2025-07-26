@@ -47,10 +47,32 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get backupTip =>
-      'De geëxporteerde gegevens zijn simpelweg versleuteld. \nBewaar deze aub veilig.';
+      'De geëxporteerde gegevens kunnen worden versleuteld met een wachtwoord. \nBewaar deze aub veilig.';
 
   @override
   String get backupVersionNotMatch => 'Back-upversie komt niet overeen.';
+
+  @override
+  String get backupPassword => 'Back-up wachtwoord';
+
+  @override
+  String get backupPasswordTip =>
+      'Stel een wachtwoord in om back-upbestanden te versleutelen. Laat leeg om versleuteling uit te schakelen.';
+
+  @override
+  String get backupPasswordWrong => 'Onjuist back-up wachtwoord';
+
+  @override
+  String get backupEncrypted => 'Back-up is versleuteld';
+
+  @override
+  String get backupNotEncrypted => 'Back-up is niet versleuteld';
+
+  @override
+  String get backupPasswordSet => 'Back-up wachtwoord ingesteld';
+
+  @override
+  String get backupPasswordRemoved => 'Back-up wachtwoord verwijderd';
 
   @override
   String get battery => 'Batterij';
@@ -470,9 +492,6 @@ class AppLocalizationsNl extends AppLocalizations {
       'Deze functie bevindt zich momenteel in de testfase en is alleen getest op PVE 8+. Gebruik het met voorzichtigheid.';
 
   @override
-  String get pwd => 'Wachtwoord';
-
-  @override
   String get read => 'Lezen';
 
   @override
@@ -774,5 +793,5 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get writeScriptTip =>
-      'Na het verbinden met de server wordt een script geschreven naar ~/.config/server_box om de systeemstatus te monitoren. U kunt de inhoud van het script controleren.';
+      'Na het verbinden met de server wordt een script geschreven naar `~/.config/server_box` \n | `/tmp/server_box` om de systeemstatus te monitoren. U kunt de inhoud van het script controleren.';
 }

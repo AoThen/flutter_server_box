@@ -26,6 +26,9 @@ extension _VirtKey on SSHPageState {
       case TerminalKey.alt:
         _keyboard.alt = !_keyboard.alt;
         break;
+      case TerminalKey.shift:
+        _keyboard.shift = !_keyboard.shift;
+        break;
       default:
         _terminal.keyInput(key);
         break;
@@ -160,9 +163,5 @@ extension _VirtKey on SSHPageState {
         _virtKeysList.add(virtKeys.sublist(len, len + 7));
       }
     }
-  }
-
-  FutureOr<List<String>?> _onKeyboardInteractive(SSHUserInfoRequest req) {
-    return KeybordInteractive.defaultHandle(widget.args.spi, ctx: context);
   }
 }

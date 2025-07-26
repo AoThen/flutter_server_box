@@ -47,11 +47,33 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get backupTip =>
-      'Експортовані дані слабо зашифровані. \nБудь ласка, зберігайте їх у безпеці.';
+      'Експортовані дані можуть бути зашифровані паролем. \nБудь ласка, зберігайте їх у безпеці.';
 
   @override
   String get backupVersionNotMatch =>
       'Версія резервного копіювання не збіглася.';
+
+  @override
+  String get backupPassword => 'Пароль резервного копіювання';
+
+  @override
+  String get backupPasswordTip =>
+      'Встановіть пароль для шифрування файлів резервного копіювання. Залиште порожнім для відключення шифрування.';
+
+  @override
+  String get backupPasswordWrong => 'Неправильний пароль резервного копіювання';
+
+  @override
+  String get backupEncrypted => 'Резервна копія зашифрована';
+
+  @override
+  String get backupNotEncrypted => 'Резервна копія не зашифрована';
+
+  @override
+  String get backupPasswordSet => 'Пароль резервного копіювання встановлено';
+
+  @override
+  String get backupPasswordRemoved => 'Пароль резервного копіювання видалено';
 
   @override
   String get battery => 'Акумулятор';
@@ -473,9 +495,6 @@ class AppLocalizationsUk extends AppLocalizations {
       'Ця функція наразі перебуває на стадії тестування та випробувалася лише на PVE 8+. Будь ласка, використовуйте її з обережністю.';
 
   @override
-  String get pwd => 'Пароль';
-
-  @override
   String get read => 'Читати';
 
   @override
@@ -775,5 +794,5 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get writeScriptTip =>
-      'Після підключення до сервера скрипт буде записано у ~/.config/server_box для моніторингу стану системи. Ви можете переглянути вміст скрипта.';
+      'Після підключення до сервера скрипт буде записано у `~/.config/server_box` \n | `/tmp/server_box` для моніторингу стану системи. Ви можете переглянути вміст скрипта.';
 }

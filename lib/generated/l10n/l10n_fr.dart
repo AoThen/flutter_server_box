@@ -47,11 +47,33 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get backupTip =>
-      'Les données exportées sont simplement chiffrées. \nVeuillez les garder en sécurité.';
+      'Les données exportées peuvent être chiffrées avec un mot de passe. \nVeuillez les garder en sécurité.';
 
   @override
   String get backupVersionNotMatch =>
       'La version de sauvegarde ne correspond pas.';
+
+  @override
+  String get backupPassword => 'Mot de passe de sauvegarde';
+
+  @override
+  String get backupPasswordTip =>
+      'Définissez un mot de passe pour chiffrer les fichiers de sauvegarde. Laissez vide pour désactiver le chiffrement.';
+
+  @override
+  String get backupPasswordWrong => 'Mot de passe de sauvegarde incorrect';
+
+  @override
+  String get backupEncrypted => 'La sauvegarde est chiffrée';
+
+  @override
+  String get backupNotEncrypted => 'La sauvegarde n\'est pas chiffrée';
+
+  @override
+  String get backupPasswordSet => 'Mot de passe de sauvegarde défini';
+
+  @override
+  String get backupPasswordRemoved => 'Mot de passe de sauvegarde supprimé';
 
   @override
   String get battery => 'Batterie';
@@ -474,9 +496,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette fonctionnalité est actuellement en phase de test et n\'a été testée que sur PVE 8+. Veuillez l\'utiliser avec prudence.';
 
   @override
-  String get pwd => 'Mot de passe';
-
-  @override
   String get read => 'Lire';
 
   @override
@@ -779,5 +798,5 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get writeScriptTip =>
-      'Après la connexion au serveur, un script sera écrit dans ~/.config/server_box pour surveiller l’état du système. Vous pouvez examiner le contenu du script.';
+      'Après la connexion au serveur, un script sera écrit dans `~/.config/server_box` \n | `/tmp/server_box` pour surveiller l’état du système. Vous pouvez examiner le contenu du script.';
 }

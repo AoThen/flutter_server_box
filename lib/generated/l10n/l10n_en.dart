@@ -47,10 +47,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupTip =>
-      'The exported data is weakly encrypted. \nPlease keep it safe.';
+      'The exported data can be encrypted with password. \nPlease keep it safe.';
 
   @override
   String get backupVersionNotMatch => 'Backup version is not match.';
+
+  @override
+  String get backupPassword => 'Backup password';
+
+  @override
+  String get backupPasswordTip =>
+      'Set a password to encrypt backup files. Leave empty to disable encryption.';
+
+  @override
+  String get backupPasswordWrong => 'Incorrect backup password';
+
+  @override
+  String get backupEncrypted => 'Backup is encrypted';
+
+  @override
+  String get backupNotEncrypted => 'Backup is not encrypted';
+
+  @override
+  String get backupPasswordSet => 'Backup password set';
+
+  @override
+  String get backupPasswordRemoved => 'Backup password removed';
 
   @override
   String get battery => 'Battery';
@@ -469,9 +491,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'This feature is currently in the testing phase and has only been tested on PVE 8+. Please use it with caution.';
 
   @override
-  String get pwd => 'Password';
-
-  @override
   String get read => 'Read';
 
   @override
@@ -769,5 +788,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get writeScriptTip =>
-      'After connecting to the server, a script will be written to ~/.config/server_box to monitor the system status. You can review the script content.';
+      'After connecting to the server, a script will be written to `~/.config/server_box` \n | `/tmp/server_box` to monitor the system status. You can review the script content.';
 }

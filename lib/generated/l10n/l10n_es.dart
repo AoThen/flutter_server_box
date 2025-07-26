@@ -47,11 +47,33 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get backupTip =>
-      'Los datos exportados solo están encriptados de manera básica, por favor guárdalos en un lugar seguro.';
+      'Los datos exportados pueden ser encriptados con contraseña. \nPor favor guárdalos en un lugar seguro.';
 
   @override
   String get backupVersionNotMatch =>
       'La versión de la copia de seguridad no coincide, no se puede restaurar';
+
+  @override
+  String get backupPassword => 'Contraseña de respaldo';
+
+  @override
+  String get backupPasswordTip =>
+      'Establece una contraseña para encriptar archivos de respaldo. Déjalo vacío para desactivar la encriptación.';
+
+  @override
+  String get backupPasswordWrong => 'Contraseña de respaldo incorrecta';
+
+  @override
+  String get backupEncrypted => 'El respaldo está encriptado';
+
+  @override
+  String get backupNotEncrypted => 'El respaldo no está encriptado';
+
+  @override
+  String get backupPasswordSet => 'Contraseña de respaldo establecida';
+
+  @override
+  String get backupPasswordRemoved => 'Contraseña de respaldo eliminada';
 
   @override
   String get battery => 'Batería';
@@ -473,9 +495,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Esta función está actualmente en fase de prueba y solo se ha probado en PVE 8+. Úsela con precaución.';
 
   @override
-  String get pwd => 'Contraseña';
-
-  @override
   String get read => 'Leer';
 
   @override
@@ -777,5 +796,5 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get writeScriptTip =>
-      'Después de conectarse al servidor, se escribirá un script en ~/.config/server_box para monitorear el estado del sistema. Puedes revisar el contenido del script.';
+      'Después de conectarse al servidor, se escribirá un script en `~/.config/server_box` \n | `/tmp/server_box` para monitorear el estado del sistema. Puedes revisar el contenido del script.';
 }
