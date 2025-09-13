@@ -4,10 +4,11 @@ import 'dart:io';
 import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_highlight/theme_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/data/model/app/net_view.dart';
-import 'package:server_box/data/provider/server.dart';
+import 'package:server_box/data/provider/server/all.dart';
 import 'package:server_box/data/res/build_data.dart';
 import 'package:server_box/data/res/github_id.dart';
 import 'package:server_box/data/res/store.dart';
@@ -16,6 +17,8 @@ import 'package:server_box/data/store/setting.dart';
 import 'package:server_box/generated/l10n/l10n.dart';
 import 'package:server_box/view/page/backup.dart';
 import 'package:server_box/view/page/private_key/list.dart';
+import 'package:server_box/view/page/server/connection_stats.dart';
+import 'package:server_box/view/page/setting/entries/home_tabs.dart';
 import 'package:server_box/view/page/setting/platform/android.dart';
 import 'package:server_box/view/page/setting/platform/ios.dart';
 import 'package:server_box/view/page/setting/platform/platform_pub.dart';
@@ -35,16 +38,16 @@ part 'entries/ssh.dart';
 
 const _kIconSize = 23.0;
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
 
   static const route = AppRouteNoArg(page: SettingsPage.new, path: '/settings');
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderStateMixin {
+class _SettingsPageState extends ConsumerState<SettingsPage> with SingleTickerProviderStateMixin {
   late final _tabCtrl = TabController(length: SettingsTabs.values.length, vsync: this);
 
   @override
@@ -98,14 +101,14 @@ class _SettingsPageState extends State<SettingsPage> with SingleTickerProviderSt
   }
 }
 
-final class AppSettingsPage extends StatefulWidget {
+final class AppSettingsPage extends ConsumerStatefulWidget {
   const AppSettingsPage({super.key});
 
   @override
-  State<AppSettingsPage> createState() => _AppSettingsPageState();
+  ConsumerState<AppSettingsPage> createState() => _AppSettingsPageState();
 }
 
-final class _AppSettingsPageState extends State<AppSettingsPage> {
+final class _AppSettingsPageState extends ConsumerState<AppSettingsPage> {
   final _setting = Stores.setting;
 
   late final _sshOpacityCtrl = TextEditingController(text: _setting.sshBgOpacity.fetch().toString());

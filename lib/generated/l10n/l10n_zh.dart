@@ -42,13 +42,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get autoUpdateHomeWidget => '自动更新桌面小部件';
 
   @override
-  String get backupTip => '导出数据可通过密码加密，请妥善保管。';
+  String get backupEncrypted => '备份已加密';
 
   @override
-  String get backupVersionNotMatch => '备份版本不兼容，无法恢复';
+  String get backupNotEncrypted => '备份未加密';
 
   @override
   String get backupPassword => '备份密码';
+
+  @override
+  String get backupPasswordRemoved => '备份密码已移除';
+
+  @override
+  String get backupPasswordSet => '备份密码已设置';
 
   @override
   String get backupPasswordTip => '设置密码以加密备份文件。留空则禁用加密。';
@@ -57,16 +63,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backupPasswordWrong => '备份密码错误';
 
   @override
-  String get backupEncrypted => '备份已加密';
+  String get backupTip => '导出数据可通过密码加密，请妥善保管。';
 
   @override
-  String get backupNotEncrypted => '备份未加密';
-
-  @override
-  String get backupPasswordSet => '备份密码已设置';
-
-  @override
-  String get backupPasswordRemoved => '备份密码已移除';
+  String get backupVersionNotMatch => '备份版本不兼容，无法恢复';
 
   @override
   String get battery => '电池';
@@ -579,6 +579,55 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String sshConfigAllExist(Object duplicateCount) {
+    return '所有服务器已存在（发现 $duplicateCount 个重复项）';
+  }
+
+  @override
+  String sshConfigDuplicatesSkipped(Object duplicateCount) {
+    return '$duplicateCount 个重复项将被跳过';
+  }
+
+  @override
+  String get sshConfigFound => '我们在您的系统中发现了 SSH 配置。';
+
+  @override
+  String sshConfigFoundServers(Object totalCount) {
+    return '发现 $totalCount 个服务器';
+  }
+
+  @override
+  String get sshConfigImport => 'SSH 配置导入';
+
+  @override
+  String get sshConfigImportHelp => '只能导入基础信息，例如：IP/端口';
+
+  @override
+  String get sshConfigImportPermission => '是否允许读取 ~/.ssh/config 并自动导入服务器设置？';
+
+  @override
+  String get sshConfigImportTip => '首次创建服务器时提示读取 ~/.ssh/config';
+
+  @override
+  String sshConfigImported(Object count) {
+    return '从 SSH 配置导入了 $count 个服务器';
+  }
+
+  @override
+  String get sshConfigManualSelect => '是否要手动选择 SSH 配置文件？';
+
+  @override
+  String get sshConfigNoServers => 'SSH 配置中未找到服务器';
+
+  @override
+  String get sshConfigPermissionDenied => '由于 macOS 权限限制，无法访问 SSH 配置文件。';
+
+  @override
+  String sshConfigServersToImport(Object importCount) {
+    return '$importCount 个服务器将被导入';
+  }
+
+  @override
   String get sshTermHelp =>
       '在终端可滚动时，横向拖动可以选中文字。点击键盘按钮可以开启/关闭键盘。文件图标会打开当前路径 SFTP。剪切板按钮会在有选中文字时复制内容，在未选中并且剪切板有内容时粘贴内容到终端。代码图标会粘贴代码片段到终端并执行。';
 
@@ -754,6 +803,70 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get writeScriptTip =>
       '在连接服务器后，会向 `~/.config/server_box` \n | `/tmp/server_box` 写入脚本来监测系统状态，你可以审查脚本内容。';
+
+  @override
+  String get connectionStats => '连接统计';
+
+  @override
+  String get connectionStatsDesc => '查看服务器连接成功率和历史记录';
+
+  @override
+  String get noConnectionStatsData => '暂无连接统计数据';
+
+  @override
+  String get totalAttempts => '总次数';
+
+  @override
+  String get lastSuccess => '最后成功';
+
+  @override
+  String get lastFailure => '最后失败';
+
+  @override
+  String get recentConnections => '最近连接记录';
+
+  @override
+  String get viewDetails => '查看详情';
+
+  @override
+  String get connectionDetails => '连接详情';
+
+  @override
+  String get clearThisServerStats => '清空此服务器统计';
+
+  @override
+  String get clearAllStatsTitle => '清空所有统计';
+
+  @override
+  String get clearAllStatsContent => '确定要清空所有服务器的连接统计数据吗？此操作无法撤销。';
+
+  @override
+  String clearServerStatsTitle(String serverName) {
+    return '清空 $serverName 统计';
+  }
+
+  @override
+  String clearServerStatsContent(String serverName) {
+    return '确定要清空服务器 \"$serverName\" 的连接统计数据吗？此操作无法撤销。';
+  }
+
+  @override
+  String get homeTabs => '主页标签';
+
+  @override
+  String get homeTabsCustomizeDesc => '自定义主页上显示的标签及其顺序';
+
+  @override
+  String get reset => '重置';
+
+  @override
+  String get availableTabs => '可用标签';
+
+  @override
+  String get atLeastOneTab => '至少需要选择一个标签';
+
+  @override
+  String get serverTabRequired => '服务器标签不能被移除';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -794,13 +907,19 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get autoUpdateHomeWidget => '自動更新桌面小工具';
 
   @override
-  String get backupTip => '匯出的資料可透過密碼加密，請妥善保管。';
+  String get backupEncrypted => '備份已加密';
 
   @override
-  String get backupVersionNotMatch => '備份版本不相容，無法還原';
+  String get backupNotEncrypted => '備份未加密';
 
   @override
   String get backupPassword => '備份密碼';
+
+  @override
+  String get backupPasswordRemoved => '備份密碼已移除';
+
+  @override
+  String get backupPasswordSet => '備份密碼已設定';
 
   @override
   String get backupPasswordTip => '設定密碼來加密備份檔案。留空則停用加密。';
@@ -809,16 +928,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get backupPasswordWrong => '備份密碼錯誤';
 
   @override
-  String get backupEncrypted => '備份已加密';
+  String get backupTip => '匯出的資料可透過密碼加密，請妥善保管。';
 
   @override
-  String get backupNotEncrypted => '備份未加密';
-
-  @override
-  String get backupPasswordSet => '備份密碼已設定';
-
-  @override
-  String get backupPasswordRemoved => '備份密碼已移除';
+  String get backupVersionNotMatch => '備份版本不相容，無法還原';
 
   @override
   String get battery => '電池';
@@ -1331,6 +1444,55 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
+  String sshConfigAllExist(Object duplicateCount) {
+    return '所有伺服器均已存在（發現$duplicateCount個重複項）';
+  }
+
+  @override
+  String sshConfigDuplicatesSkipped(Object duplicateCount) {
+    return '將跳過$duplicateCount個重複項';
+  }
+
+  @override
+  String get sshConfigFound => '我們在您的系統中發現了SSH設定';
+
+  @override
+  String sshConfigFoundServers(Object totalCount) {
+    return '發現$totalCount個伺服器';
+  }
+
+  @override
+  String get sshConfigImport => '匯入SSH設定';
+
+  @override
+  String get sshConfigImportHelp => '只能匯入基礎資訊，例如：IP/端口。';
+
+  @override
+  String get sshConfigImportPermission => '您是否希望允許讀取 ~/.ssh/config 並自動匯入伺服器設定？';
+
+  @override
+  String get sshConfigImportTip => '在建立第一個伺服器時提示讀取 ~/.ssh/config';
+
+  @override
+  String sshConfigImported(Object count) {
+    return '已從SSH設定匯入$count個伺服器';
+  }
+
+  @override
+  String get sshConfigManualSelect => '是否要手動選擇 SSH 設定檔案？';
+
+  @override
+  String get sshConfigNoServers => 'SSH設定中未找到伺服器';
+
+  @override
+  String get sshConfigPermissionDenied => '由於 macOS 權限限制，無法存取 SSH 設定檔案。';
+
+  @override
+  String sshConfigServersToImport(Object importCount) {
+    return '將匯入$importCount個伺服器';
+  }
+
+  @override
   String get sshTermHelp =>
       '在終端機可捲動時，橫向拖動可以選中文字。點擊鍵盤按鈕可以開啟/關閉鍵盤。檔案圖示會打開目前路徑 SFTP。剪貼簿按鈕會在有選中文字時複製內容，在未選中並且剪貼簿有內容時貼上內容到終端機。程式碼圖示會貼上程式碼片段到終端機並執行。';
 
@@ -1506,4 +1668,68 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get writeScriptTip =>
       '連線到伺服器後，將會在 `~/.config/server_box` \n | `/tmp/server_box` 中寫入一個腳本來監測系統狀態。你可以審查腳本內容。';
+
+  @override
+  String get connectionStats => '連線統計';
+
+  @override
+  String get connectionStatsDesc => '檢視伺服器連線成功率和歷史記錄';
+
+  @override
+  String get noConnectionStatsData => '暫無連線統計資料';
+
+  @override
+  String get totalAttempts => '總次數';
+
+  @override
+  String get lastSuccess => '最後成功';
+
+  @override
+  String get lastFailure => '最後失敗';
+
+  @override
+  String get recentConnections => '最近連線記錄';
+
+  @override
+  String get viewDetails => '檢視詳情';
+
+  @override
+  String get connectionDetails => '連線詳情';
+
+  @override
+  String get clearThisServerStats => '清空此伺服器統計';
+
+  @override
+  String get clearAllStatsTitle => '清空所有統計';
+
+  @override
+  String get clearAllStatsContent => '確定要清空所有伺服器的連線統計資料嗎？此操作無法撤銷。';
+
+  @override
+  String clearServerStatsTitle(String serverName) {
+    return '清空 $serverName 統計';
+  }
+
+  @override
+  String clearServerStatsContent(String serverName) {
+    return '確定要清空伺服器 \"$serverName\" 的連線統計資料嗎？此操作無法撤銷。';
+  }
+
+  @override
+  String get homeTabs => '主頁標籤';
+
+  @override
+  String get homeTabsCustomizeDesc => '自訂主頁上顯示的標籤及其順序';
+
+  @override
+  String get reset => '重置';
+
+  @override
+  String get availableTabs => '可用標籤';
+
+  @override
+  String get atLeastOneTab => '至少需要選擇一個標籤';
+
+  @override
+  String get serverTabRequired => '服務器標籤不能被移除';
 }

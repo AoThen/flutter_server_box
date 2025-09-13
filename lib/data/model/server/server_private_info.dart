@@ -4,10 +4,8 @@ import 'package:fl_lib/fl_lib.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:server_box/data/model/app/error.dart';
 import 'package:server_box/data/model/server/custom.dart';
-import 'package:server_box/data/model/server/server.dart';
 import 'package:server_box/data/model/server/system.dart';
 import 'package:server_box/data/model/server/wol_cfg.dart';
-import 'package:server_box/data/provider/server.dart';
 import 'package:server_box/data/store/server.dart';
 
 part 'server_private_info.freezed.dart';
@@ -58,6 +56,7 @@ abstract class Spi with _$Spi {
   @override
   String toString() => 'Spi<$oldId>';
 
+  /// Parse the [id], if it's null or empty, generate a new one.
   static String parseId(Object? id) {
     if (id == null || id is! String || id.isEmpty) return ShortId.generate();
     return id;
@@ -85,23 +84,26 @@ extension Spix on Spi {
     return newSpi.id;
   }
 
+  /// Json encode to string.
   String toJsonString() => json.encode(toJson());
 
-  VNode<Server>? get server => ServerProvider.pick(spi: this);
-  VNode<Server>? get jumpServer => ServerProvider.pick(id: jumpId);
-
-  bool shouldReconnect(Spi old) {
-    return user != old.user ||
-        ip != old.ip ||
-        port != old.port ||
-        pwd != old.pwd ||
-        keyId != old.keyId ||
-        alterUrl != old.alterUrl ||
-        jumpId != old.jumpId ||
-        custom?.cmds != old.custom?.cmds;
+  /// Returns true if the connection info is the same as [other].
+  bool isSameAs(Spi other) {
+    return user == other.user &&
+        ip == other.ip &&
+        port == other.port &&
+        pwd == other.pwd &&
+        keyId == other.keyId &&
+        jumpId == other.jumpId;
   }
 
-  (String ip, String usr, int port) fromStringUrl() {
+  /// Returns true if the connection should be re-established.
+  bool shouldReconnect(Spi old) {
+    return !isSameAs(old) || alterUrl != old.alterUrl || custom?.cmds != old.custom?.cmds;
+  }
+
+  /// Parse the [alterUrl] to (ip, user, port).
+  (String ip, String usr, int port) parseAlterUrl() {
     if (alterUrl == null) {
       throw SSHErr(type: SSHErrType.connect, message: 'alterUrl is null');
     }
@@ -146,5 +148,6 @@ extension Spix on Spi {
     id: 'id',
   );
 
+  /// Returns true if the user is 'root'.
   bool get isRoot => user == 'root';
 }

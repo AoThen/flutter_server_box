@@ -3,7 +3,6 @@ import 'package:fl_lib/fl_lib.dart';
 import 'package:fl_lib/generated/l10n/lib_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/data/res/build_data.dart';
 import 'package:server_box/data/res/store.dart';
@@ -79,14 +78,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       key: ValueKey(locale),
-      builder: (context, child) => ResponsiveBreakpoints.builder(
-        child: child ?? UIs.placeholder,
-        breakpoints: const [
-          Breakpoint(start: 0, end: 600, name: MOBILE),
-          Breakpoint(start: 600, end: 1199, name: TABLET),
-          Breakpoint(start: 1199, end: 3840, name: DESKTOP),
-        ],
-      ),
+      builder: ResponsivePoints.builder,
       locale: locale,
       localizationsDelegates: const [LibLocalizations.delegate, ...AppLocalizations.localizationsDelegates],
       supportedLocales: AppLocalizations.supportedLocales,
@@ -96,19 +88,24 @@ class MyApp extends StatelessWidget {
       themeMode: themeMode,
       theme: light.fixWindowsFont,
       darkTheme: (tMode < 3 ? dark : dark.toAmoled).fixWindowsFont,
-      home: Builder(
-        builder: (context) {
+      home: FutureBuilder<List<IntroPageBuilder>>(
+        future: _IntroPage.builders,
+        builder: (context, snapshot) {
           context.setLibL10n();
           final appL10n = AppLocalizations.of(context);
           if (appL10n != null) l10n = appL10n;
 
           Widget child;
-          final intros = _IntroPage.builders;
-          if (intros.isNotEmpty) {
-            child = _IntroPage(intros);
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            child = const Scaffold(body: Center(child: CircularProgressIndicator()));
+          } else {
+            final intros = snapshot.data ?? [];
+            if (intros.isNotEmpty) {
+              child = _IntroPage(intros);
+            } else {
+              child = const HomePage();
+            }
           }
-
-          child = const HomePage();
 
           return VirtualWindowFrame(title: BuildData.name, child: child);
         },

@@ -5,20 +5,18 @@ import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/data/model/app/bak/backup2.dart';
 import 'package:server_box/data/model/app/bak/backup_source.dart';
 import 'package:server_box/data/model/app/bak/utils.dart';
-import 'package:server_box/data/res/store.dart';
 
 /// Service class for handling backup operations
 class BackupService {
   /// Perform backup operation with the given source
   static Future<void> backup(BuildContext context, BackupSource source) async {
-    final password = await _getBackupPassword(context);
-    if (password == null) return;
-
     try {
-      final path = await BackupV2.backup(null, password.isEmpty ? null : password);
+      final saved = await SecureStoreProps.bakPwd.read();
+      final password = saved?.isEmpty == true ? null : saved;
+
+      final path = await BackupV2.backup(null, password?.isEmpty == true ? null : password);
       await source.saveContent(path);
 
-      // Show success message for clipboard source
       if (source is ClipboardBackupSource) {
         context.showSnackBar(libL10n.success);
       }
@@ -39,38 +37,6 @@ class BackupService {
     }
 
     await restoreFromText(context, text);
-  }
-
-  /// Handle password dialog for backup operations
-  static Future<String?> _getBackupPassword(BuildContext context) async {
-    final savedPassword = await Stores.setting.backupasswd.read();
-    String? password;
-
-    if (savedPassword != null && savedPassword.isNotEmpty) {
-      // Use saved password or ask for custom password
-      final useCustom = await context.showRoundDialog<bool>(
-        title: l10n.backupPassword,
-        child: Text(l10n.backupPasswordTip),
-        actions: [
-          Btn.cancel(),
-          TextButton(onPressed: () => context.pop(false), child: Text(l10n.backupPasswordSet)),
-          TextButton(onPressed: () => context.pop(true), child: Text(libL10n.custom)),
-        ],
-      );
-
-      if (useCustom == null) return null;
-
-      if (useCustom) {
-        password = await _showPasswordDialog(context, initial: savedPassword);
-      } else {
-        password = savedPassword;
-      }
-    } else {
-      // No saved password, ask if user wants to set one
-      password = await _showPasswordDialog(context);
-    }
-
-    return password;
   }
 
   /// Handle restore from text with decryption support
@@ -95,7 +61,7 @@ class BackupService {
     }
 
     // Try with saved password first
-    final savedPassword = await Stores.setting.backupasswd.read();
+    final savedPassword = await SecureStoreProps.bakPwd.read();
     if (savedPassword != null && savedPassword.isNotEmpty) {
       try {
         final (backup, err) = await context.showLoadingDialog(

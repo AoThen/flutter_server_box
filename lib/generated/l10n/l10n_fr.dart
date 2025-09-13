@@ -46,15 +46,19 @@ class AppLocalizationsFr extends AppLocalizations {
       'Mise à jour automatique du widget d\'accueil';
 
   @override
-  String get backupTip =>
-      'Les données exportées peuvent être chiffrées avec un mot de passe. \nVeuillez les garder en sécurité.';
+  String get backupEncrypted => 'La sauvegarde est chiffrée';
 
   @override
-  String get backupVersionNotMatch =>
-      'La version de sauvegarde ne correspond pas.';
+  String get backupNotEncrypted => 'La sauvegarde n\'est pas chiffrée';
 
   @override
   String get backupPassword => 'Mot de passe de sauvegarde';
+
+  @override
+  String get backupPasswordRemoved => 'Mot de passe de sauvegarde supprimé';
+
+  @override
+  String get backupPasswordSet => 'Mot de passe de sauvegarde défini';
 
   @override
   String get backupPasswordTip =>
@@ -64,16 +68,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get backupPasswordWrong => 'Mot de passe de sauvegarde incorrect';
 
   @override
-  String get backupEncrypted => 'La sauvegarde est chiffrée';
+  String get backupTip =>
+      'Les données exportées peuvent être chiffrées avec un mot de passe. \nVeuillez les garder en sécurité.';
 
   @override
-  String get backupNotEncrypted => 'La sauvegarde n\'est pas chiffrée';
-
-  @override
-  String get backupPasswordSet => 'Mot de passe de sauvegarde défini';
-
-  @override
-  String get backupPasswordRemoved => 'Mot de passe de sauvegarde supprimé';
+  String get backupVersionNotMatch =>
+      'La version de sauvegarde ne correspond pas.';
 
   @override
   String get battery => 'Batterie';
@@ -611,6 +611,62 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String sshConfigAllExist(Object duplicateCount) {
+    return 'Tous les serveurs existent déjà ($duplicateCount doublons trouvés)';
+  }
+
+  @override
+  String sshConfigDuplicatesSkipped(Object duplicateCount) {
+    return '$duplicateCount doublons seront ignorés';
+  }
+
+  @override
+  String get sshConfigFound =>
+      'Nous avons trouvé une configuration SSH sur votre système.';
+
+  @override
+  String sshConfigFoundServers(Object totalCount) {
+    return '$totalCount serveurs trouvés';
+  }
+
+  @override
+  String get sshConfigImport => 'Importation de configuration SSH';
+
+  @override
+  String get sshConfigImportHelp =>
+      'Seules les informations de base peuvent être importées, par exemple : IP/Port.';
+
+  @override
+  String get sshConfigImportPermission =>
+      'Souhaitez-vous donner la permission de lire ~/.ssh/config et d\'importer automatiquement les paramètres du serveur ?';
+
+  @override
+  String get sshConfigImportTip =>
+      'Proposer de lire ~/.ssh/config lors de la première création de serveur';
+
+  @override
+  String sshConfigImported(Object count) {
+    return '$count serveurs importés depuis la configuration SSH';
+  }
+
+  @override
+  String get sshConfigManualSelect =>
+      'Souhaitez-vous sélectionner manuellement le fichier de configuration SSH ?';
+
+  @override
+  String get sshConfigNoServers =>
+      'Aucun serveur trouvé dans la configuration SSH';
+
+  @override
+  String get sshConfigPermissionDenied =>
+      'Impossible d\'accéder au fichier de configuration SSH en raison des permissions macOS.';
+
+  @override
+  String sshConfigServersToImport(Object importCount) {
+    return '$importCount serveurs seront importés';
+  }
+
+  @override
   String get sshTermHelp =>
       'Lorsque le terminal est défilable, faire glisser horizontalement permet de sélectionner du texte. En cliquant sur le bouton du clavier, vous activez/désactivez le clavier. L\'icône de fichier ouvre le chemin actuel SFTP. Le bouton du presse-papiers copie le contenu lorsque du texte est sélectionné, et colle le contenu du presse-papiers dans le terminal lorsqu\'aucun texte n\'est sélectionné et qu\'il y a du contenu dans le presse-papiers. L\'icône de code colle des extraits de code dans le terminal et les exécute.';
 
@@ -798,5 +854,73 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get writeScriptTip =>
-      'Après la connexion au serveur, un script sera écrit dans `~/.config/server_box` \n | `/tmp/server_box` pour surveiller l’état du système. Vous pouvez examiner le contenu du script.';
+      'Après la connexion au serveur, un script sera écrit dans `~/.config/server_box` \n | `/tmp/server_box` pour surveiller l\'état du système. Vous pouvez examiner le contenu du script.';
+
+  @override
+  String get connectionStats => 'Statistiques de connexion';
+
+  @override
+  String get connectionStatsDesc =>
+      'Voir le taux de réussite de connexion du serveur et l\'historique';
+
+  @override
+  String get noConnectionStatsData =>
+      'Aucune donnée de statistiques de connexion';
+
+  @override
+  String get totalAttempts => 'Total';
+
+  @override
+  String get lastSuccess => 'Dernier succès';
+
+  @override
+  String get lastFailure => 'Dernier échec';
+
+  @override
+  String get recentConnections => 'Connexions récentes';
+
+  @override
+  String get viewDetails => 'Voir les détails';
+
+  @override
+  String get connectionDetails => 'Détails de connexion';
+
+  @override
+  String get clearThisServerStats => 'Effacer les statistiques de ce serveur';
+
+  @override
+  String get clearAllStatsTitle => 'Effacer toutes les statistiques';
+
+  @override
+  String get clearAllStatsContent =>
+      'Êtes-vous sûr de vouloir effacer toutes les statistiques de connexion des serveurs ? Cette action ne peut pas être annulée.';
+
+  @override
+  String clearServerStatsTitle(String serverName) {
+    return 'Effacer les statistiques de $serverName';
+  }
+
+  @override
+  String clearServerStatsContent(String serverName) {
+    return 'Êtes-vous sûr de vouloir effacer les statistiques de connexion du serveur \"$serverName\" ? Cette action ne peut pas être annulée.';
+  }
+
+  @override
+  String get homeTabs => 'Onglets d\'accueil';
+
+  @override
+  String get homeTabsCustomizeDesc =>
+      'Personnalisez les onglets qui apparaissent sur la page d\'accueil et leur ordre';
+
+  @override
+  String get reset => 'Réinitialiser';
+
+  @override
+  String get availableTabs => 'Onglets disponibles';
+
+  @override
+  String get atLeastOneTab => 'Au moins un onglet doit être sélectionné';
+
+  @override
+  String get serverTabRequired => 'Server tab cannot be removed';
 }

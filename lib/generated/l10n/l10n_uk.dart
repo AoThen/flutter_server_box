@@ -46,15 +46,19 @@ class AppLocalizationsUk extends AppLocalizations {
       'Автоматичне оновлення віджетів на головному екрані';
 
   @override
-  String get backupTip =>
-      'Експортовані дані можуть бути зашифровані паролем. \nБудь ласка, зберігайте їх у безпеці.';
+  String get backupEncrypted => 'Резервна копія зашифрована';
 
   @override
-  String get backupVersionNotMatch =>
-      'Версія резервного копіювання не збіглася.';
+  String get backupNotEncrypted => 'Резервна копія не зашифрована';
 
   @override
   String get backupPassword => 'Пароль резервного копіювання';
+
+  @override
+  String get backupPasswordRemoved => 'Пароль резервного копіювання видалено';
+
+  @override
+  String get backupPasswordSet => 'Пароль резервного копіювання встановлено';
 
   @override
   String get backupPasswordTip =>
@@ -64,16 +68,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get backupPasswordWrong => 'Неправильний пароль резервного копіювання';
 
   @override
-  String get backupEncrypted => 'Резервна копія зашифрована';
+  String get backupTip =>
+      'Експортовані дані можуть бути зашифровані паролем. \nБудь ласка, зберігайте їх у безпеці.';
 
   @override
-  String get backupNotEncrypted => 'Резервна копія не зашифрована';
-
-  @override
-  String get backupPasswordSet => 'Пароль резервного копіювання встановлено';
-
-  @override
-  String get backupPasswordRemoved => 'Пароль резервного копіювання видалено';
+  String get backupVersionNotMatch =>
+      'Версія резервного копіювання не збіглася.';
 
   @override
   String get battery => 'Акумулятор';
@@ -609,6 +609,60 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
+  String sshConfigAllExist(Object duplicateCount) {
+    return 'Всі сервери вже існують (знайдено $duplicateCount дублікатів)';
+  }
+
+  @override
+  String sshConfigDuplicatesSkipped(Object duplicateCount) {
+    return '$duplicateCount дублікатів буде пропущено';
+  }
+
+  @override
+  String get sshConfigFound => 'Ми знайшли SSH-конфігурацію у вашій системі';
+
+  @override
+  String sshConfigFoundServers(Object totalCount) {
+    return 'Знайдено $totalCount серверів';
+  }
+
+  @override
+  String get sshConfigImport => 'Імпорт SSH Конфігурації';
+
+  @override
+  String get sshConfigImportHelp =>
+      'Можна імпортувати лише базову інформацію, наприклад: IP/порт.';
+
+  @override
+  String get sshConfigImportPermission =>
+      'Чи хочете ви надати дозвіл на читання ~/.ssh/config та автоматичний імпорт налаштувань сервера?';
+
+  @override
+  String get sshConfigImportTip =>
+      'Пропозиція прочитати ~/.ssh/config при створенні першого сервера';
+
+  @override
+  String sshConfigImported(Object count) {
+    return 'Імпортовано $count серверів з SSH-конфігурації';
+  }
+
+  @override
+  String get sshConfigManualSelect =>
+      'Чи хочете ви вручну вибрати файл конфігурації SSH?';
+
+  @override
+  String get sshConfigNoServers => 'Сервери не знайдені в SSH-конфігурації';
+
+  @override
+  String get sshConfigPermissionDenied =>
+      'Неможливо отримати доступ до файлу конфігурації SSH через дозволи macOS.';
+
+  @override
+  String sshConfigServersToImport(Object importCount) {
+    return '$importCount серверів буде імпортовано';
+  }
+
+  @override
   String get sshTermHelp =>
       'Коли термінал прокрутний, горизонтальне проведення вибирає текст. Натискання кнопки клавіатури вмикає/вимикає клавіатуру. Іконка файлу відкриває поточний шлях SFTP. Кнопка буфера обміну копіює вміст, коли текст вибрано, і вставляє вміст з буфера обміну в термінал, коли текст не вибрано і є вміст у буфері обміну. Іконка коду вставляє фрагменти коду в термінал і виконує їх.';
 
@@ -795,4 +849,71 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get writeScriptTip =>
       'Після підключення до сервера скрипт буде записано у `~/.config/server_box` \n | `/tmp/server_box` для моніторингу стану системи. Ви можете переглянути вміст скрипта.';
+
+  @override
+  String get connectionStats => 'Статистика з\'єднань';
+
+  @override
+  String get connectionStatsDesc =>
+      'Переглянути коефіцієнт успішності підключення до сервера та історію';
+
+  @override
+  String get noConnectionStatsData => 'Немає даних статистики з\'єднань';
+
+  @override
+  String get totalAttempts => 'Загальна кількість';
+
+  @override
+  String get lastSuccess => 'Останній успіх';
+
+  @override
+  String get lastFailure => 'Остання помилка';
+
+  @override
+  String get recentConnections => 'Останні з\'єднання';
+
+  @override
+  String get viewDetails => 'Переглянути деталі';
+
+  @override
+  String get connectionDetails => 'Деталі з\'єднання';
+
+  @override
+  String get clearThisServerStats => 'Очистити статистику цього сервера';
+
+  @override
+  String get clearAllStatsTitle => 'Очистити всю статистику';
+
+  @override
+  String get clearAllStatsContent =>
+      'Ви впевнені, що хочете очистити всю статистику з\'єднань сервера? Цю дію не можна скасувати.';
+
+  @override
+  String clearServerStatsTitle(String serverName) {
+    return 'Очистити статистику $serverName';
+  }
+
+  @override
+  String clearServerStatsContent(String serverName) {
+    return 'Ви впевнені, що хочете очистити статистику з\'єднань для сервера \"$serverName\"? Цю дію не можна скасувати.';
+  }
+
+  @override
+  String get homeTabs => 'Домашні вкладки';
+
+  @override
+  String get homeTabsCustomizeDesc =>
+      'Налаштуйте, які вкладки відображаються на головній сторінці та їх порядок';
+
+  @override
+  String get reset => 'Скинути';
+
+  @override
+  String get availableTabs => 'Доступні вкладки';
+
+  @override
+  String get atLeastOneTab => 'Потрібно вибрати принаймні одну вкладку';
+
+  @override
+  String get serverTabRequired => 'Server tab cannot be removed';
 }

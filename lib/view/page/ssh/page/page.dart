@@ -7,9 +7,8 @@ import 'package:dartssh2/dartssh2.dart';
 import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:provider/provider.dart';
-
 import 'package:server_box/core/chan.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/core/utils/server.dart';
@@ -17,10 +16,12 @@ import 'package:server_box/core/utils/ssh_auth.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/model/server/snippet.dart';
 import 'package:server_box/data/model/ssh/virtual_key.dart';
+import 'package:server_box/data/provider/server/single.dart';
 import 'package:server_box/data/provider/snippet.dart';
 import 'package:server_box/data/provider/virtual_keyboard.dart';
 import 'package:server_box/data/res/store.dart';
 import 'package:server_box/data/res/terminal.dart';
+import 'package:server_box/data/ssh/session_manager.dart';
 import 'package:server_box/view/page/storage/sftp.dart';
 
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -51,23 +52,22 @@ final class SshPageArgs {
   });
 }
 
-class SSHPage extends StatefulWidget {
+class SSHPage extends ConsumerStatefulWidget {
   final SshPageArgs args;
 
   const SSHPage({super.key, required this.args});
 
   @override
-  State<SSHPage> createState() => SSHPageState();
+  ConsumerState<SSHPage> createState() => SSHPageState();
 
   static const route = AppRouteArg<void, SshPageArgs>(page: SSHPage.new, path: '/ssh/page');
 }
 
 const _horizonPadding = 7.0;
 
-class SSHPageState extends State<SSHPage>
+class SSHPageState extends ConsumerState<SSHPage>
     with AutomaticKeepAliveClientMixin, AfterLayoutMixin, TickerProviderStateMixin {
-  final _keyboard = VirtKeyProvider();
-  late final _terminal = Terminal(inputHandler: _keyboard);
+  late final _terminal = Terminal();
   late final TerminalController _terminalController = TerminalController(vsync: this);
   final List<List<VirtKey>> _virtKeysList = [];
   late final _termKey = widget.args.terminalKey ?? GlobalKey<TerminalViewState>();
@@ -80,11 +80,14 @@ class SSHPageState extends State<SSHPage>
 
   bool _isDark = false;
   Timer? _virtKeyLongPressTimer;
-  late SSHClient? _client = widget.args.spi.server?.value.client;
+  SSHClient? _client;
+  SSHSession? _session;
   Timer? _discontinuityTimer;
 
   /// Used for (de)activate the wake lock and forground service
   static var _sshConnCount = 0;
+  late final String _sessionId = ShortId.generate();
+  late final int _sessionStartMs = DateTime.now().millisecondsSinceEpoch;
 
   @override
   void dispose() {
@@ -101,6 +104,9 @@ class SSHPageState extends State<SSHPage>
       }
     }
 
+    // Remove session entry
+    TermSessionManager.remove(_sessionId);
+
     super.dispose();
   }
 
@@ -110,6 +116,10 @@ class SSHPageState extends State<SSHPage>
     _initStoredCfg();
     _initVirtKeys();
     _setupDiscontinuityTimer();
+    
+    // Initialize client from provider
+    final serverState = ref.read(serverNotifierProvider(widget.args.spi.id));
+    _client = serverState.client;
 
     if (++_sshConnCount == 1) {
       WakelockPlus.enable();
@@ -117,6 +127,16 @@ class SSHPageState extends State<SSHPage>
         MethodChans.startService();
       }
     }
+
+    // Add session entry (for Android notifications & iOS Live Activities)
+    TermSessionManager.add(
+      id: _sessionId,
+      spi: widget.args.spi,
+      startTimeMs: _sessionStartMs,
+      disconnect: _disconnectFromNotification,
+      status: TermSessionStatus.connecting,
+    );
+    TermSessionManager.setActive(_sessionId, hasTerminal: true);
   }
 
   @override
@@ -245,19 +265,22 @@ class SSHPageState extends State<SSHPage>
       child: Container(
         color: _terminalTheme.background,
         height: _virtKeysHeight + _media.padding.bottom,
-        child: ChangeNotifierProvider(
-          create: (_) => _keyboard,
-          builder: (_, _) => Consumer<VirtKeyProvider>(
-            builder: (_, _, _) {
-              return _buildVirtualKey();
-            },
-          ),
+        child: Consumer(
+          builder: (context, ref, child) {
+            final virtKeyState = ref.watch(virtKeyboardProvider);
+            final virtKeyNotifier = ref.read(virtKeyboardProvider.notifier);
+            
+            // Set the terminal input handler
+            _terminal.inputHandler = virtKeyNotifier;
+            
+            return _buildVirtualKey(virtKeyState, virtKeyNotifier);
+          },
         ),
       ),
     );
   }
 
-  Widget _buildVirtualKey() {
+  Widget _buildVirtualKey(VirtKeyState virtKeyState, VirtKeyboard virtKeyNotifier) {
     final count = _horizonVirtKeys ? _virtKeysList.length : _virtKeysList.firstOrNull?.length ?? 0;
     if (count == 0) return UIs.placeholder;
     return LayoutBuilder(
@@ -269,30 +292,30 @@ class SSHPageState extends State<SSHPage>
             child: Row(
               children: _virtKeysList
                   .expand((e) => e)
-                  .map((e) => _buildVirtKeyItem(e, virtKeyWidth))
+                  .map((e) => _buildVirtKeyItem(e, virtKeyWidth, virtKeyState, virtKeyNotifier))
                   .toList(),
             ),
           );
         }
         final rows = _virtKeysList
-            .map((e) => Row(children: e.map((e) => _buildVirtKeyItem(e, virtKeyWidth)).toList()))
+            .map((e) => Row(children: e.map((e) => _buildVirtKeyItem(e, virtKeyWidth, virtKeyState, virtKeyNotifier)).toList()))
             .toList();
         return Column(mainAxisSize: MainAxisSize.min, children: rows);
       },
     );
   }
 
-  Widget _buildVirtKeyItem(VirtKey item, double virtKeyWidth) {
+  Widget _buildVirtKeyItem(VirtKey item, double virtKeyWidth, VirtKeyState virtKeyState, VirtKeyboard virtKeyNotifier) {
     var selected = false;
     switch (item.key) {
       case TerminalKey.control:
-        selected = _keyboard.ctrl;
+        selected = virtKeyState.ctrl;
         break;
       case TerminalKey.alt:
-        selected = _keyboard.alt;
+        selected = virtKeyState.alt;
         break;
       case TerminalKey.shift:
-        selected = _keyboard.shift;
+        selected = virtKeyState.shift;
         break;
       default:
         break;
@@ -309,12 +332,12 @@ class SSHPageState extends State<SSHPage>
           );
 
     return InkWell(
-      onTap: () => _doVirtualKey(item),
+      onTap: () => _doVirtualKey(item, virtKeyNotifier),
       onTapDown: (details) {
         if (item.canLongPress) {
           _virtKeyLongPressTimer = Timer.periodic(
             const Duration(milliseconds: 137),
-            (_) => _doVirtualKey(item),
+            (_) => _doVirtualKey(item, virtKeyNotifier),
           );
         }
       },

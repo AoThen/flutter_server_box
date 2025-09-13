@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:computer/computer.dart';
 import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/core/sync.dart';
@@ -17,21 +18,23 @@ import 'package:server_box/data/res/misc.dart';
 import 'package:server_box/data/res/store.dart';
 import 'package:webdav_client_plus/webdav_client_plus.dart';
 
-class BackupPage extends StatefulWidget {
+class BackupPage extends ConsumerStatefulWidget {
   const BackupPage({super.key});
 
   @override
-  State<BackupPage> createState() => _BackupPageState();
+  ConsumerState<BackupPage> createState() => _BackupPageState();
 
   static const route = AppRouteNoArg(page: BackupPage.new, path: '/backup');
 }
 
-final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveClientMixin {
+final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKeepAliveClientMixin {
   final webdavLoading = false.vn;
+  final gistLoading = false.vn;
 
   @override
   void dispose() {
     webdavLoading.dispose();
+    gistLoading.dispose();
     super.dispose();
   }
 
@@ -48,14 +51,84 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
         [
           CenterGreyTitle(libL10n.sync),
           _buildTip,
+          _buildBakPwd,
           if (isMacOS || isIOS) _buildIcloud,
           _buildWebdav,
+          _buildGist,
           _buildFile,
           _buildClipboard,
         ],
         [CenterGreyTitle(libL10n.import), _buildBulkImportServers, _buildImportSnippet],
       ],
     );
+  }
+
+  Widget get _buildBakPwd {
+    return FutureBuilder<String?>(
+      future: SecureStoreProps.bakPwd.read(),
+      builder: (context, snapshot) {
+        final hasPwd = snapshot.data?.isNotEmpty == true;
+        return CardX(
+          child: ListTile(
+            leading: const Icon(Icons.lock),
+            title: Text(l10n.backupPassword),
+            subtitle: Text(hasPwd ? l10n.backupEncrypted : l10n.backupNotEncrypted, style: UIs.textGrey),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(onPressed: () async => _onTapSetBakPwd(context), child: Text(libL10n.setting)),
+                if (hasPwd) ...[
+                  UIs.width7,
+                  TextButton(
+                    onPressed: () async {
+                      await SecureStoreProps.bakPwd.write(null);
+                      context.showSnackBar(l10n.backupPasswordRemoved);
+                      setState(() {});
+                    },
+                    child: Text(libL10n.delete),
+                  ),
+                ],
+              ],
+            ),
+            onTap: () async => _onTapSetBakPwd(context),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onTapSetBakPwd(BuildContext context) async {
+    final currentPwd = await SecureStoreProps.bakPwd.read();
+    final controller = TextEditingController(text: currentPwd ?? '');
+    final node = FocusNode();
+    final result = await context.showRoundDialog<bool>(
+      title: l10n.backupPassword,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(l10n.backupPasswordTip, style: UIs.textGrey),
+          UIs.height13,
+          Input(
+            label: l10n.backupPassword,
+            controller: controller,
+            node: node,
+            obscureText: true,
+            onSubmitted: (_) => context.pop(true),
+          ),
+        ],
+      ),
+      actions: Btnx.oks,
+    );
+    if (result == true) {
+      final pwd = controller.text.trim();
+      if (pwd.isEmpty) {
+        context.showSnackBar(libL10n.empty);
+        return;
+      }
+      await SecureStoreProps.bakPwd.write(pwd);
+      context.showSnackBar(l10n.backupPasswordSet);
+      setState(() {});
+    }
   }
 
   Widget get _buildTip {
@@ -103,6 +176,10 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
               return false;
             }
             if (p0) {
+              final ok = await _ensureBakPwd(context);
+              if (!ok) return false;
+            }
+            if (p0) {
               await bakSync.sync(rs: icloud);
             }
             return true;
@@ -132,6 +209,10 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
                 if (p0 && PrefProps.icloudSync.get()) {
                   context.showSnackBar(l10n.autoBackupConflict);
                   return false;
+                }
+                if (p0) {
+                  final ok = await _ensureBakPwd(context);
+                  if (!ok) return false;
                 }
                 if (p0) {
                   final url = PrefProps.webdavUrl.get();
@@ -169,6 +250,67 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
                   TextButton(onPressed: () async => _onTapWebdavDl(context), child: Text(libL10n.restore)),
                   UIs.width7,
                   TextButton(onPressed: () async => _onTapWebdavUp(context), child: Text(libL10n.backup)),
+                ],
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget get _buildGist {
+    return CardX(
+      child: ExpandTile(
+        leading: const Icon(Icons.code),
+        title: const Text('GitHub Gist'),
+        initiallyExpanded: false,
+        children: [
+          ListTile(
+            title: Text(libL10n.setting),
+            trailing: const Icon(Icons.settings),
+            onTap: () async => _onTapGistSetting(context),
+          ),
+          ListTile(
+            title: Text(libL10n.auto),
+            trailing: StoreSwitch(
+              prop: PrefProps.gistSync,
+              validator: (p0) async {
+                if (p0 && (PrefProps.icloudSync.get() || PrefProps.webdavSync.get())) {
+                  context.showSnackBar(l10n.autoBackupConflict);
+                  return false;
+                }
+                if (p0) {
+                  final ok = await _ensureBakPwd(context);
+                  if (!ok) return false;
+                }
+                if (p0) {
+                  final token = PrefProps.githubToken.get();
+                  // Allow empty gistId (will create one on first upload)
+                  final hasToken = token != null && token.isNotEmpty;
+                  if (!hasToken) {
+                    context.showSnackBar('Token or Gist ID is empty');
+                    return false;
+                  }
+                  gistLoading.value = true;
+                  await bakSync.sync(rs: GistRs.shared);
+                  gistLoading.value = false;
+                }
+                return true;
+              },
+            ),
+          ),
+          ListTile(
+            title: Text(l10n.manual),
+            trailing: gistLoading.listenVal((loading) {
+              if (loading) return SizedLoading.small;
+
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(onPressed: () async => _onTapGistDl(context), child: Text(libL10n.restore)),
+                  UIs.width7,
+                  TextButton(onPressed: () async => _onTapGistUp(context), child: Text(libL10n.backup)),
                 ],
               );
             }),
@@ -218,7 +360,13 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
       onTap: () async {
         final data = await context.showImportDialog(title: l10n.snippet, modelDef: Snippet.example.toJson());
         if (data == null) return;
-        final str = String.fromCharCodes(data);
+        String str;
+        try {
+          str = utf8.decode(data);
+        } on FormatException catch (e, s) {
+          context.showErrDialog(e, s, libL10n.error);
+          return;
+        }
         final (list, _) = await context.showLoadingDialog(
           fn: () => Computer.shared.start((s) {
             return json.decode(s) as List;
@@ -252,8 +400,9 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
           child: SingleChildScrollView(child: Text(libL10n.askContinue('${libL10n.import} [$snippetNames]'))),
           actions: Btn.ok(
             onTap: () {
+              final notifier = ref.read(snippetNotifierProvider.notifier);
               for (final snippet in snippets) {
-                SnippetProvider.add(snippet);
+                notifier.add(snippet);
               }
               context.pop();
               context.pop();
@@ -264,6 +413,11 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
     ).cardx;
   }
 
+  @override
+  bool get wantKeepAlive => true;
+}
+
+extension on _BackupPageState {
   Future<void> _onTapWebdavDl(BuildContext context) async {
     webdavLoading.value = true;
     try {
@@ -289,8 +443,10 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
     final date = DateTime.now().ymdhms(ymdSep: '-', hmsSep: '-', sep: '-');
     final bakName = '$date-${Miscs.bakFileName}';
     try {
-      final savedPassword = await Stores.setting.backupasswd.read();
-      await BackupV2.backup(bakName, savedPassword);
+      final ok = await _ensureBakPwd(context);
+      if (!ok) return;
+      final savedPassword = await SecureStoreProps.bakPwd.read();
+      await BackupV2.backup(bakName, savedPassword?.isEmpty == true ? null : savedPassword);
       await Webdav.shared.upload(relativePath: bakName);
       Loggers.app.info('Upload webdav backup success');
     } catch (e, s) {
@@ -298,6 +454,85 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
       Loggers.app.warning('Upload webdav backup failed', e, s);
     } finally {
       webdavLoading.value = false;
+    }
+  }
+
+  Future<void> _onTapGistDl(BuildContext context) async {
+    gistLoading.value = true;
+    try {
+      final files = await GistRs.shared.list();
+      if (files.isEmpty) return context.showSnackBar(l10n.dirEmpty);
+
+      final fileName = await context.showPickSingleDialog(title: libL10n.restore, items: files);
+      if (fileName == null) return;
+
+      await GistRs.shared.download(relativePath: fileName);
+      final dlFile = await File('${Paths.doc}/$fileName').readAsString();
+      await BackupService.restoreFromText(context, dlFile);
+    } catch (e, s) {
+      context.showErrDialog(e, s, libL10n.restore);
+      Loggers.app.warning('Download gist backup failed', e, s);
+    } finally {
+      gistLoading.value = false;
+    }
+  }
+
+  Future<void> _onTapGistUp(BuildContext context) async {
+    gistLoading.value = true;
+    final date = DateTime.now().ymdhms(ymdSep: '-', hmsSep: '-', sep: '-');
+    final bakName = '$date-${Miscs.bakFileName}';
+    try {
+      final ok = await _ensureBakPwd(context);
+      if (!ok) return;
+      final savedPassword = await SecureStoreProps.bakPwd.read();
+      await BackupV2.backup(bakName, savedPassword?.isEmpty == true ? null : savedPassword);
+      await GistRs.shared.upload(relativePath: bakName);
+      Loggers.app.info('Upload gist backup success');
+    } catch (e, s) {
+      context.showErrDialog(e, s, l10n.upload);
+      Loggers.app.warning('Upload gist backup failed', e, s);
+    } finally {
+      gistLoading.value = false;
+    }
+  }
+
+  Future<void> _onTapGistSetting(BuildContext context) async {
+    final tokenCtrl = TextEditingController(text: PrefProps.githubToken.get());
+    final gistIdCtrl = TextEditingController(text: PrefProps.gistId.get());
+    final nodeToken = FocusNode();
+    final result = await context.showRoundDialog<bool>(
+      title: 'GitHub Gist',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Input(label: 'Token', controller: tokenCtrl, suggestion: false, node: nodeToken),
+          Input(
+            label: 'Gist ID (optional)',
+            controller: gistIdCtrl,
+            suggestion: false,
+            onSubmitted: (_) => context.pop(true),
+          ),
+        ],
+      ),
+      actions: Btnx.oks,
+    );
+    if (result == true) {
+      try {
+        final token_ = tokenCtrl.text.trim();
+        final gistId_ = gistIdCtrl.text.trim();
+
+        await GistRs.test(token: token_, gistId: gistId_.isEmpty ? null : gistId_);
+        context.showSnackBar(libL10n.success);
+
+        await PrefProps.githubToken.set(token_);
+        if (gistId_.isEmpty) {
+          await PrefProps.gistId.remove();
+        } else {
+          await PrefProps.gistId.set(gistId_);
+        }
+      } catch (e, s) {
+        context.showErrDialog(e, s, 'Gist');
+      }
     }
   }
 
@@ -359,7 +594,13 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
   void _onBulkImportServers(BuildContext context) async {
     final data = await context.showImportDialog(title: l10n.server, modelDef: Spix.example.toJson());
     if (data == null) return;
-    final text = String.fromCharCodes(data);
+    String text;
+    try {
+      text = utf8.decode(data);
+    } on FormatException catch (e, s) {
+      context.showErrDialog(e, s, libL10n.error);
+      return;
+    }
 
     try {
       final (spis, err) = await context.showLoadingDialog(
@@ -377,8 +618,15 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
       if (sure == true) {
         final (suc, err) = await context.showLoadingDialog(
           fn: () async {
+            final usedIds = <String>{};
             for (var spi in spis) {
-              Stores.server.put(spi);
+              // Ensure each server has a unique ID
+
+              // Only generate a new ID if the imported one is empty or already used in importing stage
+              final isIdUsed = spi.id.isNotEmpty || usedIds.contains(spi.id);
+              final spiWithId = isIdUsed ? spi.copyWith(id: ShortId.generate()) : spi;
+              Stores.server.put(spiWithId);
+              usedIds.add(spiWithId.id);
             }
             return true;
           },
@@ -392,6 +640,29 @@ final class _BackupPageState extends State<BackupPage> with AutomaticKeepAliveCl
     }
   }
 
-  @override
-  bool get wantKeepAlive => true;
+  Future<bool> _ensureBakPwd(BuildContext context) async {
+    final saved = await SecureStoreProps.bakPwd.read();
+    if (saved != null && saved.isNotEmpty) return true;
+
+    // Show dialog asking if user wants to set password or continue without
+    final result = await context.showRoundDialog<bool>(
+      title: l10n.backupPassword,
+      child: Text(l10n.backupPasswordTip, style: UIs.textGrey),
+      actions: [
+        TextButton(onPressed: () => context.pop(true), child: Text(libL10n.cancel)),
+        TextButton(onPressed: () => context.pop(false), child: Text(libL10n.setting)),
+      ],
+    );
+
+    if (result == true) {
+      // Continue without password
+      return true;
+    } else if (result == false) {
+      // User wants to set password
+      await _onTapSetBakPwd(context);
+      return true; // Allow continuing even if password setting was cancelled
+    }
+
+    return false; // User cancelled the dialog
+  }
 }

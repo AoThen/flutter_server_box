@@ -185,23 +185,35 @@ abstract class AppLocalizations {
   /// **'Automatic home widget update'**
   String get autoUpdateHomeWidget;
 
-  /// No description provided for @backupTip.
+  /// No description provided for @backupEncrypted.
   ///
   /// In en, this message translates to:
-  /// **'The exported data can be encrypted with password. \nPlease keep it safe.'**
-  String get backupTip;
+  /// **'Backup is encrypted'**
+  String get backupEncrypted;
 
-  /// No description provided for @backupVersionNotMatch.
+  /// No description provided for @backupNotEncrypted.
   ///
   /// In en, this message translates to:
-  /// **'Backup version is not match.'**
-  String get backupVersionNotMatch;
+  /// **'Backup is not encrypted'**
+  String get backupNotEncrypted;
 
   /// No description provided for @backupPassword.
   ///
   /// In en, this message translates to:
   /// **'Backup password'**
   String get backupPassword;
+
+  /// No description provided for @backupPasswordRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password removed'**
+  String get backupPasswordRemoved;
+
+  /// No description provided for @backupPasswordSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup password set'**
+  String get backupPasswordSet;
 
   /// No description provided for @backupPasswordTip.
   ///
@@ -215,29 +227,17 @@ abstract class AppLocalizations {
   /// **'Incorrect backup password'**
   String get backupPasswordWrong;
 
-  /// No description provided for @backupEncrypted.
+  /// No description provided for @backupTip.
   ///
   /// In en, this message translates to:
-  /// **'Backup is encrypted'**
-  String get backupEncrypted;
+  /// **'The exported data can be encrypted with password. \nPlease keep it safe.'**
+  String get backupTip;
 
-  /// No description provided for @backupNotEncrypted.
+  /// No description provided for @backupVersionNotMatch.
   ///
   /// In en, this message translates to:
-  /// **'Backup is not encrypted'**
-  String get backupNotEncrypted;
-
-  /// No description provided for @backupPasswordSet.
-  ///
-  /// In en, this message translates to:
-  /// **'Backup password set'**
-  String get backupPasswordSet;
-
-  /// No description provided for @backupPasswordRemoved.
-  ///
-  /// In en, this message translates to:
-  /// **'Backup password removed'**
-  String get backupPasswordRemoved;
+  /// **'Backup version is not match.'**
+  String get backupVersionNotMatch;
 
   /// No description provided for @battery.
   ///
@@ -1202,6 +1202,84 @@ abstract class AppLocalizations {
   /// **'Spent time: {time}'**
   String spentTime(Object time);
 
+  /// No description provided for @sshConfigAllExist.
+  ///
+  /// In en, this message translates to:
+  /// **'All servers already exist ({duplicateCount} duplicates found)'**
+  String sshConfigAllExist(Object duplicateCount);
+
+  /// No description provided for @sshConfigDuplicatesSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{duplicateCount} duplicates will be skipped'**
+  String sshConfigDuplicatesSkipped(Object duplicateCount);
+
+  /// No description provided for @sshConfigFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We found SSH configuration on your system.'**
+  String get sshConfigFound;
+
+  /// No description provided for @sshConfigFoundServers.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {totalCount} servers'**
+  String sshConfigFoundServers(Object totalCount);
+
+  /// No description provided for @sshConfigImport.
+  ///
+  /// In en, this message translates to:
+  /// **'SSH Config Import'**
+  String get sshConfigImport;
+
+  /// No description provided for @sshConfigImportHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only basic information can be imported, for example: IP/Port.'**
+  String get sshConfigImportHelp;
+
+  /// No description provided for @sshConfigImportPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to give permission to read ~/.ssh/config and automatically import server settings?'**
+  String get sshConfigImportPermission;
+
+  /// No description provided for @sshConfigImportTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt to read ~/.ssh/config on first server creation'**
+  String get sshConfigImportTip;
+
+  /// No description provided for @sshConfigImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {count} servers from SSH config'**
+  String sshConfigImported(Object count);
+
+  /// No description provided for @sshConfigManualSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to select the SSH config file manually?'**
+  String get sshConfigManualSelect;
+
+  /// No description provided for @sshConfigNoServers.
+  ///
+  /// In en, this message translates to:
+  /// **'No servers found in SSH config'**
+  String get sshConfigNoServers;
+
+  /// No description provided for @sshConfigPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot access SSH config file due to macOS permissions.'**
+  String get sshConfigPermissionDenied;
+
+  /// No description provided for @sshConfigServersToImport.
+  ///
+  /// In en, this message translates to:
+  /// **'{importCount} servers will be imported'**
+  String sshConfigServersToImport(Object importCount);
+
   /// No description provided for @sshTermHelp.
   ///
   /// In en, this message translates to:
@@ -1543,6 +1621,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'After connecting to the server, a script will be written to `~/.config/server_box` \n | `/tmp/server_box` to monitor the system status. You can review the script content.'**
   String get writeScriptTip;
+
+  /// No description provided for @connectionStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Statistics'**
+  String get connectionStats;
+
+  /// No description provided for @connectionStatsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'View server connection success rate and history'**
+  String get connectionStatsDesc;
+
+  /// No description provided for @noConnectionStatsData.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection statistics data'**
+  String get noConnectionStatsData;
+
+  /// No description provided for @totalAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get totalAttempts;
+
+  /// No description provided for @lastSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Success'**
+  String get lastSuccess;
+
+  /// No description provided for @lastFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Failure'**
+  String get lastFailure;
+
+  /// No description provided for @recentConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Connections'**
+  String get recentConnections;
+
+  /// No description provided for @viewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetails;
+
+  /// No description provided for @connectionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Details'**
+  String get connectionDetails;
+
+  /// No description provided for @clearThisServerStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear This Server Statistics'**
+  String get clearThisServerStats;
+
+  /// No description provided for @clearAllStatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Statistics'**
+  String get clearAllStatsTitle;
+
+  /// No description provided for @clearAllStatsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear all server connection statistics? This action cannot be undone.'**
+  String get clearAllStatsContent;
+
+  /// No description provided for @clearServerStatsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear {serverName} Statistics'**
+  String clearServerStatsTitle(String serverName);
+
+  /// No description provided for @clearServerStatsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear connection statistics for server \"{serverName}\"? This action cannot be undone.'**
+  String clearServerStatsContent(String serverName);
+
+  /// No description provided for @homeTabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Tabs'**
+  String get homeTabs;
+
+  /// No description provided for @homeTabsCustomizeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize which tabs appear on the home page and their order'**
+  String get homeTabsCustomizeDesc;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @availableTabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Tabs'**
+  String get availableTabs;
+
+  /// No description provided for @atLeastOneTab.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one tab must be selected'**
+  String get atLeastOneTab;
+
+  /// No description provided for @serverTabRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Server tab cannot be removed'**
+  String get serverTabRequired;
 }
 
 class _AppLocalizationsDelegate

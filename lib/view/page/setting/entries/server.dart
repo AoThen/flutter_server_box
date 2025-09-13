@@ -9,6 +9,7 @@ extension _Server on _AppSettingsPageState {
         _buildNetViewType(),
         _buildServerSeq(),
         _buildServerDetailCardSeq(),
+        _buildConnectionStats(),
         _buildDeleteServers(),
         _buildCpuView(),
         _buildServerMore(),
@@ -38,6 +39,22 @@ extension _Server on _AppSettingsPageState {
     );
   }
 
+  Widget _buildConnectionStats() {
+    return ListTile(
+      leading: const Icon(Icons.analytics, size: _kIconSize),
+      title: Text(l10n.connectionStats),
+      subtitle: Text(l10n.connectionStatsDesc),
+      trailing: const Icon(Icons.keyboard_arrow_right),
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const ConnectionStatsPage(),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildDeleteServers() {
     return ListTile(
       title: Text(l10n.deleteServers),
@@ -46,7 +63,7 @@ extension _Server on _AppSettingsPageState {
       onTap: () async {
         final keys = Stores.server.keys();
         final names = Map.fromEntries(
-          keys.map((e) => MapEntry(e, ServerProvider.pick(id: e)?.value.spi.name ?? e)),
+          keys.map((e) => MapEntry(e, ref.read(serversNotifierProvider).servers[e]?.name ?? e)),
         );
         final deleteKeys = await context.showPickDialog<String>(
           clearable: true,
@@ -180,6 +197,7 @@ extension _Server on _AppSettingsPageState {
         _buildDoubleColumnServersPage(),
         _buildUpdateInterval(),
         _buildMaxRetry(),
+        _buildSSHConfigImport(),
       ],
     );
   }
@@ -304,6 +322,14 @@ extension _Server on _AppSettingsPageState {
     return ListTile(
       title: Text(l10n.preferDiskAmount),
       trailing: StoreSwitch(prop: Stores.setting.serverTabPreferDiskAmount),
+    );
+  }
+
+  Widget _buildSSHConfigImport() {
+    return ListTile(
+      title: Text(l10n.sshConfigImport),
+      subtitle: Text(l10n.sshConfigImportTip, style: UIs.textGrey),
+      trailing: StoreSwitch(prop: _setting.firstTimeReadSSHCfg),
     );
   }
 }

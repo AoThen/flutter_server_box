@@ -6,20 +6,20 @@ part of 'app.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appProviderHash() => r'8378ec9d0a9c8d99cc05805047cd2d52ac4dbb56';
+String _$appStatesHash() => r'ef96f10f6fff0f3dd6d3128ebf070ad79cbc8bc9';
 
-/// See also [AppProvider].
-@ProviderFor(AppProvider)
-final appProviderProvider = NotifierProvider<AppProvider, AppState>.internal(
-  AppProvider.new,
-  name: r'appProviderProvider',
+/// See also [AppStates].
+@ProviderFor(AppStates)
+final appStatesProvider = NotifierProvider<AppStates, AppState>.internal(
+  AppStates.new,
+  name: r'appStatesProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$appProviderHash,
+      : _$appStatesHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$AppProvider = Notifier<AppState>;
+typedef _$AppStates = Notifier<AppState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

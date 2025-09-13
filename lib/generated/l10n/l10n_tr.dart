@@ -45,14 +45,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get autoUpdateHomeWidget => 'Ana ekran bileşenini otomatik güncelle';
 
   @override
-  String get backupTip =>
-      'Dışa aktarılan veriler parola ile şifrelenebilir. \nLütfen güvenli bir şekilde saklayın.';
+  String get backupEncrypted => 'Yedekleme şifrelenmiş';
 
   @override
-  String get backupVersionNotMatch => 'Yedekleme sürümü eşleşmiyor.';
+  String get backupNotEncrypted => 'Yedekleme şifreli değil';
 
   @override
   String get backupPassword => 'Yedekleme parolası';
+
+  @override
+  String get backupPasswordRemoved => 'Yedekleme parolası kaldırıldı';
+
+  @override
+  String get backupPasswordSet => 'Yedekleme parolası ayarlandı';
 
   @override
   String get backupPasswordTip =>
@@ -62,16 +67,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get backupPasswordWrong => 'Yanlış yedekleme parolası';
 
   @override
-  String get backupEncrypted => 'Yedekleme şifrelenmiş';
+  String get backupTip =>
+      'Dışa aktarılan veriler parola ile şifrelenebilir. \nLütfen güvenli bir şekilde saklayın.';
 
   @override
-  String get backupNotEncrypted => 'Yedekleme şifreli değil';
-
-  @override
-  String get backupPasswordSet => 'Yedekleme parolası ayarlandı';
-
-  @override
-  String get backupPasswordRemoved => 'Yedekleme parolası kaldırıldı';
+  String get backupVersionNotMatch => 'Yedekleme sürümü eşleşmiyor.';
 
   @override
   String get battery => 'Pil';
@@ -604,6 +604,60 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String sshConfigAllExist(Object duplicateCount) {
+    return 'Tüm sunucular zaten mevcut ($duplicateCount kopya bulundu)';
+  }
+
+  @override
+  String sshConfigDuplicatesSkipped(Object duplicateCount) {
+    return '$duplicateCount kopya atlanacak';
+  }
+
+  @override
+  String get sshConfigFound => 'Sisteminizde SSH yapılandırması bulduk';
+
+  @override
+  String sshConfigFoundServers(Object totalCount) {
+    return '$totalCount sunucu bulundu';
+  }
+
+  @override
+  String get sshConfigImport => 'SSH Yapılandırma İçe Aktarma';
+
+  @override
+  String get sshConfigImportHelp =>
+      'Yalnızca temel bilgiler içe aktarılabilir, örneğin: IP/Port.';
+
+  @override
+  String get sshConfigImportPermission =>
+      '~/.ssh/config dosyasını okumak ve sunucu ayarlarını otomatik olarak içe aktarmak için izin vermek ister misiniz?';
+
+  @override
+  String get sshConfigImportTip =>
+      'İlk sunucu oluşturulurken ~/.ssh/config okuma istemi';
+
+  @override
+  String sshConfigImported(Object count) {
+    return 'SSH yapılandırmasından $count sunucu içe aktarıldı';
+  }
+
+  @override
+  String get sshConfigManualSelect =>
+      'SSH yapılandırma dosyasını manuel olarak seçmek ister misiniz?';
+
+  @override
+  String get sshConfigNoServers => 'SSH yapılandırmasında sunucu bulunamadı';
+
+  @override
+  String get sshConfigPermissionDenied =>
+      'macOS izinleri nedeniyle SSH yapılandırma dosyasına erişilemiyor.';
+
+  @override
+  String sshConfigServersToImport(Object importCount) {
+    return '$importCount sunucu içe aktarılacak';
+  }
+
+  @override
   String get sshTermHelp =>
       'Terminal kaydırılabilir olduğunda, yatay olarak sürüklemek metni seçebilir. Klavye düğmesine tıklamak klavyeyi açar/kapar. Dosya simgesi mevcut yolu SFTP\'de açar. Pano düğmesi, metin seçiliyken içeriği kopyalar ve metin seçili değilken panoda içerik varsa terminale yapıştırır. Kod simgesi, kod parçacıklarını terminale yapıştırır ve yürütür.';
 
@@ -789,4 +843,71 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get writeScriptTip =>
       'Sunucuya bağlandıktan sonra, sistem durumunu izlemek için `~/.config/server_box` \n | `/tmp/server_box` dizinine bir betik yazılacak. Betik içeriğini inceleyebilirsiniz.';
+
+  @override
+  String get connectionStats => 'Bağlantı İstatistikleri';
+
+  @override
+  String get connectionStatsDesc =>
+      'Sunucu bağlantı başarı oranını ve geçmişi görüntüle';
+
+  @override
+  String get noConnectionStatsData => 'Bağlantı istatistik verisi yok';
+
+  @override
+  String get totalAttempts => 'Toplam';
+
+  @override
+  String get lastSuccess => 'Son Başarı';
+
+  @override
+  String get lastFailure => 'Son Başarısızlık';
+
+  @override
+  String get recentConnections => 'Son Bağlantılar';
+
+  @override
+  String get viewDetails => 'Detayları Görüntüle';
+
+  @override
+  String get connectionDetails => 'Bağlantı Detayları';
+
+  @override
+  String get clearThisServerStats => 'Bu Sunucu İstatistiklerini Temizle';
+
+  @override
+  String get clearAllStatsTitle => 'Tüm İstatistikleri Temizle';
+
+  @override
+  String get clearAllStatsContent =>
+      'Tüm sunucu bağlantı istatistiklerini temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.';
+
+  @override
+  String clearServerStatsTitle(String serverName) {
+    return '$serverName İstatistiklerini Temizle';
+  }
+
+  @override
+  String clearServerStatsContent(String serverName) {
+    return '\"$serverName\" sunucusu için bağlantı istatistiklerini temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.';
+  }
+
+  @override
+  String get homeTabs => 'Ana Sayfa Sekmeleri';
+
+  @override
+  String get homeTabsCustomizeDesc =>
+      'Ana sayfada görünecek sekmeleri ve sıralarını özelleştirin';
+
+  @override
+  String get reset => 'Sıfırla';
+
+  @override
+  String get availableTabs => 'Mevcut Sekmeler';
+
+  @override
+  String get atLeastOneTab => 'En az bir sekme seçilmelidir';
+
+  @override
+  String get serverTabRequired => 'Server tab cannot be removed';
 }

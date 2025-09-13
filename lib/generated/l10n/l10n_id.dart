@@ -46,14 +46,19 @@ class AppLocalizationsId extends AppLocalizations {
   String get autoUpdateHomeWidget => 'Widget Rumah Pembaruan Otomatis';
 
   @override
-  String get backupTip =>
-      'Data yang diekspor dapat dienkripsi dengan kata sandi. \nHarap jaga keamanannya.';
+  String get backupEncrypted => 'Cadangan telah dienkripsi';
 
   @override
-  String get backupVersionNotMatch => 'Versi cadangan tidak cocok.';
+  String get backupNotEncrypted => 'Cadangan tidak dienkripsi';
 
   @override
   String get backupPassword => 'Kata sandi cadangan';
+
+  @override
+  String get backupPasswordRemoved => 'Kata sandi cadangan dihapus';
+
+  @override
+  String get backupPasswordSet => 'Kata sandi cadangan ditetapkan';
 
   @override
   String get backupPasswordTip =>
@@ -63,16 +68,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get backupPasswordWrong => 'Kata sandi cadangan salah';
 
   @override
-  String get backupEncrypted => 'Cadangan telah dienkripsi';
+  String get backupTip =>
+      'Data yang diekspor dapat dienkripsi dengan kata sandi. \nHarap jaga keamanannya.';
 
   @override
-  String get backupNotEncrypted => 'Cadangan tidak dienkripsi';
-
-  @override
-  String get backupPasswordSet => 'Kata sandi cadangan ditetapkan';
-
-  @override
-  String get backupPasswordRemoved => 'Kata sandi cadangan dihapus';
+  String get backupVersionNotMatch => 'Versi cadangan tidak cocok.';
 
   @override
   String get battery => 'Baterai';
@@ -604,6 +604,61 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String sshConfigAllExist(Object duplicateCount) {
+    return 'Semua server sudah ada (ditemukan $duplicateCount duplikat)';
+  }
+
+  @override
+  String sshConfigDuplicatesSkipped(Object duplicateCount) {
+    return '$duplicateCount duplikat akan dilewati';
+  }
+
+  @override
+  String get sshConfigFound => 'Kami menemukan konfigurasi SSH di sistem Anda';
+
+  @override
+  String sshConfigFoundServers(Object totalCount) {
+    return 'Ditemukan $totalCount server';
+  }
+
+  @override
+  String get sshConfigImport => 'Impor Konfigurasi SSH';
+
+  @override
+  String get sshConfigImportHelp =>
+      'Hanya informasi dasar yang dapat diimpor, misalnya: IP/Port.';
+
+  @override
+  String get sshConfigImportPermission =>
+      'Apakah Anda ingin memberikan izin untuk membaca ~/.ssh/config dan secara otomatis mengimpor pengaturan server?';
+
+  @override
+  String get sshConfigImportTip =>
+      'Prompt untuk membaca ~/.ssh/config saat pembuatan server pertama';
+
+  @override
+  String sshConfigImported(Object count) {
+    return 'Berhasil mengimpor $count server dari konfigurasi SSH';
+  }
+
+  @override
+  String get sshConfigManualSelect =>
+      'Apakah Anda ingin memilih file konfigurasi SSH secara manual?';
+
+  @override
+  String get sshConfigNoServers =>
+      'Tidak ada server yang ditemukan dalam konfigurasi SSH';
+
+  @override
+  String get sshConfigPermissionDenied =>
+      'Tidak dapat mengakses file konfigurasi SSH karena izin macOS.';
+
+  @override
+  String sshConfigServersToImport(Object importCount) {
+    return '$importCount server akan diimpor';
+  }
+
+  @override
   String get sshTermHelp =>
       'Ketika terminal dapat digulirkan, menggeser secara horizontal dapat memilih teks. Mengklik tombol keyboard mengaktifkan/menonaktifkan keyboard. Ikon file membuka SFTP jalur saat ini. Tombol papan klip menyalin konten saat teks dipilih, dan menempelkan konten dari papan klip ke terminal saat tidak ada teks yang dipilih dan ada konten di papan klip. Ikon kode menempelkan potongan kode ke terminal dan mengeksekusinya.';
 
@@ -788,4 +843,71 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get writeScriptTip =>
       'Setelah terhubung ke server, sebuah skrip akan ditulis ke `~/.config/server_box` \n | `/tmp/server_box` untuk memantau status sistem. Anda dapat meninjau konten skrip tersebut.';
+
+  @override
+  String get connectionStats => 'Statistik Koneksi';
+
+  @override
+  String get connectionStatsDesc =>
+      'Lihat tingkat keberhasilan koneksi server dan riwayat';
+
+  @override
+  String get noConnectionStatsData => 'Tidak ada data statistik koneksi';
+
+  @override
+  String get totalAttempts => 'Total';
+
+  @override
+  String get lastSuccess => 'Sukses Terakhir';
+
+  @override
+  String get lastFailure => 'Gagal Terakhir';
+
+  @override
+  String get recentConnections => 'Koneksi Terkini';
+
+  @override
+  String get viewDetails => 'Lihat Detail';
+
+  @override
+  String get connectionDetails => 'Detail Koneksi';
+
+  @override
+  String get clearThisServerStats => 'Hapus Statistik Server Ini';
+
+  @override
+  String get clearAllStatsTitle => 'Hapus Semua Statistik';
+
+  @override
+  String get clearAllStatsContent =>
+      'Apakah Anda yakin ingin menghapus semua statistik koneksi server? Tindakan ini tidak dapat dibatalkan.';
+
+  @override
+  String clearServerStatsTitle(String serverName) {
+    return 'Hapus Statistik $serverName';
+  }
+
+  @override
+  String clearServerStatsContent(String serverName) {
+    return 'Apakah Anda yakin ingin menghapus statistik koneksi untuk server \"$serverName\"? Tindakan ini tidak dapat dibatalkan.';
+  }
+
+  @override
+  String get homeTabs => 'Tab Beranda';
+
+  @override
+  String get homeTabsCustomizeDesc =>
+      'Sesuaikan tab mana yang muncul di halaman beranda dan urutannya';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get availableTabs => 'Tab Tersedia';
+
+  @override
+  String get atLeastOneTab => 'Setidaknya satu tab harus dipilih';
+
+  @override
+  String get serverTabRequired => 'Server tab cannot be removed';
 }

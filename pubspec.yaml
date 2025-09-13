@@ -1,11 +1,11 @@
 name: server_box
 description: server status & toolbox app.
 publish_to: "none"
-version: 1.0.1206+1206
+version: 1.0.1253+1253
 
 environment:
-  sdk: ">=3.8.0"
-  flutter: ">=3.32.1"
+  sdk: ">=3.9.0"
+  flutter: ">=3.35.0"
 
 dependencies:
   flutter:
@@ -47,7 +47,7 @@ dependencies:
   xterm:
     git:
       url: https://github.com/lollipopkit/xterm.dart
-      ref: v4.0.3
+      ref: v4.0.4
   computer:
     git:
       url: https://github.com/lollipopkit/dart_computer
@@ -63,7 +63,9 @@ dependencies:
   fl_lib:
     git:
       url: https://github.com/lppcg/fl_lib
-      ref: v1.0.327
+      ref: v1.0.346
+  flutter_gbk2utf8: ^1.0.1
+  get_it: ^8.2.0
 
 dependency_overrides:
   # webdav_client_plus:
@@ -76,6 +78,10 @@ dependency_overrides:
   #   path: ../fl_lib
   # fl_build:
   #   path: ../fl_build
+  gtk: # TODO: remove it after fixed in upstream
+    git:
+      url: https://github.com/lollipopkit/gtk.dart
+      ref: v0.0.36
 
 dev_dependencies:
   analyzer: ^7.3.0
@@ -85,14 +91,18 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   json_serializable: ^6.8.0
   freezed: ^3.0.0
-  riverpod_generator: ^2.6.3
+  riverpod_generator: ^2.6.1
   test: ^1.24.0
   flutter_test:
     sdk: flutter
+  # riverpod_reg:
+  #   git:
+  #     url: https://github.com/lollipopkit/riverpod_reg
+  #     ref: v0.0.2
   fl_build:
     git:
       url: https://github.com/lppcg/fl_build.git
-      ref: v1.0.51
+      ref: v1.0.52
 
 flutter:
   generate: true
@@ -115,18 +125,15 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
+
+riverpod_reg:
+  class_name: Riverpods
+  gen_path: lib/generated/riverpod_reg.dart
+
 flutter_native_splash:
   color: "#ffffff"
   image: assets/app_icon.png
   color_dark: "#121212"
-  #background_image_dark: "assets/dark-background.png"
-  #image_dark: assets/splash-invert.png
-  #android: false
-  #ios: false
-  #web: false
-  #android_gravity: center
-  #ios_content_mode: center
-  #fullscreen: true
   info_plist_files:
     - "ios/Runner/Info-Debug.plist"
     - "ios/Runner/Info-Profile.plist"

@@ -5,11 +5,27 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.util.*
 
 class ForegroundService : Service() {
+    companion object {
+        @Volatile
+        var isRunning: Boolean = false
+    }
     private val chanId = "ForegroundServiceChannel"
+    private val NOTIFICATION_ID = 1000
+    private val ACTION_STOP_FOREGROUND = "ACTION_STOP_FOREGROUND"
+    private val ACTION_UPDATE_SESSIONS = "tech.lolli.toolbox.ACTION_UPDATE_SESSIONS"
+    private val ACTION_DISCONNECT_SESSION = "tech.lolli.toolbox.ACTION_DISCONNECT_SESSION"
+
+    private var isFgStarted = false
+    private val postedIds = mutableSetOf<Int>()
+    // Stable mapping from session-id -> notification-id to avoid hash collisions
+    private val notificationIdMap = mutableMapOf<String, Int>()
+    private val nextNotificationId = java.util.concurrent.atomic.AtomicInteger(2001)
 
     private fun logError(message: String, error: Throwable? = null) {
         Log.e("ForegroundService", message, error)
@@ -26,6 +42,7 @@ class ForegroundService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.d("ForegroundService", "Service onCreate")
+        isRunning = true
         createNotificationChannel()
     }
 
@@ -50,24 +67,23 @@ class ForegroundService : Service() {
             val action = intent.action
             Log.d("ForegroundService", "onStartCommand action=$action")
 
-            // Create notification before starting foreground
-            val notification = createNotification()
-            
-            // Use try-catch for startForeground
-            try {
-                startForeground(1, notification)
-            } catch (e: Exception) {
-                logError("Failed to start foreground", e)
-                stopSelf()
-                return START_NOT_STICKY
-            }
-
             return when (action) {
-                "ACTION_STOP_FOREGROUND" -> {
+                ACTION_STOP_FOREGROUND -> {
+                    // Notify Flutter to stop all connections before stopping service
+                    val stopAllIntent = Intent("tech.lolli.toolbox.STOP_ALL_CONNECTIONS")
+                    sendBroadcast(stopAllIntent)
+                    clearAll()
                     stopForegroundService()
                     START_NOT_STICKY
                 }
+                ACTION_UPDATE_SESSIONS -> {
+                    val payload = intent.getStringExtra("payload") ?: "{}"
+                    handleUpdateSessions(payload)
+                    START_STICKY
+                }
                 else -> {
+                    // Default bring up foreground with placeholder
+                    ensureForeground(createMergedNotification(0, emptyList(), emptyList()))
                     START_STICKY
                 }
             }
@@ -101,48 +117,146 @@ class ForegroundService : Service() {
         }
     }
 
-    private fun createNotification(): Notification {
+    private fun ensureForeground(notification: Notification) {
         try {
-            val notificationIntent = Intent(this, MainActivity::class.java)
-            val pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                notificationIntent,
-                PendingIntent.FLAG_IMMUTABLE
-            )
-
-            val deleteIntent = Intent(this, ForegroundService::class.java).apply {
-                action = "ACTION_STOP_FOREGROUND"
-            }
-            val deletePendingIntent = PendingIntent.getService(
-                this,
-                0,
-                deleteIntent,
-                PendingIntent.FLAG_IMMUTABLE
-            )
-
-            val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Notification.Builder(this, chanId)
+            if (!isFgStarted) {
+                startForeground(NOTIFICATION_ID, notification)
+                isFgStarted = true
             } else {
-                Notification.Builder(this)
+                val nm = getSystemService(NotificationManager::class.java)
+                nm?.notify(NOTIFICATION_ID, notification)
             }
-
-            return builder
-                .setContentTitle("Server Box")
-                .setContentText("Running in background")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(pendingIntent)
-                .addAction(android.R.drawable.ic_delete, "Stop", deletePendingIntent)
-                .build()
         } catch (e: Exception) {
-            logError("Error creating notification", e)
-            // Return a basic notification as fallback
-            return Notification.Builder(this)
-                .setContentTitle("Server Box")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .build()
+            logError("Failed to start/update foreground", e)
         }
     }
+
+
+    private fun createMergedNotification(count: Int, lines: List<String>, sessions: List<SessionItem>): Notification {
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE
+        )
+        val stopIntent = Intent(this, ForegroundService::class.java).apply { action = ACTION_STOP_FOREGROUND }
+        val stopPending = PendingIntent.getService(this, 0, stopIntent, PendingIntent.FLAG_IMMUTABLE)
+
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, chanId)
+        } else {
+            Notification.Builder(this)
+        }
+
+        // Use the earliest session's start time for chronometer
+        val earliestStartTime = sessions.minOfOrNull { it.startWhen } ?: System.currentTimeMillis()
+
+        val title = when {
+            count == 0 -> "Server Box"
+            count == 1 -> sessions.first().title
+            else -> "SSH sessions: $count active"
+        }
+
+        val contentText = when {
+            count == 0 -> "Ready for connections"
+            count == 1 -> {
+                val session = sessions.first()
+                "${session.subtitle} · ${session.status}"
+            }
+            else -> "Multiple SSH connections active"
+        }
+
+        // For multiple sessions, show details in expanded view
+        val style = if (count > 1) {
+            val inbox = Notification.InboxStyle()
+            val maxLines = 5
+            val displayLines = if (lines.size > maxLines) {
+                lines.take(maxLines) + "...and ${lines.size - maxLines} more"
+            } else {
+                lines
+            }
+            displayLines.forEach { inbox.addLine(it) }
+            inbox.setBigContentTitle(title)
+            inbox
+        } else {
+            null
+        }
+
+        val notification = builder
+            .setContentTitle(title)
+            .setContentText(contentText)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setWhen(earliestStartTime)
+            .setUsesChronometer(true)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setContentIntent(pendingIntent)
+            .addAction(android.R.drawable.ic_delete, "Stop All", stopPending)
+
+        if (style != null) {
+            notification.setStyle(style)
+        }
+
+        return notification.build()
+    }
+
+    private fun handleUpdateSessions(payload: String) {
+        val nm = getSystemService(NotificationManager::class.java)
+        if (nm == null) {
+            logError("NotificationManager null")
+            return
+        }
+
+        val sessions = mutableListOf<SessionItem>()
+        try {
+            val obj = JSONObject(payload)
+            val arr: JSONArray = obj.optJSONArray("sessions") ?: JSONArray()
+            for (i in 0 until arr.length()) {
+                val s = arr.optJSONObject(i) ?: continue
+                val id = s.optString("id")
+                val title = s.optString("title")
+                val sub = s.optString("subtitle")
+                val whenMs = s.optLong("startTimeMs", System.currentTimeMillis())
+                val status = s.optString("status", "connected")
+                if (id.isNotEmpty()) {
+                    sessions.add(SessionItem(id, title, sub, whenMs, status))
+                }
+            }
+        } catch (e: Exception) {
+            logError("Failed to parse payload", e)
+        }
+
+        // Clear if empty
+        if (sessions.isEmpty()) {
+            clearAll()
+            return
+        }
+
+        // Cancel any existing individual notifications (we only show merged notification now)
+        val toCancel = postedIds.toSet()
+        toCancel.forEach { nm.cancel(it) }
+        postedIds.clear()
+        notificationIdMap.clear()
+
+        // Create merged notification content
+        val summaryLines = sessions.map { "${it.title}: ${it.status}" }
+        val mergedNotification = createMergedNotification(sessions.size, summaryLines, sessions)
+        ensureForeground(mergedNotification)
+    }
+
+    private fun clearAll() {
+        val nm = getSystemService(NotificationManager::class.java)
+        nm?.cancel(NOTIFICATION_ID)
+        postedIds.forEach { id -> nm?.cancel(id) }
+        postedIds.clear()
+        isFgStarted = false
+    }
+
+    data class SessionItem(
+        val id: String,
+        val title: String,
+        val subtitle: String,
+        val startWhen: Long,
+        val status: String,
+    )
 
     private fun stopForegroundService() {
         try {
@@ -157,5 +271,6 @@ class ForegroundService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d("ForegroundService", "Service onDestroy")
+        isRunning = false
     }
 }
