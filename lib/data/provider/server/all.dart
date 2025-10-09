@@ -98,7 +98,7 @@ class ServersNotifier extends _$ServersNotifier {
     if (spi != null) {
       final newManualDisconnected = Set<String>.from(state.manualDisconnectedIds)..remove(spi.id);
       state = state.copyWith(manualDisconnectedIds: newManualDisconnected);
-      final serverNotifier = ref.read(serverNotifierProvider(spi.id).notifier);
+      final serverNotifier = ref.read(serverProvider(spi.id).notifier);
       await serverNotifier.refresh();
       return;
     }
@@ -109,19 +109,19 @@ class ServersNotifier extends _$ServersNotifier {
         final spi = entry.value;
 
         if (onlyFailed) {
-          final serverState = ref.read(serverNotifierProvider(serverId));
+          final serverState = ref.read(serverProvider(serverId));
           if (serverState.conn != ServerConn.failed) return;
           TryLimiter.reset(serverId);
         }
 
         if (state.manualDisconnectedIds.contains(serverId)) return;
 
-        final serverState = ref.read(serverNotifierProvider(serverId));
+        final serverState = ref.read(serverProvider(serverId));
         if (serverState.conn == ServerConn.disconnected && !spi.autoConnect) {
           return;
         }
 
-        final serverNotifier = ref.read(serverNotifierProvider(serverId).notifier);
+        final serverNotifier = ref.read(serverProvider(serverId).notifier);
         await serverNotifier.refresh();
       }),
     );
@@ -153,7 +153,7 @@ class ServersNotifier extends _$ServersNotifier {
 
   void setDisconnected() {
     for (final serverId in state.servers.keys) {
-      final serverNotifier = ref.read(serverNotifierProvider(serverId).notifier);
+      final serverNotifier = ref.read(serverProvider(serverId).notifier);
       serverNotifier.updateConnection(ServerConn.disconnected);
 
       // Update SSH session status to disconnected
@@ -180,7 +180,7 @@ class ServersNotifier extends _$ServersNotifier {
       return;
     }
 
-    final serverNotifier = ref.read(serverNotifierProvider(id).notifier);
+    final serverNotifier = ref.read(serverProvider(id).notifier);
     serverNotifier.closeConnection();
 
     final newManualDisconnected = Set<String>.from(state.manualDisconnectedIds)..add(id);
@@ -239,6 +239,50 @@ class ServersNotifier extends _$ServersNotifier {
     bakSync.sync(milliDelay: 1000);
   }
 
+  void updateServerOrder(List<String> order) {
+    final seen = <String>{};
+    final newOrder = <String>[];
+
+    for (final id in order) {
+      if (!state.servers.containsKey(id)) {
+        continue;
+      }
+      if (!seen.add(id)) {
+        continue;
+      }
+      newOrder.add(id);
+    }
+
+    for (final id in state.servers.keys) {
+      if (seen.add(id)) {
+        newOrder.add(id);
+      }
+    }
+
+    if (_isSameOrder(newOrder, state.serverOrder)) {
+      return;
+    }
+
+    state = state.copyWith(serverOrder: newOrder);
+    Stores.setting.serverOrder.put(newOrder);
+    bakSync.sync(milliDelay: 1000);
+  }
+
+  bool _isSameOrder(List<String> a, List<String> b) {
+    if (identical(a, b)) {
+      return true;
+    }
+    if (a.length != b.length) {
+      return false;
+    }
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   Future<void> updateServer(Spi old, Spi newSpi) async {
     if (old != newSpi) {
       Stores.server.update(old, newSpi);
@@ -259,7 +303,7 @@ class ServersNotifier extends _$ServersNotifier {
       } else {
         newServers[old.id] = newSpi;
         // Update SPI in the corresponding IndividualServerNotifier
-        final serverNotifier = ref.read(serverNotifierProvider(old.id).notifier);
+        final serverNotifier = ref.read(serverProvider(old.id).notifier);
         serverNotifier.updateSpi(newSpi);
       }
 

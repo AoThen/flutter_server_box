@@ -42,7 +42,7 @@ extension _Widgets on _ServerEditPageState {
 
   Widget _buildKeyAuth() {
     const padding = EdgeInsets.only(left: 13, right: 13, bottom: 7);
-    final privateKeyState = ref.watch(privateKeyNotifierProvider);
+    final privateKeyState = ref.watch(privateKeyProvider);
     final pkis = privateKeyState.keys;
 
     final choice = _keyIdx.listenVal((val) {
@@ -350,7 +350,7 @@ extension _Widgets on _ServerEditPageState {
   Widget _buildJumpServer() {
     const padding = EdgeInsets.only(left: 13, right: 13, bottom: 7);
     final srvs = ref
-        .watch(serversNotifierProvider)
+        .watch(serversProvider)
         .servers
         .values
         .where((e) => e.jumpId == null)
@@ -439,6 +439,16 @@ extension _Widgets on _ServerEditPageState {
     );
   }
 
+  Widget _buildSSHDiscovery() {
+    return Btn.tile(
+      text: l10n.discoverSshServers,
+      icon: const Icon(BoxIcons.bx_search, color: Colors.grey),
+      onTap: _onTapSSHDiscovery,
+      textStyle: UIs.textGrey,
+      mainAxisSize: MainAxisSize.min,
+    );
+  }
+
   Widget _buildDelBtn() {
     return IconButton(
       onPressed: () {
@@ -452,7 +462,7 @@ extension _Widgets on _ServerEditPageState {
           actions: Btn.ok(
             onTap: () async {
               context.pop();
-              ref.read(serversNotifierProvider.notifier).delServer(spi!.id);
+              ref.read(serversProvider.notifier).delServer(spi!.id);
               context.pop(true);
             },
             red: true,
