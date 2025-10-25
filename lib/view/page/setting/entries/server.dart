@@ -46,11 +46,7 @@ extension _Server on _AppSettingsPageState {
       subtitle: Text(l10n.connectionStatsDesc),
       trailing: const Icon(Icons.keyboard_arrow_right),
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const ConnectionStatsPage(),
-          ),
-        );
+        ConnectionStatsPage.route.go(context);
       },
     );
   }
@@ -208,53 +204,6 @@ extension _Server on _AppSettingsPageState {
       // subtitle: Text(l10n.rememberPwdInMemTip, style: UIs.textGrey),
       title: TipText(l10n.rememberPwdInMem, l10n.rememberPwdInMemTip),
       trailing: StoreSwitch(prop: _setting.rememberPwdInMem),
-    );
-  }
-
-  Widget _buildEditRawSettings() {
-    return ListTile(
-      title: const Text('(Dev) Edit raw json'),
-      trailing: const Icon(Icons.keyboard_arrow_right),
-      onTap: _editRawSettings,
-    );
-  }
-
-  Future<void> _editRawSettings() async {
-    final map = Stores.setting.getAllMap(includeInternalKeys: true);
-    final keys = map.keys;
-
-    void onSave(EditorPageRet ret) {
-      if (ret.typ != EditorPageRetType.text) {
-        context.showRoundDialog(title: libL10n.fail, child: Text(l10n.invalid));
-        return;
-      }
-      try {
-        final newSettings = json.decode(ret.val) as Map<String, dynamic>;
-        Stores.setting.box.putAll(newSettings);
-        final newKeys = newSettings.keys;
-        final removedKeys = keys.where((e) => !newKeys.contains(e));
-        for (final key in removedKeys) {
-          Stores.setting.box.delete(key);
-        }
-      } catch (e, trace) {
-        context.showRoundDialog(title: libL10n.error, child: Text('${l10n.save}:\n$e'));
-        Loggers.app.warning('Update json settings failed', e, trace);
-      }
-    }
-
-    /// Encode [map] to String with indent `\t`
-    final text = jsonIndentEncoder.convert(map);
-    await EditorPage.route.go(
-      context,
-      args: EditorPageArgs(
-        text: text,
-        lang: ProgLang.json,
-        title: libL10n.setting,
-        onSave: onSave,
-        closeAfterSave: SettingStore.instance.closeAfterSave.fetch(),
-        softWrap: SettingStore.instance.editorSoftWrap.fetch(),
-        enableHighlight: SettingStore.instance.editorHighlight.fetch(),
-      ),
     );
   }
 

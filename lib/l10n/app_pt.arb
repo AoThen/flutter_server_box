@@ -1,25 +1,27 @@
 {
   "@@locale": "pt",
-  "@clearServerStatsContent": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
-  "@clearServerStatsTitle": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
   "aboutThanks": "Agradecimentos a todos os participantes.",
   "acceptBeta": "Aceitar atualizações da versão de teste",
   "addSystemPrivateKeyTip": "Atualmente, não há nenhuma chave privada. Gostaria de adicionar a chave do sistema (~/.ssh/id_rsa)?",
   "added2List": "Adicionado à lista de tarefas",
   "addr": "Endereço",
   "alreadyLastDir": "Já é o diretório mais alto",
+  "askAi": "Perguntar à IA",
+  "askAiApiKey": "Chave de API",
+  "askAiAwaitingResponse": "Aguardando resposta da IA...",
+  "askAiBaseUrl": "URL base",
+  "askAiCommandInserted": "Comando inserido no terminal",
+  "askAiConfigMissing": "Configure {fields} nas configurações.",
+  "askAiConfirmExecute": "Confirmar antes de executar",
+  "askAiConversation": "Conversa com a IA",
+  "askAiDisclaimer": "A IA pode errar. Use com cautela.",
+  "askAiFollowUpHint": "Faça uma pergunta adicional...",
+  "askAiInsertTerminal": "Inserir no terminal",
+  "askAiModel": "Modelo",
+  "askAiNoResponse": "Sem resposta",
+  "askAiRecommendedCommand": "Comando sugerido pela IA",
+  "askAiSelectedContent": "Conteúdo selecionado",
+  "askAiUsageHint": "Usado no terminal SSH",
   "atLeastOneTab": "Pelo menos uma aba deve ser selecionada",
   "authFailTip": "Autenticação falhou, por favor verifique se a senha/chave/host/usuário, etc., estão incorretos.",
   "autoBackupConflict": "Apenas um backup automático pode ser ativado por vez",
@@ -169,6 +171,7 @@
   "port": "Porta",
   "preferDiskAmount": "Priorizar a exibição da capacidade do disco",
   "privateKey": "Chave privada",
+  "privateKeyNotFoundFmt": "Chave privada [{keyId}] não encontrada.",
   "process": "Processo",
   "prune": "Podar",
   "pushToken": "Token de notificação push",
@@ -223,6 +226,12 @@
   "sshConfigImportPermission": "Gostaria de dar permissão para ler ~/.ssh/config e importar automaticamente as configurações do servidor?",
   "sshConfigImportTip": "Sugestão para ler ~/.ssh/config na criação do primeiro servidor",
   "sshConfigImported": "Importados {count} servidores da configuração SSH",
+  "sshHostKeyChangedDesc": "A chave de host SSH de {serverName} foi alterada. Continue apenas se confiar neste servidor.",
+  "sshHostKeyFingerprintMd5Base64": "Impressão digital (MD5 Base64): {fingerprint}",
+  "sshHostKeyFingerprintMd5Hex": "Impressão digital (MD5 hex): {fingerprint}",
+  "sshHostKeyType": "Tipo de chave de host SSH",
+  "sshHostKeyNewDesc": "Uma nova chave de host SSH foi recebida de {serverName}. Verifique a impressão digital antes de confiar.",
+  "sshHostKeyStoredFingerprint": "Impressão digital armazenada: {fingerprint}",
   "sshConfigManualSelect": "Gostaria de selecionar manualmente o arquivo de configuração SSH?",
   "sshConfigNoServers": "Nenhum servidor encontrado na configuração SSH",
   "sshConfigPermissionDenied": "Não é possível acessar o arquivo de configuração SSH devido às permissões do macOS.",

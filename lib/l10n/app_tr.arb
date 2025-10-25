@@ -1,25 +1,27 @@
 {
   "@@locale": "tr",
-  "@clearServerStatsContent": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
-  "@clearServerStatsTitle": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
   "aboutThanks": "Aşağıdaki katılımcılara teşekkürler.",
   "acceptBeta": "Beta sürüm güncellemelerini kabul et",
   "addSystemPrivateKeyTip": "Şu anda özel anahtarlar mevcut değil, sistemle birlikte gelen anahtarı (~/.ssh/id_rsa) eklemek ister misiniz?",
   "added2List": "Görev listesine eklendi",
   "addr": "Adres",
   "alreadyLastDir": "Zaten son dizindesiniz.",
+  "askAi": "Yapay zekaya sor",
+  "askAiApiKey": "API anahtarı",
+  "askAiAwaitingResponse": "Yapay zekâ yanıtı bekleniyor...",
+  "askAiBaseUrl": "Temel URL",
+  "askAiCommandInserted": "Komut terminale eklendi",
+  "askAiConfigMissing": "Lütfen Ayarlar'da {fields} öğesini yapılandırın.",
+  "askAiConfirmExecute": "Çalıştırmadan önce onayla",
+  "askAiConversation": "YZ sohbeti",
+  "askAiDisclaimer": "Yapay zeka hata yapabilir. Lütfen dikkatli kullanın.",
+  "askAiFollowUpHint": "Yeni bir soru sor...",
+  "askAiInsertTerminal": "Terminale ekle",
+  "askAiModel": "Model",
+  "askAiNoResponse": "Yanıt yok",
+  "askAiRecommendedCommand": "YZ önerilen komut",
+  "askAiSelectedContent": "Seçilen içerik",
+  "askAiUsageHint": "SSH Terminalinde kullanılır",
   "atLeastOneTab": "En az bir sekme seçilmelidir",
   "authFailTip": "Kimlik doğrulama başarısız oldu, lütfen kimlik bilgilerinin doğru olup olmadığını kontrol edin",
   "autoBackupConflict": "Aynı anda yalnızca bir otomatik yedekleme açık olabilir.",
@@ -169,6 +171,7 @@
   "port": "Port",
   "preferDiskAmount": "Disk kapasitesini öncelikli olarak göster",
   "privateKey": "Özel Anahtar",
+  "privateKeyNotFoundFmt": "Özel anahtar [{keyId}] bulunamadı.",
   "process": "İşlem",
   "prune": "Budamak",
   "pushToken": "Push belirteci",
@@ -223,6 +226,12 @@
   "sshConfigImportPermission": "~/.ssh/config dosyasını okumak ve sunucu ayarlarını otomatik olarak içe aktarmak için izin vermek ister misiniz?",
   "sshConfigImportTip": "İlk sunucu oluşturulurken ~/.ssh/config okuma istemi",
   "sshConfigImported": "SSH yapılandırmasından {count} sunucu içe aktarıldı",
+  "sshHostKeyChangedDesc": "{serverName} için SSH ana bilgisayar anahtarı değişti. Yalnızca bu sunucuya güveniyorsanız devam edin.",
+  "sshHostKeyFingerprintMd5Base64": "Parmak izi (MD5 Base64): {fingerprint}",
+  "sshHostKeyFingerprintMd5Hex": "Parmak izi (MD5 hex): {fingerprint}",
+  "sshHostKeyType": "SSH ana bilgisayar anahtarı türü",
+  "sshHostKeyNewDesc": "{serverName} üzerinden yeni bir SSH ana bilgisayar anahtarı alındı. Güvenmeden önce parmak izini kontrol edin.",
+  "sshHostKeyStoredFingerprint": "Kaydedilen parmak izi: {fingerprint}",
   "sshConfigManualSelect": "SSH yapılandırma dosyasını manuel olarak seçmek ister misiniz?",
   "sshConfigNoServers": "SSH yapılandırmasında sunucu bulunamadı",
   "sshConfigPermissionDenied": "macOS izinleri nedeniyle SSH yapılandırma dosyasına erişilemiyor.",

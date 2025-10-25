@@ -72,6 +72,18 @@ class SettingStore extends HiveStore {
 
   late final editorFontSize = propertyDefault('editorFontSize', 12.5);
 
+  /// Trusted SSH host key fingerprints keyed by `serverId::keyType`.
+  late final sshKnownHostFingerprints = propertyDefault<Map<String, String>>(
+    'sshKnownHostFingerprints',
+    const {},
+    fromObj: (raw) {
+      if (raw is Map) {
+        return raw.map((key, value) => MapEntry(key.toString(), value.toString()));
+      }
+      return <String, String>{};
+    },
+  );
+
   // Editor theme
   late final editorTheme = propertyDefault('editorTheme', Defaults.editorTheme);
 
@@ -141,6 +153,11 @@ class SettingStore extends HiveStore {
 
   /// Whether collapse UI items by default
   late final collapseUIDefault = propertyDefault('collapseUIDefault', true);
+
+  /// Terminal AI helper configuration
+  late final askAiBaseUrl = propertyDefault('askAiBaseUrl', 'https://api.openai.com');
+  late final askAiApiKey = propertyDefault('askAiApiKey', '');
+  late final askAiModel = propertyDefault('askAiModel', 'gpt-4o-mini');
 
   late final serverFuncBtns = listProperty('serverBtns', defaultValue: ServerFuncBtn.defaultIdxs);
 

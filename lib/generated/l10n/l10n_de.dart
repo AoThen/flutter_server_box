@@ -29,6 +29,57 @@ class AppLocalizationsDe extends AppLocalizations {
   String get alreadyLastDir => 'Bereits im letzten Verzeichnis.';
 
   @override
+  String get askAi => 'KI fragen';
+
+  @override
+  String get askAiApiKey => 'API-Schlüssel';
+
+  @override
+  String get askAiAwaitingResponse => 'Warte auf KI-Antwort...';
+
+  @override
+  String get askAiBaseUrl => 'Basis-URL';
+
+  @override
+  String get askAiCommandInserted => 'Befehl ins Terminal eingefügt';
+
+  @override
+  String askAiConfigMissing(Object fields) {
+    return 'Bitte konfigurieren Sie $fields in den Einstellungen.';
+  }
+
+  @override
+  String get askAiConfirmExecute => 'Vor Ausführung bestätigen';
+
+  @override
+  String get askAiConversation => 'KI-Unterhaltung';
+
+  @override
+  String get askAiDisclaimer =>
+      'KI kann Fehler machen. Bitte vorsichtig verwenden.';
+
+  @override
+  String get askAiFollowUpHint => 'Weitere Frage stellen...';
+
+  @override
+  String get askAiInsertTerminal => 'In Terminal einfügen';
+
+  @override
+  String get askAiModel => 'Modell';
+
+  @override
+  String get askAiNoResponse => 'Keine Antwort';
+
+  @override
+  String get askAiRecommendedCommand => 'KI-empfohlener Befehl';
+
+  @override
+  String get askAiSelectedContent => 'Ausgewählter Inhalt';
+
+  @override
+  String get askAiUsageHint => 'Verwendet im SSH-Terminal';
+
+  @override
   String get atLeastOneTab => 'Mindestens ein Tab muss ausgewählt sein';
 
   @override
@@ -99,12 +150,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get clearAllStatsTitle => 'Alle Statistiken löschen';
 
   @override
-  String clearServerStatsContent(String serverName) {
+  String clearServerStatsContent(Object serverName) {
     return 'Sind Sie sicher, dass Sie die Verbindungsstatistiken für Server \"$serverName\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.';
   }
 
   @override
-  String clearServerStatsTitle(String serverName) {
+  String clearServerStatsTitle(Object serverName) {
     return '$serverName Statistiken löschen';
   }
 
@@ -531,6 +582,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get privateKey => 'Private Key';
 
   @override
+  String privateKeyNotFoundFmt(Object keyId) {
+    return 'Privater Schlüssel [$keyId] wurde nicht gefunden.';
+  }
+
+  @override
   String get process => 'Prozess';
 
   @override
@@ -711,6 +767,34 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String sshConfigImported(Object count) {
     return '$count Server aus SSH-Konfiguration importiert';
+  }
+
+  @override
+  String sshHostKeyChangedDesc(Object serverName) {
+    return 'Der SSH-Hostschlüssel für $serverName hat sich geändert. Fahren Sie nur fort, wenn Sie diesem Server vertrauen.';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Base64(Object fingerprint) {
+    return 'Fingerabdruck (MD5 Base64): $fingerprint';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Hex(Object fingerprint) {
+    return 'Fingerabdruck (MD5 Hex): $fingerprint';
+  }
+
+  @override
+  String get sshHostKeyType => 'SSH-Hostschlüsseltyp';
+
+  @override
+  String sshHostKeyNewDesc(Object serverName) {
+    return 'Ein neuer SSH-Hostschlüssel wurde von $serverName empfangen. Prüfen Sie den Fingerabdruck, bevor Sie vertrauen.';
+  }
+
+  @override
+  String sshHostKeyStoredFingerprint(Object fingerprint) {
+    return 'Gespeicherter Fingerabdruck: $fingerprint';
   }
 
   @override

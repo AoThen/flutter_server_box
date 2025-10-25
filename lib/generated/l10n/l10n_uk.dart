@@ -28,6 +28,56 @@ class AppLocalizationsUk extends AppLocalizations {
   String get alreadyLastDir => 'Вже в останньому каталозі.';
 
   @override
+  String get askAi => 'Запитати ШІ';
+
+  @override
+  String get askAiApiKey => 'Ключ API';
+
+  @override
+  String get askAiAwaitingResponse => 'Очікування відповіді ШІ...';
+
+  @override
+  String get askAiBaseUrl => 'Базова URL';
+
+  @override
+  String get askAiCommandInserted => 'Команду вставлено в термінал';
+
+  @override
+  String askAiConfigMissing(Object fields) {
+    return 'Налаштуйте $fields у налаштуваннях.';
+  }
+
+  @override
+  String get askAiConfirmExecute => 'Підтвердити перед виконанням';
+
+  @override
+  String get askAiConversation => 'Розмова з ШІ';
+
+  @override
+  String get askAiDisclaimer => 'ШІ може помилятися. Користуйтеся обережно.';
+
+  @override
+  String get askAiFollowUpHint => 'Поставте додаткове запитання...';
+
+  @override
+  String get askAiInsertTerminal => 'Вставити в термінал';
+
+  @override
+  String get askAiModel => 'Модель';
+
+  @override
+  String get askAiNoResponse => 'Відповідь відсутня';
+
+  @override
+  String get askAiRecommendedCommand => 'Команда, запропонована ШІ';
+
+  @override
+  String get askAiSelectedContent => 'Вибраний вміст';
+
+  @override
+  String get askAiUsageHint => 'Використовується в SSH-терміналі';
+
+  @override
   String get atLeastOneTab => 'Потрібно вибрати принаймні одну вкладку';
 
   @override
@@ -99,12 +149,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get clearAllStatsTitle => 'Очистити всю статистику';
 
   @override
-  String clearServerStatsContent(String serverName) {
+  String clearServerStatsContent(Object serverName) {
     return 'Ви впевнені, що хочете очистити статистику з\'єднань для сервера \"$serverName\"? Цю дію не можна скасувати.';
   }
 
   @override
-  String clearServerStatsTitle(String serverName) {
+  String clearServerStatsTitle(Object serverName) {
     return 'Очистити статистику $serverName';
   }
 
@@ -533,6 +583,11 @@ class AppLocalizationsUk extends AppLocalizations {
   String get privateKey => 'Приватний ключ';
 
   @override
+  String privateKeyNotFoundFmt(Object keyId) {
+    return 'Приватний ключ [$keyId] не знайдено.';
+  }
+
+  @override
   String get process => 'Процес';
 
   @override
@@ -712,6 +767,34 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String sshConfigImported(Object count) {
     return 'Імпортовано $count серверів з SSH-конфігурації';
+  }
+
+  @override
+  String sshHostKeyChangedDesc(Object serverName) {
+    return 'SSH-ключ хоста для $serverName змінено. Продовжуйте лише якщо довіряєте цьому серверу.';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Base64(Object fingerprint) {
+    return 'Відбиток (MD5 Base64): $fingerprint';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Hex(Object fingerprint) {
+    return 'Відбиток (MD5 hex): $fingerprint';
+  }
+
+  @override
+  String get sshHostKeyType => 'Тип ключа хоста SSH';
+
+  @override
+  String sshHostKeyNewDesc(Object serverName) {
+    return 'Отримано новий SSH-ключ хоста від $serverName. Перевірте відбиток перед тим, як довіряти.';
+  }
+
+  @override
+  String sshHostKeyStoredFingerprint(Object fingerprint) {
+    return 'Збережений відбиток: $fingerprint';
   }
 
   @override

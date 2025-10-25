@@ -29,6 +29,56 @@ class AppLocalizationsId extends AppLocalizations {
   String get alreadyLastDir => 'Sudah di direktori terakhir.';
 
   @override
+  String get askAi => 'Tanya AI';
+
+  @override
+  String get askAiApiKey => 'Kunci API';
+
+  @override
+  String get askAiAwaitingResponse => 'Menunggu respons AI...';
+
+  @override
+  String get askAiBaseUrl => 'URL dasar';
+
+  @override
+  String get askAiCommandInserted => 'Perintah dimasukkan ke terminal';
+
+  @override
+  String askAiConfigMissing(Object fields) {
+    return 'Harap konfigurasikan $fields di Pengaturan.';
+  }
+
+  @override
+  String get askAiConfirmExecute => 'Konfirmasi sebelum menjalankan';
+
+  @override
+  String get askAiConversation => 'Percakapan AI';
+
+  @override
+  String get askAiDisclaimer => 'AI bisa saja salah. Gunakan dengan hati-hati.';
+
+  @override
+  String get askAiFollowUpHint => 'Ajukan pertanyaan lanjutan...';
+
+  @override
+  String get askAiInsertTerminal => 'Masukkan ke terminal';
+
+  @override
+  String get askAiModel => 'Model';
+
+  @override
+  String get askAiNoResponse => 'Tidak ada respons';
+
+  @override
+  String get askAiRecommendedCommand => 'Perintah yang disarankan AI';
+
+  @override
+  String get askAiSelectedContent => 'Konten yang dipilih';
+
+  @override
+  String get askAiUsageHint => 'Digunakan di Terminal SSH';
+
+  @override
   String get atLeastOneTab => 'Setidaknya satu tab harus dipilih';
 
   @override
@@ -98,12 +148,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get clearAllStatsTitle => 'Hapus Semua Statistik';
 
   @override
-  String clearServerStatsContent(String serverName) {
+  String clearServerStatsContent(Object serverName) {
     return 'Apakah Anda yakin ingin menghapus statistik koneksi untuk server \"$serverName\"? Tindakan ini tidak dapat dibatalkan.';
   }
 
   @override
-  String clearServerStatsTitle(String serverName) {
+  String clearServerStatsTitle(Object serverName) {
     return 'Hapus Statistik $serverName';
   }
 
@@ -529,6 +579,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get privateKey => 'Kunci Pribadi';
 
   @override
+  String privateKeyNotFoundFmt(Object keyId) {
+    return 'Kunci privat [$keyId] tidak ditemukan.';
+  }
+
+  @override
   String get process => 'Proses';
 
   @override
@@ -707,6 +762,34 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String sshConfigImported(Object count) {
     return 'Berhasil mengimpor $count server dari konfigurasi SSH';
+  }
+
+  @override
+  String sshHostKeyChangedDesc(Object serverName) {
+    return 'Kunci host SSH untuk $serverName telah berubah. Lanjutkan hanya jika Anda mempercayai server ini.';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Base64(Object fingerprint) {
+    return 'Sidik jari (MD5 Base64): $fingerprint';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Hex(Object fingerprint) {
+    return 'Sidik jari (MD5 hex): $fingerprint';
+  }
+
+  @override
+  String get sshHostKeyType => 'Jenis kunci host SSH';
+
+  @override
+  String sshHostKeyNewDesc(Object serverName) {
+    return 'Kunci host SSH baru diterima dari $serverName. Periksa sidik jarinya sebelum mempercayai.';
+  }
+
+  @override
+  String sshHostKeyStoredFingerprint(Object fingerprint) {
+    return 'Sidik jari tersimpan: $fingerprint';
   }
 
   @override

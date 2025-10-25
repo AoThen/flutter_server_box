@@ -28,6 +28,57 @@ class AppLocalizationsRu extends AppLocalizations {
   String get alreadyLastDir => 'Уже в корневом каталоге';
 
   @override
+  String get askAi => 'Спросить ИИ';
+
+  @override
+  String get askAiApiKey => 'Ключ API';
+
+  @override
+  String get askAiAwaitingResponse => 'Ожидание ответа ИИ...';
+
+  @override
+  String get askAiBaseUrl => 'Базовый URL';
+
+  @override
+  String get askAiCommandInserted => 'Команда вставлена в терминал';
+
+  @override
+  String askAiConfigMissing(Object fields) {
+    return 'Настройте $fields в настройках.';
+  }
+
+  @override
+  String get askAiConfirmExecute => 'Подтвердите перед выполнением';
+
+  @override
+  String get askAiConversation => 'Разговор с ИИ';
+
+  @override
+  String get askAiDisclaimer =>
+      'ИИ может ошибаться. Используйте с осторожностью.';
+
+  @override
+  String get askAiFollowUpHint => 'Задайте дополнительный вопрос...';
+
+  @override
+  String get askAiInsertTerminal => 'Вставить в терминал';
+
+  @override
+  String get askAiModel => 'Модель';
+
+  @override
+  String get askAiNoResponse => 'Нет ответа';
+
+  @override
+  String get askAiRecommendedCommand => 'Команда, предложенная ИИ';
+
+  @override
+  String get askAiSelectedContent => 'Выбранное содержимое';
+
+  @override
+  String get askAiUsageHint => 'Используется в SSH-терминале';
+
+  @override
   String get atLeastOneTab => 'Должна быть выбрана хотя бы одна вкладка';
 
   @override
@@ -99,12 +150,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get clearAllStatsTitle => 'Очистить всю статистику';
 
   @override
-  String clearServerStatsContent(String serverName) {
+  String clearServerStatsContent(Object serverName) {
     return 'Вы уверены, что хотите очистить статистику соединений для сервера \"$serverName\"? Это действие не может быть отменено.';
   }
 
   @override
-  String clearServerStatsTitle(String serverName) {
+  String clearServerStatsTitle(Object serverName) {
     return 'Очистить статистику $serverName';
   }
 
@@ -531,6 +582,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get privateKey => 'Приватный ключ';
 
   @override
+  String privateKeyNotFoundFmt(Object keyId) {
+    return 'Закрытый ключ [$keyId] не найден.';
+  }
+
+  @override
   String get process => 'Процесс';
 
   @override
@@ -711,6 +767,34 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String sshConfigImported(Object count) {
     return 'Импортировано $count серверов из SSH-конфигурации';
+  }
+
+  @override
+  String sshHostKeyChangedDesc(Object serverName) {
+    return 'SSH-ключ хоста для $serverName изменился. Продолжайте только если доверяете этому серверу.';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Base64(Object fingerprint) {
+    return 'Отпечаток (MD5 Base64): $fingerprint';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Hex(Object fingerprint) {
+    return 'Отпечаток (MD5 hex): $fingerprint';
+  }
+
+  @override
+  String get sshHostKeyType => 'Тип ключа хоста SSH';
+
+  @override
+  String sshHostKeyNewDesc(Object serverName) {
+    return 'Получен новый SSH-ключ хоста от $serverName. Проверьте отпечаток перед продолжением.';
+  }
+
+  @override
+  String sshHostKeyStoredFingerprint(Object fingerprint) {
+    return 'Сохранённый отпечаток: $fingerprint';
   }
 
   @override

@@ -28,6 +28,56 @@ class AppLocalizationsJa extends AppLocalizations {
   String get alreadyLastDir => 'すでに最上位のディレクトリです';
 
   @override
+  String get askAi => 'AI に質問';
+
+  @override
+  String get askAiApiKey => 'API キー';
+
+  @override
+  String get askAiAwaitingResponse => 'AI の応答を待機中...';
+
+  @override
+  String get askAiBaseUrl => 'ベース URL';
+
+  @override
+  String get askAiCommandInserted => 'コマンドをターミナルに挿入しました';
+
+  @override
+  String askAiConfigMissing(Object fields) {
+    return '設定で $fields を構成してください。';
+  }
+
+  @override
+  String get askAiConfirmExecute => '実行前に確認';
+
+  @override
+  String get askAiConversation => 'AI 会話';
+
+  @override
+  String get askAiDisclaimer => 'AI が誤る可能性があります。注意してご利用ください。';
+
+  @override
+  String get askAiFollowUpHint => '追質問をする...';
+
+  @override
+  String get askAiInsertTerminal => 'ターミナルに挿入';
+
+  @override
+  String get askAiModel => 'モデル';
+
+  @override
+  String get askAiNoResponse => '応答なし';
+
+  @override
+  String get askAiRecommendedCommand => 'AI 推奨コマンド';
+
+  @override
+  String get askAiSelectedContent => '選択した内容';
+
+  @override
+  String get askAiUsageHint => 'SSH ターミナルで使用';
+
+  @override
   String get atLeastOneTab => '少なくとも1つのタブを選択する必要があります';
 
   @override
@@ -93,12 +143,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clearAllStatsTitle => 'すべての統計をクリア';
 
   @override
-  String clearServerStatsContent(String serverName) {
+  String clearServerStatsContent(Object serverName) {
     return 'サーバー\"$serverName\"の接続統計を削除してもよろしいですか？この操作は元に戻せません。';
   }
 
   @override
-  String clearServerStatsTitle(String serverName) {
+  String clearServerStatsTitle(Object serverName) {
     return '$serverNameの統計をクリア';
   }
 
@@ -511,6 +561,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get privateKey => '秘密鍵';
 
   @override
+  String privateKeyNotFoundFmt(Object keyId) {
+    return '秘密鍵 [$keyId] が見つかりません。';
+  }
+
+  @override
   String get process => 'プロセス';
 
   @override
@@ -685,6 +740,34 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String sshConfigImported(Object count) {
     return 'SSH設定から$count個のサーバーをインポートしました';
+  }
+
+  @override
+  String sshHostKeyChangedDesc(Object serverName) {
+    return '$serverName の SSH ホスト鍵が変更されました。このサーバーを信頼できる場合のみ続行してください。';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Base64(Object fingerprint) {
+    return 'フィンガープリント (MD5 Base64): $fingerprint';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Hex(Object fingerprint) {
+    return 'フィンガープリント (MD5 16進): $fingerprint';
+  }
+
+  @override
+  String get sshHostKeyType => 'SSH ホストキーの種類';
+
+  @override
+  String sshHostKeyNewDesc(Object serverName) {
+    return '$serverName から新しい SSH ホスト鍵を受信しました。信頼する前にフィンガープリントを確認してください。';
+  }
+
+  @override
+  String sshHostKeyStoredFingerprint(Object fingerprint) {
+    return '保存済みフィンガープリント: $fingerprint';
   }
 
   @override

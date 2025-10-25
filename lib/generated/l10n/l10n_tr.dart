@@ -28,6 +28,57 @@ class AppLocalizationsTr extends AppLocalizations {
   String get alreadyLastDir => 'Zaten son dizindesiniz.';
 
   @override
+  String get askAi => 'Yapay zekaya sor';
+
+  @override
+  String get askAiApiKey => 'API anahtarı';
+
+  @override
+  String get askAiAwaitingResponse => 'Yapay zekâ yanıtı bekleniyor...';
+
+  @override
+  String get askAiBaseUrl => 'Temel URL';
+
+  @override
+  String get askAiCommandInserted => 'Komut terminale eklendi';
+
+  @override
+  String askAiConfigMissing(Object fields) {
+    return 'Lütfen Ayarlar\'da $fields öğesini yapılandırın.';
+  }
+
+  @override
+  String get askAiConfirmExecute => 'Çalıştırmadan önce onayla';
+
+  @override
+  String get askAiConversation => 'YZ sohbeti';
+
+  @override
+  String get askAiDisclaimer =>
+      'Yapay zeka hata yapabilir. Lütfen dikkatli kullanın.';
+
+  @override
+  String get askAiFollowUpHint => 'Yeni bir soru sor...';
+
+  @override
+  String get askAiInsertTerminal => 'Terminale ekle';
+
+  @override
+  String get askAiModel => 'Model';
+
+  @override
+  String get askAiNoResponse => 'Yanıt yok';
+
+  @override
+  String get askAiRecommendedCommand => 'YZ önerilen komut';
+
+  @override
+  String get askAiSelectedContent => 'Seçilen içerik';
+
+  @override
+  String get askAiUsageHint => 'SSH Terminalinde kullanılır';
+
+  @override
   String get atLeastOneTab => 'En az bir sekme seçilmelidir';
 
   @override
@@ -97,12 +148,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get clearAllStatsTitle => 'Tüm İstatistikleri Temizle';
 
   @override
-  String clearServerStatsContent(String serverName) {
+  String clearServerStatsContent(Object serverName) {
     return '\"$serverName\" sunucusu için bağlantı istatistiklerini temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.';
   }
 
   @override
-  String clearServerStatsTitle(String serverName) {
+  String clearServerStatsTitle(Object serverName) {
     return '$serverName İstatistiklerini Temizle';
   }
 
@@ -528,6 +579,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get privateKey => 'Özel Anahtar';
 
   @override
+  String privateKeyNotFoundFmt(Object keyId) {
+    return 'Özel anahtar [$keyId] bulunamadı.';
+  }
+
+  @override
   String get process => 'İşlem';
 
   @override
@@ -707,6 +763,34 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String sshConfigImported(Object count) {
     return 'SSH yapılandırmasından $count sunucu içe aktarıldı';
+  }
+
+  @override
+  String sshHostKeyChangedDesc(Object serverName) {
+    return '$serverName için SSH ana bilgisayar anahtarı değişti. Yalnızca bu sunucuya güveniyorsanız devam edin.';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Base64(Object fingerprint) {
+    return 'Parmak izi (MD5 Base64): $fingerprint';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Hex(Object fingerprint) {
+    return 'Parmak izi (MD5 hex): $fingerprint';
+  }
+
+  @override
+  String get sshHostKeyType => 'SSH ana bilgisayar anahtarı türü';
+
+  @override
+  String sshHostKeyNewDesc(Object serverName) {
+    return '$serverName üzerinden yeni bir SSH ana bilgisayar anahtarı alındı. Güvenmeden önce parmak izini kontrol edin.';
+  }
+
+  @override
+  String sshHostKeyStoredFingerprint(Object fingerprint) {
+    return 'Kaydedilen parmak izi: $fingerprint';
   }
 
   @override

@@ -28,6 +28,57 @@ class AppLocalizationsFr extends AppLocalizations {
   String get alreadyLastDir => 'Déjà dans le dernier répertoire.';
 
   @override
+  String get askAi => 'Demander à l\'IA';
+
+  @override
+  String get askAiApiKey => 'Clé API';
+
+  @override
+  String get askAiAwaitingResponse => 'En attente de la réponse de l\'IA...';
+
+  @override
+  String get askAiBaseUrl => 'URL de base';
+
+  @override
+  String get askAiCommandInserted => 'Commande insérée dans le terminal';
+
+  @override
+  String askAiConfigMissing(Object fields) {
+    return 'Veuillez configurer $fields dans les paramètres.';
+  }
+
+  @override
+  String get askAiConfirmExecute => 'Confirmer avant d\'exécuter';
+
+  @override
+  String get askAiConversation => 'Conversation avec l\'IA';
+
+  @override
+  String get askAiDisclaimer =>
+      'L\'IA peut se tromper. Utilisez-la avec prudence.';
+
+  @override
+  String get askAiFollowUpHint => 'Poser une question supplémentaire...';
+
+  @override
+  String get askAiInsertTerminal => 'Insérer dans le terminal';
+
+  @override
+  String get askAiModel => 'Modèle';
+
+  @override
+  String get askAiNoResponse => 'Aucune réponse';
+
+  @override
+  String get askAiRecommendedCommand => 'Commande suggérée par l\'IA';
+
+  @override
+  String get askAiSelectedContent => 'Contenu sélectionné';
+
+  @override
+  String get askAiUsageHint => 'Utilisé dans le terminal SSH';
+
+  @override
   String get atLeastOneTab => 'Au moins un onglet doit être sélectionné';
 
   @override
@@ -99,12 +150,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get clearAllStatsTitle => 'Effacer toutes les statistiques';
 
   @override
-  String clearServerStatsContent(String serverName) {
+  String clearServerStatsContent(Object serverName) {
     return 'Êtes-vous sûr de vouloir effacer les statistiques de connexion du serveur \"$serverName\" ? Cette action ne peut pas être annulée.';
   }
 
   @override
-  String clearServerStatsTitle(String serverName) {
+  String clearServerStatsTitle(Object serverName) {
     return 'Effacer les statistiques de $serverName';
   }
 
@@ -535,6 +586,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get privateKey => 'Clé privée';
 
   @override
+  String privateKeyNotFoundFmt(Object keyId) {
+    return 'Clé privée [$keyId] introuvable.';
+  }
+
+  @override
   String get process => 'Processus';
 
   @override
@@ -716,6 +772,34 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String sshConfigImported(Object count) {
     return '$count serveurs importés depuis la configuration SSH';
+  }
+
+  @override
+  String sshHostKeyChangedDesc(Object serverName) {
+    return 'La clé d\'hôte SSH de $serverName a changé. Ne continuez que si vous faites confiance à ce serveur.';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Base64(Object fingerprint) {
+    return 'Empreinte (MD5 Base64) : $fingerprint';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Hex(Object fingerprint) {
+    return 'Empreinte (MD5 hex) : $fingerprint';
+  }
+
+  @override
+  String get sshHostKeyType => 'Type de clé d\'hôte SSH';
+
+  @override
+  String sshHostKeyNewDesc(Object serverName) {
+    return 'Une nouvelle clé d\'hôte SSH a été reçue de $serverName. Vérifiez l\'empreinte avant de faire confiance.';
+  }
+
+  @override
+  String sshHostKeyStoredFingerprint(Object fingerprint) {
+    return 'Empreinte enregistrée : $fingerprint';
   }
 
   @override

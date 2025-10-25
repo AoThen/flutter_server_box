@@ -1,25 +1,27 @@
 {
   "@@locale": "id",
-  "@clearServerStatsContent": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
-  "@clearServerStatsTitle": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
   "aboutThanks": "Terima kasih kepada orang -orang berikut yang berpartisipasi.",
   "acceptBeta": "Terima pembaruan versi uji coba",
   "addSystemPrivateKeyTip": "Saat ini tidak memiliki kunci privat, apakah Anda menambahkan kunci yang disertakan dengan sistem (~/.ssh/id_rsa)?",
   "added2List": "Ditambahkan ke Daftar Tugas",
   "addr": "Alamat",
   "alreadyLastDir": "Sudah di direktori terakhir.",
+  "askAi": "Tanya AI",
+  "askAiApiKey": "Kunci API",
+  "askAiAwaitingResponse": "Menunggu respons AI...",
+  "askAiBaseUrl": "URL dasar",
+  "askAiCommandInserted": "Perintah dimasukkan ke terminal",
+  "askAiConfigMissing": "Harap konfigurasikan {fields} di Pengaturan.",
+  "askAiConfirmExecute": "Konfirmasi sebelum menjalankan",
+  "askAiConversation": "Percakapan AI",
+  "askAiDisclaimer": "AI bisa saja salah. Gunakan dengan hati-hati.",
+  "askAiFollowUpHint": "Ajukan pertanyaan lanjutan...",
+  "askAiInsertTerminal": "Masukkan ke terminal",
+  "askAiModel": "Model",
+  "askAiNoResponse": "Tidak ada respons",
+  "askAiRecommendedCommand": "Perintah yang disarankan AI",
+  "askAiSelectedContent": "Konten yang dipilih",
+  "askAiUsageHint": "Digunakan di Terminal SSH",
   "atLeastOneTab": "Setidaknya satu tab harus dipilih",
   "authFailTip": "Otentikasi gagal, silakan periksa apakah kata sandi/kunci/host/pengguna, dll, salah.",
   "autoBackupConflict": "Hanya satu pencadangan otomatis yang dapat diaktifkan pada saat yang bersamaan.",
@@ -169,6 +171,7 @@
   "port": "Port",
   "preferDiskAmount": "Prioritaskan tampilan kapasitas disk",
   "privateKey": "Kunci Pribadi",
+  "privateKeyNotFoundFmt": "Kunci privat [{keyId}] tidak ditemukan.",
   "process": "Proses",
   "prune": "Pangkas",
   "pushToken": "Dorong token",
@@ -223,6 +226,12 @@
   "sshConfigImportPermission": "Apakah Anda ingin memberikan izin untuk membaca ~/.ssh/config dan secara otomatis mengimpor pengaturan server?",
   "sshConfigImportTip": "Prompt untuk membaca ~/.ssh/config saat pembuatan server pertama",
   "sshConfigImported": "Berhasil mengimpor {count} server dari konfigurasi SSH",
+  "sshHostKeyChangedDesc": "Kunci host SSH untuk {serverName} telah berubah. Lanjutkan hanya jika Anda mempercayai server ini.",
+  "sshHostKeyFingerprintMd5Base64": "Sidik jari (MD5 Base64): {fingerprint}",
+  "sshHostKeyFingerprintMd5Hex": "Sidik jari (MD5 hex): {fingerprint}",
+  "sshHostKeyType": "Jenis kunci host SSH",
+  "sshHostKeyNewDesc": "Kunci host SSH baru diterima dari {serverName}. Periksa sidik jarinya sebelum mempercayai.",
+  "sshHostKeyStoredFingerprint": "Sidik jari tersimpan: {fingerprint}",
   "sshConfigManualSelect": "Apakah Anda ingin memilih file konfigurasi SSH secara manual?",
   "sshConfigNoServers": "Tidak ada server yang ditemukan dalam konfigurasi SSH",
   "sshConfigPermissionDenied": "Tidak dapat mengakses file konfigurasi SSH karena izin macOS.",

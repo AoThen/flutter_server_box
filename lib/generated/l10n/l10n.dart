@@ -155,6 +155,102 @@ abstract class AppLocalizations {
   /// **'Already in last directory.'**
   String get alreadyLastDir;
 
+  /// No description provided for @askAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI'**
+  String get askAi;
+
+  /// No description provided for @askAiApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API Key'**
+  String get askAiApiKey;
+
+  /// No description provided for @askAiAwaitingResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for AI response...'**
+  String get askAiAwaitingResponse;
+
+  /// No description provided for @askAiBaseUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL'**
+  String get askAiBaseUrl;
+
+  /// No description provided for @askAiCommandInserted.
+  ///
+  /// In en, this message translates to:
+  /// **'Command inserted into terminal'**
+  String get askAiCommandInserted;
+
+  /// No description provided for @askAiConfigMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Please configure {fields} in Settings.'**
+  String askAiConfigMissing(Object fields);
+
+  /// No description provided for @askAiConfirmExecute.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm before executing'**
+  String get askAiConfirmExecute;
+
+  /// No description provided for @askAiConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'AI conversation'**
+  String get askAiConversation;
+
+  /// No description provided for @askAiDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'AI may be incorrect. Review carefully before applying.'**
+  String get askAiDisclaimer;
+
+  /// No description provided for @askAiFollowUpHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask a follow-up...'**
+  String get askAiFollowUpHint;
+
+  /// No description provided for @askAiInsertTerminal.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert into terminal'**
+  String get askAiInsertTerminal;
+
+  /// No description provided for @askAiModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get askAiModel;
+
+  /// No description provided for @askAiNoResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'No response'**
+  String get askAiNoResponse;
+
+  /// No description provided for @askAiRecommendedCommand.
+  ///
+  /// In en, this message translates to:
+  /// **'AI suggested command'**
+  String get askAiRecommendedCommand;
+
+  /// No description provided for @askAiSelectedContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected content'**
+  String get askAiSelectedContent;
+
+  /// No description provided for @askAiUsageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Used in SSH Terminal'**
+  String get askAiUsageHint;
+
   /// No description provided for @atLeastOneTab.
   ///
   /// In en, this message translates to:
@@ -285,13 +381,13 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Are you sure you want to clear connection statistics for server \"{serverName}\"? This action cannot be undone.'**
-  String clearServerStatsContent(String serverName);
+  String clearServerStatsContent(Object serverName);
 
   /// No description provided for @clearServerStatsTitle.
   ///
   /// In en, this message translates to:
   /// **'Clear {serverName} Statistics'**
-  String clearServerStatsTitle(String serverName);
+  String clearServerStatsTitle(Object serverName);
 
   /// No description provided for @clearThisServerStats.
   ///
@@ -1052,6 +1148,12 @@ abstract class AppLocalizations {
   /// **'Private Key'**
   String get privateKey;
 
+  /// No description provided for @privateKeyNotFoundFmt.
+  ///
+  /// In en, this message translates to:
+  /// **'Private key [{keyId}] not found.'**
+  String privateKeyNotFoundFmt(Object keyId);
+
   /// No description provided for @process.
   ///
   /// In en, this message translates to:
@@ -1375,6 +1477,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Imported {count} servers from SSH config'**
   String sshConfigImported(Object count);
+
+  /// No description provided for @sshHostKeyChangedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The SSH host key changed for {serverName}. Only continue if you trust this server.'**
+  String sshHostKeyChangedDesc(Object serverName);
+
+  /// No description provided for @sshHostKeyFingerprintMd5Base64.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint (MD5 base64): {fingerprint}'**
+  String sshHostKeyFingerprintMd5Base64(Object fingerprint);
+
+  /// No description provided for @sshHostKeyFingerprintMd5Hex.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint (MD5 hex): {fingerprint}'**
+  String sshHostKeyFingerprintMd5Hex(Object fingerprint);
+
+  /// Label for the SSH host key type displayed in the host key verification dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'SSH host key type'**
+  String get sshHostKeyType;
+
+  /// No description provided for @sshHostKeyNewDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A new SSH host key was received from {serverName}. Review the fingerprint before trusting.'**
+  String sshHostKeyNewDesc(Object serverName);
+
+  /// No description provided for @sshHostKeyStoredFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored fingerprint: {fingerprint}'**
+  String sshHostKeyStoredFingerprint(Object fingerprint);
 
   /// No description provided for @sshConfigManualSelect.
   ///

@@ -29,6 +29,56 @@ class AppLocalizationsNl extends AppLocalizations {
   String get alreadyLastDir => 'Al in de laatst gebruikte map.';
 
   @override
+  String get askAi => 'AI vragen';
+
+  @override
+  String get askAiApiKey => 'API-sleutel';
+
+  @override
+  String get askAiAwaitingResponse => 'Wachten op AI-reactie...';
+
+  @override
+  String get askAiBaseUrl => 'Basis-URL';
+
+  @override
+  String get askAiCommandInserted => 'Commando in terminal ingevoegd';
+
+  @override
+  String askAiConfigMissing(Object fields) {
+    return 'Configureer $fields in de instellingen.';
+  }
+
+  @override
+  String get askAiConfirmExecute => 'Bevestigen voor uitvoeren';
+
+  @override
+  String get askAiConversation => 'AI-gesprek';
+
+  @override
+  String get askAiDisclaimer => 'AI kan fouten maken. Gebruik het zorgvuldig.';
+
+  @override
+  String get askAiFollowUpHint => 'Stel een vervolgvraag...';
+
+  @override
+  String get askAiInsertTerminal => 'In terminal invoegen';
+
+  @override
+  String get askAiModel => 'Model';
+
+  @override
+  String get askAiNoResponse => 'Geen reactie';
+
+  @override
+  String get askAiRecommendedCommand => 'Door AI voorgestelde opdracht';
+
+  @override
+  String get askAiSelectedContent => 'Geselecteerde inhoud';
+
+  @override
+  String get askAiUsageHint => 'Gebruikt in de SSH-terminal';
+
+  @override
   String get atLeastOneTab =>
       'Er moet minimaal één tabblad worden geselecteerd';
 
@@ -99,12 +149,12 @@ class AppLocalizationsNl extends AppLocalizations {
   String get clearAllStatsTitle => 'Alle statistieken wissen';
 
   @override
-  String clearServerStatsContent(String serverName) {
+  String clearServerStatsContent(Object serverName) {
     return 'Weet u zeker dat u de verbindingsstatistieken voor server \"$serverName\" wilt wissen? Deze actie kan niet ongedaan worden gemaakt.';
   }
 
   @override
-  String clearServerStatsTitle(String serverName) {
+  String clearServerStatsTitle(Object serverName) {
     return 'Statistieken van $serverName wissen';
   }
 
@@ -531,6 +581,11 @@ class AppLocalizationsNl extends AppLocalizations {
   String get privateKey => 'Privésleutel';
 
   @override
+  String privateKeyNotFoundFmt(Object keyId) {
+    return 'Privésleutel [$keyId] niet gevonden.';
+  }
+
+  @override
   String get process => 'Proces';
 
   @override
@@ -711,6 +766,34 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String sshConfigImported(Object count) {
     return '$count servers geïmporteerd uit SSH-configuratie';
+  }
+
+  @override
+  String sshHostKeyChangedDesc(Object serverName) {
+    return 'De SSH-hostsleutel voor $serverName is gewijzigd. Ga alleen verder als u deze server vertrouwt.';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Base64(Object fingerprint) {
+    return 'Vingerafdruk (MD5 Base64): $fingerprint';
+  }
+
+  @override
+  String sshHostKeyFingerprintMd5Hex(Object fingerprint) {
+    return 'Vingerafdruk (MD5 hex): $fingerprint';
+  }
+
+  @override
+  String get sshHostKeyType => 'Type SSH-hostsleutel';
+
+  @override
+  String sshHostKeyNewDesc(Object serverName) {
+    return 'Er is een nieuwe SSH-hostsleutel ontvangen van $serverName. Controleer de vingerafdruk voordat u vertrouwt.';
+  }
+
+  @override
+  String sshHostKeyStoredFingerprint(Object fingerprint) {
+    return 'Opgeslagen vingerafdruk: $fingerprint';
   }
 
   @override

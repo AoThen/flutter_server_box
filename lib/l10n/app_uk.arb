@@ -1,25 +1,27 @@
 {
   "@@locale": "uk",
-  "@clearServerStatsContent": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
-  "@clearServerStatsTitle": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
   "aboutThanks": "Дякуємо наступним особам, які взяли участь.",
   "acceptBeta": "Прийняти оновлення бета-версії",
   "addSystemPrivateKeyTip": "Наразі приватних ключів нема, хочете додати той, що йде з системою (~/.ssh/id_rsa)?",
   "added2List": "Додано до списку завдань",
   "addr": "Адреса",
   "alreadyLastDir": "Вже в останньому каталозі.",
+  "askAi": "Запитати ШІ",
+  "askAiApiKey": "Ключ API",
+  "askAiAwaitingResponse": "Очікування відповіді ШІ...",
+  "askAiBaseUrl": "Базова URL",
+  "askAiCommandInserted": "Команду вставлено в термінал",
+  "askAiConfigMissing": "Налаштуйте {fields} у налаштуваннях.",
+  "askAiConfirmExecute": "Підтвердити перед виконанням",
+  "askAiConversation": "Розмова з ШІ",
+  "askAiDisclaimer": "ШІ може помилятися. Користуйтеся обережно.",
+  "askAiFollowUpHint": "Поставте додаткове запитання...",
+  "askAiInsertTerminal": "Вставити в термінал",
+  "askAiModel": "Модель",
+  "askAiNoResponse": "Відповідь відсутня",
+  "askAiRecommendedCommand": "Команда, запропонована ШІ",
+  "askAiSelectedContent": "Вибраний вміст",
+  "askAiUsageHint": "Використовується в SSH-терміналі",
   "atLeastOneTab": "Потрібно вибрати принаймні одну вкладку",
   "authFailTip": "Авторизація не вдалася, будь ласка, перевірте правильність облікових даних",
   "autoBackupConflict": "Тільки одне автоматичне резервне копіювання може бути активне одночасно.",
@@ -169,6 +171,7 @@
   "port": "Порт",
   "preferDiskAmount": "Пріоритетно показувати ємність диска",
   "privateKey": "Приватний ключ",
+  "privateKeyNotFoundFmt": "Приватний ключ [{keyId}] не знайдено.",
   "process": "Процес",
   "prune": "Обрізати",
   "pushToken": "Надіслати токен",
@@ -223,6 +226,12 @@
   "sshConfigImportPermission": "Чи хочете ви надати дозвіл на читання ~/.ssh/config та автоматичний імпорт налаштувань сервера?",
   "sshConfigImportTip": "Пропозиція прочитати ~/.ssh/config при створенні першого сервера",
   "sshConfigImported": "Імпортовано {count} серверів з SSH-конфігурації",
+  "sshHostKeyChangedDesc": "SSH-ключ хоста для {serverName} змінено. Продовжуйте лише якщо довіряєте цьому серверу.",
+  "sshHostKeyFingerprintMd5Base64": "Відбиток (MD5 Base64): {fingerprint}",
+  "sshHostKeyFingerprintMd5Hex": "Відбиток (MD5 hex): {fingerprint}",
+  "sshHostKeyType": "Тип ключа хоста SSH",
+  "sshHostKeyNewDesc": "Отримано новий SSH-ключ хоста від {serverName}. Перевірте відбиток перед тим, як довіряти.",
+  "sshHostKeyStoredFingerprint": "Збережений відбиток: {fingerprint}",
   "sshConfigManualSelect": "Чи хочете ви вручну вибрати файл конфігурації SSH?",
   "sshConfigNoServers": "Сервери не знайдені в SSH-конфігурації",
   "sshConfigPermissionDenied": "Неможливо отримати доступ до файлу конфігурації SSH через дозволи macOS.",

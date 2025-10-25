@@ -1,25 +1,27 @@
 {
   "@@locale": "nl",
-  "@clearServerStatsContent": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
-  "@clearServerStatsTitle": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
   "aboutThanks": "Met dank aan de volgende mensen die hebben deelgenomen aan.",
   "acceptBeta": "Accepteer testversie-updates",
   "addSystemPrivateKeyTip": "Er is momenteel geen privésleutel, wilt u degene toevoegen die bij het systeem wordt geleverd (~/.ssh/id_rsa)?",
   "added2List": "Toegevoegd aan takenlijst",
   "addr": "Adres",
   "alreadyLastDir": "Al in de laatst gebruikte map.",
+  "askAi": "AI vragen",
+  "askAiApiKey": "API-sleutel",
+  "askAiAwaitingResponse": "Wachten op AI-reactie...",
+  "askAiBaseUrl": "Basis-URL",
+  "askAiCommandInserted": "Commando in terminal ingevoegd",
+  "askAiConfigMissing": "Configureer {fields} in de instellingen.",
+  "askAiConfirmExecute": "Bevestigen voor uitvoeren",
+  "askAiConversation": "AI-gesprek",
+  "askAiDisclaimer": "AI kan fouten maken. Gebruik het zorgvuldig.",
+  "askAiFollowUpHint": "Stel een vervolgvraag...",
+  "askAiInsertTerminal": "In terminal invoegen",
+  "askAiModel": "Model",
+  "askAiNoResponse": "Geen reactie",
+  "askAiRecommendedCommand": "Door AI voorgestelde opdracht",
+  "askAiSelectedContent": "Geselecteerde inhoud",
+  "askAiUsageHint": "Gebruikt in de SSH-terminal",
   "atLeastOneTab": "Er moet minimaal één tabblad worden geselecteerd",
   "authFailTip": "Authenticatie mislukt, controleer of het wachtwoord/sleutel/host/gebruiker, enz., incorrect zijn.",
   "autoBackupConflict": "Er kan slechts één automatische back-up tegelijk worden ingeschakeld.",
@@ -169,6 +171,7 @@
   "port": "Poort",
   "preferDiskAmount": "Geef de schijfcapaciteit prioriteit bij weergave",
   "privateKey": "Privésleutel",
+  "privateKeyNotFoundFmt": "Privésleutel [{keyId}] niet gevonden.",
   "process": "Proces",
   "prune": "Snoeien",
   "pushToken": "Push-token",
@@ -223,6 +226,12 @@
   "sshConfigImportPermission": "Wilt u toestemming geven om ~/.ssh/config te lezen en automatisch serverinstellingen te importeren?",
   "sshConfigImportTip": "Prompt om ~/.ssh/config te lezen bij het aanmaken van de eerste server",
   "sshConfigImported": "{count} servers geïmporteerd uit SSH-configuratie",
+  "sshHostKeyChangedDesc": "De SSH-hostsleutel voor {serverName} is gewijzigd. Ga alleen verder als u deze server vertrouwt.",
+  "sshHostKeyFingerprintMd5Base64": "Vingerafdruk (MD5 Base64): {fingerprint}",
+  "sshHostKeyFingerprintMd5Hex": "Vingerafdruk (MD5 hex): {fingerprint}",
+  "sshHostKeyType": "Type SSH-hostsleutel",
+  "sshHostKeyNewDesc": "Er is een nieuwe SSH-hostsleutel ontvangen van {serverName}. Controleer de vingerafdruk voordat u vertrouwt.",
+  "sshHostKeyStoredFingerprint": "Opgeslagen vingerafdruk: {fingerprint}",
   "sshConfigManualSelect": "Wilt u het SSH-configuratiebestand handmatig selecteren?",
   "sshConfigNoServers": "Geen servers gevonden in SSH-configuratie",
   "sshConfigPermissionDenied": "Kan geen toegang krijgen tot SSH-configuratiebestand vanwege macOS-rechten.",

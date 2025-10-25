@@ -1,25 +1,27 @@
 {
   "@@locale": "de",
-  "@clearServerStatsContent": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
-  "@clearServerStatsTitle": {
-    "placeholders": {
-      "serverName": {
-        "type": "String"
-      }
-    }
-  },
   "aboutThanks": "Vielen Dank an die folgenden Personen, die daran teilgenommen haben.\n",
   "acceptBeta": "Akzeptieren Sie Testversion-Updates",
   "addSystemPrivateKeyTip": "Derzeit haben Sie keinen privaten Schlüssel, fügen Sie den Schlüssel hinzu, der mit dem System geliefert wird (~/.ssh/id_rsa)?",
   "added2List": "Zur Aufgabenliste hinzugefügt",
   "addr": "Adresse",
   "alreadyLastDir": "Bereits im letzten Verzeichnis.",
+  "askAi": "KI fragen",
+  "askAiApiKey": "API-Schlüssel",
+  "askAiAwaitingResponse": "Warte auf KI-Antwort...",
+  "askAiBaseUrl": "Basis-URL",
+  "askAiCommandInserted": "Befehl ins Terminal eingefügt",
+  "askAiConfigMissing": "Bitte konfigurieren Sie {fields} in den Einstellungen.",
+  "askAiConfirmExecute": "Vor Ausführung bestätigen",
+  "askAiConversation": "KI-Unterhaltung",
+  "askAiDisclaimer": "KI kann Fehler machen. Bitte vorsichtig verwenden.",
+  "askAiFollowUpHint": "Weitere Frage stellen...",
+  "askAiInsertTerminal": "In Terminal einfügen",
+  "askAiModel": "Modell",
+  "askAiNoResponse": "Keine Antwort",
+  "askAiRecommendedCommand": "KI-empfohlener Befehl",
+  "askAiSelectedContent": "Ausgewählter Inhalt",
+  "askAiUsageHint": "Verwendet im SSH-Terminal",
   "atLeastOneTab": "Mindestens ein Tab muss ausgewählt sein",
   "authFailTip": "Authentifizierung fehlgeschlagen, bitte überprüfen Sie, ob das Passwort/Schlüssel/Host/Benutzer usw. falsch sind.",
   "autoBackupConflict": "Es kann nur eine automatische Sicherung gleichzeitig aktiviert werden.",
@@ -169,6 +171,7 @@
   "port": "Port",
   "preferDiskAmount": "Festplattenkapazität vorrangig anzeigen",
   "privateKey": "Private Key",
+  "privateKeyNotFoundFmt": "Privater Schlüssel [{keyId}] wurde nicht gefunden.",
   "process": "Prozess",
   "prune": "Beschneiden",
   "pushToken": "Push Token",
@@ -223,6 +226,12 @@
   "sshConfigImportPermission": "Möchten Sie die Berechtigung erteilen, ~/.ssh/config zu lesen und Server-Einstellungen automatisch zu importieren?",
   "sshConfigImportTip": "Bei der ersten Server-Erstellung zum Lesen von ~/.ssh/config auffordern",
   "sshConfigImported": "{count} Server aus SSH-Konfiguration importiert",
+  "sshHostKeyChangedDesc": "Der SSH-Hostschlüssel für {serverName} hat sich geändert. Fahren Sie nur fort, wenn Sie diesem Server vertrauen.",
+  "sshHostKeyFingerprintMd5Base64": "Fingerabdruck (MD5 Base64): {fingerprint}",
+  "sshHostKeyFingerprintMd5Hex": "Fingerabdruck (MD5 Hex): {fingerprint}",
+  "sshHostKeyType": "SSH-Hostschlüsseltyp",
+  "sshHostKeyNewDesc": "Ein neuer SSH-Hostschlüssel wurde von {serverName} empfangen. Prüfen Sie den Fingerabdruck, bevor Sie vertrauen.",
+  "sshHostKeyStoredFingerprint": "Gespeicherter Fingerabdruck: {fingerprint}",
   "sshConfigManualSelect": "Möchten Sie die SSH-Konfigurationsdatei manuell auswählen?",
   "sshConfigNoServers": "Keine Server in der SSH-Konfiguration gefunden",
   "sshConfigPermissionDenied": "Aufgrund der macOS-Berechtigungen kann nicht auf die SSH-Konfigurationsdatei zugegriffen werden.",

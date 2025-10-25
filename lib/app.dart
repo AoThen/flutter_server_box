@@ -3,6 +3,7 @@ import 'package:fl_lib/fl_lib.dart';
 import 'package:fl_lib/generated/l10n/lib_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:server_box/core/app_navigator.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/data/res/build_data.dart';
 import 'package:server_box/data/res/store.dart';
@@ -11,8 +12,15 @@ import 'package:server_box/view/page/home.dart';
 
 part 'intro.dart';
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final Future<List<IntroPageBuilder>> _introFuture = _IntroPage.builders;
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +65,10 @@ class MyApp extends StatelessWidget {
         final darkTheme = ThemeData(useMaterial3: true, brightness: Brightness.dark, colorScheme: dark);
         if (context.isDark && dark != null) {
           UIs.primaryColor = dark.primary;
+          UIs.colorSeed = dark.primary;
         } else if (!context.isDark && light != null) {
           UIs.primaryColor = light.primary;
+          UIs.colorSeed = light.primary;
         }
 
         return _buildApp(context, light: lightTheme, dark: darkTheme);
@@ -78,6 +88,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       key: ValueKey(locale),
+      navigatorKey: AppNavigator.key,
       builder: ResponsivePoints.builder,
       locale: locale,
       localizationsDelegates: const [LibLocalizations.delegate, ...AppLocalizations.localizationsDelegates],
@@ -89,7 +100,7 @@ class MyApp extends StatelessWidget {
       theme: light.fixWindowsFont,
       darkTheme: (tMode < 3 ? dark : dark.toAmoled).fixWindowsFont,
       home: FutureBuilder<List<IntroPageBuilder>>(
-        future: _IntroPage.builders,
+        future: _introFuture,
         builder: (context, snapshot) {
           context.setLibL10n();
           final appL10n = AppLocalizations.of(context);
