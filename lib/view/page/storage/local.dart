@@ -123,7 +123,7 @@ class _LocalFilePageState extends ConsumerState<LocalFilePage> with AutomaticKee
 
             final item = items![index];
             final file = item.$1;
-            final fileName = file.path.split('/').last;
+            final fileName = file.path.split(Pfs.seperator).last;
             final stat = item.$2;
             final isDir = stat.type == FileSystemEntityType.directory;
 
@@ -140,11 +140,23 @@ class _LocalFilePageState extends ConsumerState<LocalFilePage> with AutomaticKee
     required FileStat stat,
     required bool isDir,
   }) {
+    final isServerFolder = isDir && file.parent.path == Paths.file;
+    String? serverName;
+    if (isServerFolder) {
+      final servers = ref.read(serversProvider).servers;
+      final server = servers[fileName];
+      if (server != null) {
+        serverName = server.name;
+      }
+    }
+
     return CardX(
       child: ListTile(
         leading: isDir ? const Icon(Icons.folder_open) : const Icon(Icons.insert_drive_file),
-        title: Text(fileName),
-        subtitle: isDir ? null : Text(stat.size.bytes2Str, style: UIs.textGrey),
+        title: Text(serverName ?? fileName),
+        subtitle: isDir
+            ? (serverName != null ? Text(fileName, style: UIs.textGrey) : null)
+            : Text(stat.size.bytes2Str, style: UIs.textGrey),
         trailing: Text(stat.modified.ymdhms(), style: UIs.textGrey),
         onLongPress: () {
           if (isDir) {
@@ -216,7 +228,7 @@ extension _Actions on _LocalFilePageState {
   }
 
   Future<void> _showFileActionDialog(FileSystemEntity file) async {
-    final fileName = file.path.split('/').lastOrNull ?? '';
+    final fileName = file.path.split(Pfs.seperator).lastOrNull ?? '';
     if (isPickFile) {
       context.showRoundDialog(
         title: libL10n.file,
@@ -308,7 +320,7 @@ extension _Actions on _LocalFilePageState {
   }
 
   void _showDeleteDialog(FileSystemEntity file) {
-    final fileName = file.path.split('/').last;
+    final fileName = file.path.split(Pfs.seperator).last;
     context.showRoundDialog(
       title: libL10n.delete,
       child: Text(libL10n.askContinue('${libL10n.delete} $fileName')),

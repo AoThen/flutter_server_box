@@ -21,7 +21,8 @@ class SftpReq {
     }
     try {
       knownHostFingerprints = Map<String, String>.from(Stores.setting.sshKnownHostFingerprints.get());
-    } catch (_) {
+    } catch (e, s) {
+      Loggers.app.warning('Failed to load SSH known host fingerprints', e, s);
       knownHostFingerprints = null;
     }
   }
@@ -36,7 +37,7 @@ class SftpReqStatus {
   late SftpWorker worker;
   final Completer? completer;
 
-  String get fileName => req.localPath.split('/').last;
+  String get fileName => req.localPath.split(Pfs.seperator).last;
 
   // status of the download
   double? progress;

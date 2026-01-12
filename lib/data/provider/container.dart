@@ -186,7 +186,7 @@ class ContainerNotifier extends _$ContainerNotifier {
           (element) => element.contains(id.substring(0, 5)),
         );
         if (statsLine == null) continue;
-        item.parseStats(statsLine);
+        item.parseStats(statsLine, state.version);
       }
     } catch (e, trace) {
       state = state.copyWith(
@@ -280,7 +280,7 @@ enum ContainerCmdType {
     return switch (this) {
       ContainerCmdType.version => '$prefix version $_jsonFmt',
       ContainerCmdType.ps => switch (type) {
-        /// TODO: Rollback to json format when permformance recovers.
+        /// TODO: Rollback to json format when performance recovers.
         /// Use [_jsonFmt] in Docker will cause the operation to slow down.
         ContainerType.docker =>
           '$prefix ps -a --format "table {{printf \\"'
