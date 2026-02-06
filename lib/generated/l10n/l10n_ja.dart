@@ -156,6 +156,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clearThisServerStats => 'このサーバーの統計をクリア';
 
   @override
+  String get compactDatabase => 'データベースを圧縮';
+
+  @override
+  String compactDatabaseContent(Object size) {
+    return 'データベースサイズ: $size\n\nこれにより、ファイルサイズを小さくするためにデータベースが再編成されます。データは削除されません。';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
   String get closeAfterSave => '保存して閉じる';
 
   @override
@@ -182,6 +193,14 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get containerTrySudoTip =>
       '例：アプリ内でユーザーをaaaに設定しているが、Dockerがrootユーザーでインストールされている場合、このオプションを有効にする必要があります';
+
+  @override
+  String get containerSudoPasswordRequired =>
+      'Dockerにアクセスするにはsudoパスワードが必要です。パスワードを入力してください。';
+
+  @override
+  String get containerSudoPasswordIncorrect =>
+      'sudoパスワードが正しくないか、許可されていません。再試行してください。';
 
   @override
   String get convert => '変換';
@@ -406,6 +425,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get invalid => '無効';
+
+  @override
+  String get invalidHostFormat =>
+      'Invalid host format. Only IPv4, IPv6, and domain characters are allowed.';
 
   @override
   String get jumpServer => 'ジャンプサーバー';
@@ -992,4 +1015,8 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get logs => 'ログ';
+
+  @override
+  String get podmanDockerEmulationDetected =>
+      'Podman Docker エミュレーションが検出されました。設定で Podman に切り替えてください。';
 }

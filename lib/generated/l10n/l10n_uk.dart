@@ -162,6 +162,17 @@ class AppLocalizationsUk extends AppLocalizations {
   String get clearThisServerStats => 'Очистити статистику цього сервера';
 
   @override
+  String get compactDatabase => 'Стиснути базу даних';
+
+  @override
+  String compactDatabaseContent(Object size) {
+    return 'Розмір бази даних: $size\n\nЦе перебудує базу даних, щоб зменшити розмір файлу. Дані не будуть видалені.';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
   String get closeAfterSave => 'Зберегти та закрити';
 
   @override
@@ -190,6 +201,14 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get containerTrySudoTip =>
       'Наприклад: У застосунку користувач це aaa, але Docker встановлений під користувачем root. У цьому випадку вам потрібно активувати цю опцію.';
+
+  @override
+  String get containerSudoPasswordRequired =>
+      'Для доступу до Docker потрібен пароль sudo. Будь ласка, введіть ваш пароль.';
+
+  @override
+  String get containerSudoPasswordIncorrect =>
+      'Пароль sudo неправильний або не дозволений. Будь ласка, спробуйте ще раз.';
 
   @override
   String get convert => 'Конвертувати';
@@ -419,6 +438,10 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get invalid => 'Недійсний';
+
+  @override
+  String get invalidHostFormat =>
+      'Недійсний формат хоста. Дозволено лише символи IPv4, IPv6 та домену.';
 
   @override
   String get jumpServer => 'Стрибковий Сервер';
@@ -1028,4 +1051,8 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get logs => 'Журнали';
+
+  @override
+  String get podmanDockerEmulationDetected =>
+      'Виявлено емуляцію Podman Docker. Будь ласка, переключіться на Podman у налаштуваннях.';
 }

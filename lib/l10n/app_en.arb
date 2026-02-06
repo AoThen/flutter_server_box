@@ -46,6 +46,9 @@
   "clearServerStatsContent": "Are you sure you want to clear connection statistics for server \"{serverName}\"? This action cannot be undone.",
   "clearServerStatsTitle": "Clear {serverName} Statistics",
   "clearThisServerStats": "Clear This Server Statistics",
+  "compactDatabase": "Compact Database",
+  "compactDatabaseContent": "Database size: {size}\n\nThis will reorganize the database to reduce file size. No data will be deleted.",
+  "confirm": "Confirm",
   "closeAfterSave": "Save and close",
   "cmd": "Command",
   "collapseUITip": "Whether to collapse long lists present in the UI by default",
@@ -55,6 +58,8 @@
   "connectionStatsDesc": "View server connection success rate and history",
   "container": "Container",
   "containerTrySudoTip": "For example: In the app, the user is set to aaa, but Docker is installed under the root user. In this case, you need to enable this option.",
+  "containerSudoPasswordRequired": "Sudo password is required to access Docker. Please enter your password.",
+  "containerSudoPasswordIncorrect": "Sudo password is incorrect or not allowed. Please try again.",
   "convert": "Convert",
   "copyPath": "Copy path",
   "cpuViewAsProgressTip": "Display the usage of each CPU in a progress bar style (old style)",
@@ -122,6 +127,7 @@
   "install": "install",
   "installDockerWithUrl": "Please https://docs.docker.com/engine/install docker first.",
   "invalid": "Invalid",
+  "invalidHostFormat": "Invalid host format. Only IPv4, IPv6, and domain characters are allowed.",
   "jumpServer": "Jump server",
   "keepForeground": "Keep app foreground!",
   "keepStatusWhenErr": "Preserve the last server state",
@@ -304,5 +310,6 @@
   "menuGitHubRepository": "GitHub Repository",
   "menuWiki": "Wiki",
     "menuHelp": "Help",
-  "logs": "Logs"
+  "logs": "Logs",
+  "podmanDockerEmulationDetected": "Podman Docker emulation detected. Please switch to Podman in settings."
 }

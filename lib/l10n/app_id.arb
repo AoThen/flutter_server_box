@@ -46,6 +46,8 @@
   "clearServerStatsContent": "Apakah Anda yakin ingin menghapus statistik koneksi untuk server \"{serverName}\"? Tindakan ini tidak dapat dibatalkan.",
   "clearServerStatsTitle": "Hapus Statistik {serverName}",
   "clearThisServerStats": "Hapus Statistik Server Ini",
+  "compactDatabase": "Kompres Database",
+  "compactDatabaseContent": "Ukuran database: {size}\n\nIni akan mengatur ulang database untuk mengurangi ukuran file. Tidak ada data yang akan dihapus.",
   "closeAfterSave": "Simpan dan tutup",
   "cmd": "Memerintah",
   "collapseUITip": "Apakah akan menciutkan daftar panjang yang ada di UI secara default atau tidak",
@@ -55,6 +57,8 @@
   "connectionStatsDesc": "Lihat tingkat keberhasilan koneksi server dan riwayat",
   "container": "Wadah",
   "containerTrySudoTip": "Contohnya: Di dalam aplikasi, pengguna diatur sebagai aaa, tetapi Docker diinstal di bawah pengguna root. Dalam kasus ini, Anda perlu mengaktifkan opsi ini.",
+  "containerSudoPasswordRequired": "Kata sandi sudo diperlukan untuk mengakses Docker. Silakan masukkan kata sandi Anda.",
+  "containerSudoPasswordIncorrect": "Kata sandi sudo salah atau tidak diizinkan. Silakan coba lagi.",
   "convert": "Mengubah",
   "copyPath": "Path Copy",
   "cpuViewAsProgressTip": "Tampilkan tingkat penggunaan setiap CPU dalam gaya bilah kemajuan (gaya lama)",
@@ -294,5 +298,6 @@
   "write": "Tulis",
   "writeScriptFailTip": "Penulisan ke skrip gagal, mungkin karena tidak ada izin atau direktori tidak ada.",
   "writeScriptTip": "Setelah terhubung ke server, sebuah skrip akan ditulis ke `~/.config/server_box` \n | `/tmp/server_box` untuk memantau status sistem. Anda dapat meninjau konten skrip tersebut.",
-  "logs": "Log"
+  "logs": "Log",
+  "podmanDockerEmulationDetected": "Emulasi Podman Docker terdeteksi. Silakan beralih ke Podman di pengaturan."
 }

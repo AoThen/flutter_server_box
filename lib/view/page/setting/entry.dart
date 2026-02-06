@@ -20,7 +20,6 @@ import 'package:server_box/view/page/backup.dart';
 import 'package:server_box/view/page/private_key/list.dart';
 import 'package:server_box/view/page/server/connection_stats.dart';
 import 'package:server_box/view/page/setting/entries/home_tabs.dart';
-import 'package:server_box/view/page/setting/platform/android.dart';
 import 'package:server_box/view/page/setting/platform/ios.dart';
 import 'package:server_box/view/page/setting/platform/platform_pub.dart';
 import 'package:server_box/view/page/setting/seq/srv_detail_seq.dart';
@@ -98,7 +97,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> with SingleTickerPr
           ),
         ],
       ),
-      body: TabBarView(controller: _tabCtrl, children: SettingsTabs.pages),
+      body: SafeArea(child: TabBarView(controller: _tabCtrl, children: SettingsTabs.pages)),
     );
   }
 }

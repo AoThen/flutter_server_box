@@ -161,6 +161,17 @@ class AppLocalizationsId extends AppLocalizations {
   String get clearThisServerStats => 'Hapus Statistik Server Ini';
 
   @override
+  String get compactDatabase => 'Kompres Database';
+
+  @override
+  String compactDatabaseContent(Object size) {
+    return 'Ukuran database: $size\n\nIni akan mengatur ulang database untuk mengurangi ukuran file. Tidak ada data yang akan dihapus.';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
   String get closeAfterSave => 'Simpan dan tutup';
 
   @override
@@ -189,6 +200,14 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get containerTrySudoTip =>
       'Contohnya: Di dalam aplikasi, pengguna diatur sebagai aaa, tetapi Docker diinstal di bawah pengguna root. Dalam kasus ini, Anda perlu mengaktifkan opsi ini.';
+
+  @override
+  String get containerSudoPasswordRequired =>
+      'Kata sandi sudo diperlukan untuk mengakses Docker. Silakan masukkan kata sandi Anda.';
+
+  @override
+  String get containerSudoPasswordIncorrect =>
+      'Kata sandi sudo salah atau tidak diizinkan. Silakan coba lagi.';
 
   @override
   String get convert => 'Mengubah';
@@ -417,6 +436,10 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get invalid => 'Tidak valid';
+
+  @override
+  String get invalidHostFormat =>
+      'Invalid host format. Only IPv4, IPv6, and domain characters are allowed.';
 
   @override
   String get jumpServer => 'Lompat server';
@@ -1022,4 +1045,8 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get logs => 'Log';
+
+  @override
+  String get podmanDockerEmulationDetected =>
+      'Emulasi Podman Docker terdeteksi. Silakan beralih ke Podman di pengaturan.';
 }

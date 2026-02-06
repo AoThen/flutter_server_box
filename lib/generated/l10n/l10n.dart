@@ -395,6 +395,24 @@ abstract class AppLocalizations {
   /// **'Clear This Server Statistics'**
   String get clearThisServerStats;
 
+  /// No description provided for @compactDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact Database'**
+  String get compactDatabase;
+
+  /// No description provided for @compactDatabaseContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Database size: {size}\n\nThis will reorganize the database to reduce file size. No data will be deleted.'**
+  String compactDatabaseContent(Object size);
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
   /// No description provided for @closeAfterSave.
   ///
   /// In en, this message translates to:
@@ -448,6 +466,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'For example: In the app, the user is set to aaa, but Docker is installed under the root user. In this case, you need to enable this option.'**
   String get containerTrySudoTip;
+
+  /// No description provided for @containerSudoPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sudo password is required to access Docker. Please enter your password.'**
+  String get containerSudoPasswordRequired;
+
+  /// No description provided for @containerSudoPasswordIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Sudo password is incorrect or not allowed. Please try again.'**
+  String get containerSudoPasswordIncorrect;
 
   /// No description provided for @convert.
   ///
@@ -853,6 +883,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid'**
   String get invalid;
+
+  /// No description provided for @invalidHostFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid host format. Only IPv4, IPv6, and domain characters are allowed.'**
+  String get invalidHostFormat;
 
   /// No description provided for @jumpServer.
   ///
@@ -1933,6 +1969,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Logs'**
   String get logs;
+
+  /// No description provided for @podmanDockerEmulationDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Podman Docker emulation detected. Please switch to Podman in settings.'**
+  String get podmanDockerEmulationDetected;
 }
 
 class _AppLocalizationsDelegate

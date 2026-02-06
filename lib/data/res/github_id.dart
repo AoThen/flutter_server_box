@@ -131,6 +131,16 @@ abstract final class GithubIds {
     'Lancerys',
     'yaziku',
     'yeluosln',
+    'FadeFx',
+    'Snihc1205',
+    'Bjups',
+    '4061N',
+    'itmagpro',
+    'atikattar1104',
+    'coldboy404',
+    'puskyer',
+    'wanababy',
+    'toarujs'
   };
 }
 

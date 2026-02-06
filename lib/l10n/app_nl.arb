@@ -46,6 +46,8 @@
   "clearServerStatsContent": "Weet u zeker dat u de verbindingsstatistieken voor server \"{serverName}\" wilt wissen? Deze actie kan niet ongedaan worden gemaakt.",
   "clearServerStatsTitle": "Statistieken van {serverName} wissen",
   "clearThisServerStats": "Statistieken van deze server wissen",
+  "compactDatabase": "Database comprimeren",
+  "compactDatabaseContent": "Databasgrootte: {size}\n\nDit zal de database opnieuw organiseren om de bestandsgrootte te verkleinen. Geen gegevens worden verwijderd.",
   "closeAfterSave": "Opslaan en sluiten",
   "cmd": "Opdracht",
   "collapseUITip": "Of lange lijsten in de UI standaard moeten worden ingeklapt",
@@ -55,6 +57,8 @@
   "connectionStatsDesc": "Bekijk server verbindingssucces ratio en geschiedenis",
   "container": "Container",
   "containerTrySudoTip": "Bijvoorbeeld: in de app is de gebruiker ingesteld op aaa, maar Docker is geïnstalleerd onder de rootgebruiker. In dit geval moet u deze optie inschakelen.",
+  "containerSudoPasswordRequired": "Een sudo-wachtwoord is vereist om toegang te krijgen tot Docker. Voer uw wachtwoord in.",
+  "containerSudoPasswordIncorrect": "Het sudo-wachtwoord is onjuist of niet toegestaan. Probeer het opnieuw.",
   "convert": "Converteren",
   "copyPath": "Pad kopiëren",
   "cpuViewAsProgressTip": "Toon het gebruik van elke CPU in een voortgangsbalkstijl (oude stijl)",
@@ -294,5 +298,6 @@
   "write": "Schrijven",
   "writeScriptFailTip": "Het schrijven naar het script is mislukt, mogelijk door gebrek aan rechten of omdat de map niet bestaat.",
   "writeScriptTip": "Na het verbinden met de server wordt een script geschreven naar `~/.config/server_box` \n | `/tmp/server_box` om de systeemstatus te monitoren. U kunt de inhoud van het script controleren.",
-  "logs": "Logboeken"
+  "logs": "Logboeken",
+  "podmanDockerEmulationDetected": "Podman Docker-emulatie gedetecteerd. Schakel over naar Podman in de instellingen."
 }

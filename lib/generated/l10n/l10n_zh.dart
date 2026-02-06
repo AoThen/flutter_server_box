@@ -154,6 +154,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clearThisServerStats => '清空此服务器统计';
 
   @override
+  String get compactDatabase => '压缩数据库';
+
+  @override
+  String compactDatabaseContent(Object size) {
+    return '数据库大小：$size\n\n此操作将重新组织数据库以减少体积，数据不会丢失。';
+  }
+
+  @override
+  String get confirm => '确认';
+
+  @override
   String get closeAfterSave => '保存后关闭';
 
   @override
@@ -180,6 +191,12 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get containerTrySudoTip =>
       '例如：在应用内将用户设置为 aaa，但是 Docker 安装在root用户下，这时就需要启用此选项';
+
+  @override
+  String get containerSudoPasswordRequired => '需要 sudo 密码才能访问 Docker。请输入您的密码。';
+
+  @override
+  String get containerSudoPasswordIncorrect => 'sudo 密码错误或无权限。请重试。';
 
   @override
   String get convert => '转换';
@@ -400,6 +417,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get invalid => '无效';
+
+  @override
+  String get invalidHostFormat => '主机格式无效，仅支持 IPv4、IPv6 和域名字符。';
 
   @override
   String get jumpServer => '跳板服务器';
@@ -977,6 +997,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get logs => '日志';
+
+  @override
+  String get podmanDockerEmulationDetected =>
+      '检测到 Podman Docker 仿真。请在设置中切换到 Podman。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1129,6 +1153,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get clearThisServerStats => '清空此伺服器統計';
 
   @override
+  String get compactDatabase => '壓縮資料庫';
+
+  @override
+  String compactDatabaseContent(Object size) {
+    return '資料庫大小：$size\n\n此操作將重新組織資料庫以減少體積，資料不會遺失。';
+  }
+
+  @override
   String get closeAfterSave => '儲存後關閉';
 
   @override
@@ -1155,6 +1187,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get containerTrySudoTip =>
       '例如：App 內設定使用者為 aaa，但是 Docker 安裝在 root 使用者，這時就需要開啟此選項';
+
+  @override
+  String get containerSudoPasswordRequired => '需要 sudo 密碼才能存取 Docker。請輸入您的密碼。';
+
+  @override
+  String get containerSudoPasswordIncorrect => 'sudo 密碼錯誤或無權限。請重試。';
 
   @override
   String get convert => '轉換';
@@ -1375,6 +1413,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get invalid => '無效';
+
+  @override
+  String get invalidHostFormat => '主機格式無效，僅支援 IPv4、IPv6 和網域字元。';
 
   @override
   String get jumpServer => '跳板伺服器';
@@ -1931,4 +1972,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get logs => '日誌';
+
+  @override
+  String get podmanDockerEmulationDetected =>
+      '檢測到 Podman Docker 仿真。請在設定中切換到 Podman。';
 }

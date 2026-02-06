@@ -46,6 +46,8 @@
   "clearServerStatsContent": "\"{serverName}\" sunucusu için bağlantı istatistiklerini temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
   "clearServerStatsTitle": "{serverName} İstatistiklerini Temizle",
   "clearThisServerStats": "Bu Sunucu İstatistiklerini Temizle",
+  "compactDatabase": "Veritabanını Sıkıştır",
+  "compactDatabaseContent": "Veritabanı boyutu: {size}\n\nBu, dosya boyutunu küçültmek için veritabanını yeniden düzenleyecektir. Veriler silinmeyecek.",
   "closeAfterSave": "Kaydet ve kapat",
   "cmd": "Komut",
   "collapseUITip": "Arayüzde uzun listelerin varsayılan olarak daraltılıp daraltılmayacağı",
@@ -55,6 +57,8 @@
   "connectionStatsDesc": "Sunucu bağlantı başarı oranını ve geçmişi görüntüle",
   "container": "Konteyner",
   "containerTrySudoTip": "Örneğin: Uygulamada kullanıcı aaa olarak ayarlanmış, ancak Docker root kullanıcısı altında kurulmuş. Bu durumda bu seçeneği etkinleştirmeniz gerekir.",
+  "containerSudoPasswordRequired": "Docker'e erişmek için sudo şifresi gereklidir. Lütfen şifrenizi girin.",
+  "containerSudoPasswordIncorrect": "Sudo şifresi yanlış veya izin verilmiyor. Lütfen tekrar deneyin.",
   "convert": "Dönüştür",
   "copyPath": "Yolu kopyala",
   "cpuViewAsProgressTip": "Her CPU'nun kullanımını ilerleme çubuğu tarzında göster (eski tarz)",
@@ -294,5 +298,6 @@
   "write": "Yaz",
   "writeScriptFailTip": "Betik yazma başarısız oldu, muhtemelen izin eksikliği veya dizin mevcut değil.",
   "writeScriptTip": "Sunucuya bağlandıktan sonra, sistem durumunu izlemek için `~/.config/server_box` \n | `/tmp/server_box` dizinine bir betik yazılacak. Betik içeriğini inceleyebilirsiniz.",
-  "logs": "Günlükler"
+  "logs": "Günlükler",
+  "podmanDockerEmulationDetected": "Podman Docker emülasyonu tespit edildi. Lütfen ayarlarda Podman'a geçin."
 }

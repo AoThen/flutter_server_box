@@ -162,6 +162,17 @@ class AppLocalizationsNl extends AppLocalizations {
   String get clearThisServerStats => 'Statistieken van deze server wissen';
 
   @override
+  String get compactDatabase => 'Database comprimeren';
+
+  @override
+  String compactDatabaseContent(Object size) {
+    return 'Databasgrootte: $size\n\nDit zal de database opnieuw organiseren om de bestandsgrootte te verkleinen. Geen gegevens worden verwijderd.';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
   String get closeAfterSave => 'Opslaan en sluiten';
 
   @override
@@ -190,6 +201,14 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get containerTrySudoTip =>
       'Bijvoorbeeld: in de app is de gebruiker ingesteld op aaa, maar Docker is geïnstalleerd onder de rootgebruiker. In dit geval moet u deze optie inschakelen.';
+
+  @override
+  String get containerSudoPasswordRequired =>
+      'Een sudo-wachtwoord is vereist om toegang te krijgen tot Docker. Voer uw wachtwoord in.';
+
+  @override
+  String get containerSudoPasswordIncorrect =>
+      'Het sudo-wachtwoord is onjuist of niet toegestaan. Probeer het opnieuw.';
 
   @override
   String get convert => 'Converteren';
@@ -418,6 +437,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get invalid => 'Ongeldig';
+
+  @override
+  String get invalidHostFormat =>
+      'Invalid host format. Only IPv4, IPv6, and domain characters are allowed.';
 
   @override
   String get jumpServer => 'Spring naar server';
@@ -1029,4 +1052,8 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get logs => 'Logboeken';
+
+  @override
+  String get podmanDockerEmulationDetected =>
+      'Podman Docker-emulatie gedetecteerd. Schakel over naar Podman in de instellingen.';
 }

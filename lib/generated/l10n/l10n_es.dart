@@ -163,6 +163,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get clearThisServerStats => 'Limpiar estadísticas de este servidor';
 
   @override
+  String get compactDatabase => 'Compactar base de datos';
+
+  @override
+  String compactDatabaseContent(Object size) {
+    return 'Tamaño de la base de datos: $size\n\nEsto reorganizará la base de datos para reducir el tamaño del archivo. No se eliminará ningún dato.';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
   String get closeAfterSave => 'Guardar y cerrar';
 
   @override
@@ -191,6 +202,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get containerTrySudoTip =>
       'Por ejemplo: si configuras el usuario dentro de la app como aaa, pero Docker está instalado bajo el usuario root, entonces necesitarás habilitar esta opción';
+
+  @override
+  String get containerSudoPasswordRequired =>
+      'Se requiere contraseña de sudo para acceder a Docker. Por favor ingrese su contraseña.';
+
+  @override
+  String get containerSudoPasswordIncorrect =>
+      'La contraseña de sudo es incorrecta o no está permitida. Por favor intente de nuevo.';
 
   @override
   String get convert => 'Convertir';
@@ -418,6 +437,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get invalid => 'Inválido';
+
+  @override
+  String get invalidHostFormat =>
+      'Invalid host format. Only IPv4, IPv6, and domain characters are allowed.';
 
   @override
   String get jumpServer => 'Servidor de salto';
@@ -1033,4 +1056,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get logs => 'Registros';
+
+  @override
+  String get podmanDockerEmulationDetected =>
+      'Detectada emulación de Podman Docker. Por favor, cambie a Podman en la configuración.';
 }

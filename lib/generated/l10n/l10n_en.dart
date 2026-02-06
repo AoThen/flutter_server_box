@@ -162,6 +162,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clearThisServerStats => 'Clear This Server Statistics';
 
   @override
+  String get compactDatabase => 'Compact Database';
+
+  @override
+  String compactDatabaseContent(Object size) {
+    return 'Database size: $size\n\nThis will reorganize the database to reduce file size. No data will be deleted.';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
   String get closeAfterSave => 'Save and close';
 
   @override
@@ -190,6 +201,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get containerTrySudoTip =>
       'For example: In the app, the user is set to aaa, but Docker is installed under the root user. In this case, you need to enable this option.';
+
+  @override
+  String get containerSudoPasswordRequired =>
+      'Sudo password is required to access Docker. Please enter your password.';
+
+  @override
+  String get containerSudoPasswordIncorrect =>
+      'Sudo password is incorrect or not allowed. Please try again.';
 
   @override
   String get convert => 'Convert';
@@ -417,6 +436,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalid => 'Invalid';
+
+  @override
+  String get invalidHostFormat =>
+      'Invalid host format. Only IPv4, IPv6, and domain characters are allowed.';
 
   @override
   String get jumpServer => 'Jump server';
@@ -1022,4 +1045,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logs => 'Logs';
+
+  @override
+  String get podmanDockerEmulationDetected =>
+      'Podman Docker emulation detected. Please switch to Podman in settings.';
 }

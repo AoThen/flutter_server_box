@@ -46,6 +46,8 @@
   "clearServerStatsContent": "確定要清空伺服器 \"{serverName}\" 的連線統計資料嗎？此操作無法撤銷。",
   "clearServerStatsTitle": "清空 {serverName} 統計",
   "clearThisServerStats": "清空此伺服器統計",
+  "compactDatabase": "壓縮資料庫",
+  "compactDatabaseContent": "資料庫大小：{size}\n\n此操作將重新組織資料庫以減少體積，資料不會遺失。",
   "closeAfterSave": "儲存後關閉",
   "cmd": "指令",
   "collapseUITip": "是否預設折疊 UI 中存在的長列表",
@@ -55,6 +57,8 @@
   "connectionStatsDesc": "檢視伺服器連線成功率和歷史記錄",
   "container": "容器",
   "containerTrySudoTip": "例如：App 內設定使用者為 aaa，但是 Docker 安裝在 root 使用者，這時就需要開啟此選項",
+  "containerSudoPasswordRequired": "需要 sudo 密碼才能存取 Docker。請輸入您的密碼。",
+  "containerSudoPasswordIncorrect": "sudo 密碼錯誤或無權限。請重試。",
   "convert": "轉換",
   "copyPath": "複製路徑",
   "cpuViewAsProgressTip": "以進度條樣式顯示每個CPU的使用率（舊版樣式）",
@@ -122,6 +126,7 @@
   "install": "安裝",
   "installDockerWithUrl": "請先前往 https://docs.docker.com/engine/install 安裝 Docker",
   "invalid": "無效",
+  "invalidHostFormat": "主機格式無效，僅支援 IPv4、IPv6 和網域字元。",
   "jumpServer": "跳板伺服器",
   "keepForeground": "請讓 App 保持在前景執行",
   "keepStatusWhenErr": "保留上次的伺服器狀態",
@@ -294,5 +299,6 @@
   "write": "寫入",
   "writeScriptFailTip": "寫入腳本失敗，可能是沒有權限/目錄不存在等。",
   "writeScriptTip": "連線到伺服器後，將會在 `~/.config/server_box` \n | `/tmp/server_box` 中寫入一個腳本來監測系統狀態。你可以審查腳本內容。",
-  "logs": "日誌"
+  "logs": "日誌",
+  "podmanDockerEmulationDetected": "檢測到 Podman Docker 仿真。請在設定中切換到 Podman。"
 }

@@ -46,6 +46,8 @@
   "clearServerStatsContent": "Tem certeza de que deseja limpar as estatísticas de conexão para o servidor \"{serverName}\"? Esta ação não pode ser desfeita.",
   "clearServerStatsTitle": "Limpar estatísticas de {serverName}",
   "clearThisServerStats": "Limpar estatísticas deste servidor",
+  "compactDatabase": "Compactar banco de dados",
+  "compactDatabaseContent": "Tamanho do banco de dados: {size}\n\nIsso reorganizará o banco de dados para reduzir o tamanho do arquivo. Nenhum dado será excluído.",
   "closeAfterSave": "Salvar e fechar",
   "cmd": "Comando",
   "collapseUITip": "Deve colapsar listas longas na UI por padrão?",
@@ -55,6 +57,8 @@
   "connectionStatsDesc": "Ver taxa de sucesso de conexão do servidor e histórico",
   "container": "Contêiner",
   "containerTrySudoTip": "Por exemplo: se o usuário for definido como aaa dentro do app, mas o Docker estiver instalado sob o usuário root, esta opção precisará ser ativada",
+  "containerSudoPasswordRequired": "É necessária uma senha sudo para acessar o Docker. Por favor, insira sua senha.",
+  "containerSudoPasswordIncorrect": "A senha sudo está incorreta ou não é permitida. Por favor, tente novamente.",
   "convert": "Converter",
   "copyPath": "Copiar caminho",
   "cpuViewAsProgressTip": "Exiba a taxa de uso de cada CPU em estilo de barra de progresso (estilo antigo)",
@@ -294,5 +298,6 @@
   "write": "Escrita",
   "writeScriptFailTip": "Falha ao escrever no script, possivelmente devido à falta de permissões ou o diretório não existe.",
   "writeScriptTip": "Após conectar ao servidor, um script será escrito em `~/.config/server_box` \n | `/tmp/server_box` para monitorar o status do sistema. Você pode revisar o conteúdo do script.",
-  "logs": "Logs"
+  "logs": "Logs",
+  "podmanDockerEmulationDetected": "Emulação Podman Docker detectada. Por favor, alterne para Podman nas configurações."
 }

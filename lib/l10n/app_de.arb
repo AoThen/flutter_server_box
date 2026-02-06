@@ -46,6 +46,9 @@
   "clearServerStatsContent": "Sind Sie sicher, dass Sie die Verbindungsstatistiken für Server \"{serverName}\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
   "clearServerStatsTitle": "{serverName} Statistiken löschen",
   "clearThisServerStats": "Statistiken dieses Servers löschen",
+  "compactDatabase": "Datenbank komprimieren",
+  "compactDatabaseContent": "Datenbankgröße: {size}\n\nDies wird die Datenbank neu organisieren, um die Dateigröße zu reduzieren. Es werden keine Daten gelöscht.",
+  "confirm": "Bestätigen",
   "closeAfterSave": "Speichern und schließen",
   "cmd": "Command",
   "collapseUITip": "Ob lange Listen in der Benutzeroberfläche standardmäßig eingeklappt werden sollen oder nicht",
@@ -55,6 +58,8 @@
   "connectionStatsDesc": "Server-Verbindungserfolgsrate und Verlauf anzeigen",
   "container": "Container",
   "containerTrySudoTip": "Zum Beispiel: In der App ist der Benutzer auf aaa eingestellt, aber Docker ist unter dem Root-Benutzer installiert. In diesem Fall müssen Sie diese Option aktivieren",
+  "containerSudoPasswordRequired": "Ein sudo-Passwort ist erforderlich, um auf Docker zuzugreifen. Bitte geben Sie Ihr Passwort ein.",
+  "containerSudoPasswordIncorrect": "Das sudo-Passwort ist falsch oder nicht erlaubt. Bitte versuchen Sie es erneut.",
   "convert": "Konvertieren",
   "copyPath": "Pfad kopieren",
   "cpuViewAsProgressTip": "Zeigen Sie die Auslastung jedes CPUs in einem Fortschrittsbalken-Stil an (alter Stil)",
@@ -294,5 +299,6 @@
   "write": "Schreiben",
   "writeScriptFailTip": "Das Schreiben des Skripts ist fehlgeschlagen, möglicherweise aufgrund fehlender Berechtigungen oder das Verzeichnis existiert nicht.",
   "writeScriptTip": "Nach der Verbindung mit dem Server wird ein Skript in `~/.config/server_box` \n | `/tmp/server_box` geschrieben, um den Systemstatus zu überwachen. Sie können den Skriptinhalt überprüfen.",
-  "logs": "Protokolle"
+  "logs": "Protokolle",
+  "podmanDockerEmulationDetected": "Podman Docker-Emulation erkannt. Bitte wechseln Sie in den Einstellungen zu Podman."
 }

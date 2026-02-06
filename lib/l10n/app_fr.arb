@@ -46,6 +46,8 @@
   "clearServerStatsContent": "Êtes-vous sûr de vouloir effacer les statistiques de connexion du serveur \"{serverName}\" ? Cette action ne peut pas être annulée.",
   "clearServerStatsTitle": "Effacer les statistiques de {serverName}",
   "clearThisServerStats": "Effacer les statistiques de ce serveur",
+  "compactDatabase": "Compacter la base de données",
+  "compactDatabaseContent": "Taille de la base de données : {size}\n\nCela réorganisera la base de données pour réduire la taille du fichier. Aucune donnée ne sera supprimée.",
   "closeAfterSave": "Enregistrer et fermer",
   "cmd": "Commande",
   "collapseUITip": "Indique si les longues listes présentées dans l'interface utilisateur doivent être réduites par défaut.",
@@ -55,6 +57,8 @@
   "connectionStatsDesc": "Voir le taux de réussite de connexion du serveur et l'historique",
   "container": "Conteneur",
   "containerTrySudoTip": "Par exemple : Dans l'application, l'utilisateur est défini comme aaa, mais Docker est installé sous l'utilisateur root. Dans ce cas, vous devez activer cette option.",
+  "containerSudoPasswordRequired": "Un mot de passe sudo est requis pour accéder à Docker. Veuillez entrer votre mot de passe.",
+  "containerSudoPasswordIncorrect": "Le mot de passe sudo est incorrect ou non autorisé. Veuillez réessayer.",
   "convert": "Convertir",
   "copyPath": "Copier le chemin",
   "cpuViewAsProgressTip": "Afficher le taux d'utilisation de chaque CPU sous forme de barre de progression (ancien style)",
@@ -294,5 +298,6 @@
   "write": "Écrire",
   "writeScriptFailTip": "Échec de l'écriture dans le script, probablement en raison d'un manque de permissions ou que le répertoire n'existe pas.",
   "writeScriptTip": "Après la connexion au serveur, un script sera écrit dans `~/.config/server_box` \n | `/tmp/server_box` pour surveiller l'état du système. Vous pouvez examiner le contenu du script.",
-  "logs": "Journaux"
+  "logs": "Journaux",
+  "podmanDockerEmulationDetected": "Émulation Podman Docker détectée. Veuillez passer à Podman dans les paramètres."
 }

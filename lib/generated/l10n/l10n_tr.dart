@@ -161,6 +161,17 @@ class AppLocalizationsTr extends AppLocalizations {
   String get clearThisServerStats => 'Bu Sunucu İstatistiklerini Temizle';
 
   @override
+  String get compactDatabase => 'Veritabanını Sıkıştır';
+
+  @override
+  String compactDatabaseContent(Object size) {
+    return 'Veritabanı boyutu: $size\n\nBu, dosya boyutunu küçültmek için veritabanını yeniden düzenleyecektir. Veriler silinmeyecek.';
+  }
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
   String get closeAfterSave => 'Kaydet ve kapat';
 
   @override
@@ -189,6 +200,14 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get containerTrySudoTip =>
       'Örneğin: Uygulamada kullanıcı aaa olarak ayarlanmış, ancak Docker root kullanıcısı altında kurulmuş. Bu durumda bu seçeneği etkinleştirmeniz gerekir.';
+
+  @override
+  String get containerSudoPasswordRequired =>
+      'Docker\'e erişmek için sudo şifresi gereklidir. Lütfen şifrenizi girin.';
+
+  @override
+  String get containerSudoPasswordIncorrect =>
+      'Sudo şifresi yanlış veya izin verilmiyor. Lütfen tekrar deneyin.';
 
   @override
   String get convert => 'Dönüştür';
@@ -417,6 +436,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get invalid => 'Geçersiz';
+
+  @override
+  String get invalidHostFormat =>
+      'Invalid host format. Only IPv4, IPv6, and domain characters are allowed.';
 
   @override
   String get jumpServer => 'Atlama sunucusu';
@@ -1023,4 +1046,8 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get logs => 'Günlükler';
+
+  @override
+  String get podmanDockerEmulationDetected =>
+      'Podman Docker emülasyonu tespit edildi. Lütfen ayarlarda Podman\'a geçin.';
 }

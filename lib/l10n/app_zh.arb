@@ -46,6 +46,9 @@
   "clearServerStatsContent": "确定要清空服务器 \"{serverName}\" 的连接统计数据吗？此操作无法撤销。",
   "clearServerStatsTitle": "清空 {serverName} 统计",
   "clearThisServerStats": "清空此服务器统计",
+  "compactDatabase": "压缩数据库",
+  "compactDatabaseContent": "数据库大小：{size}\n\n此操作将重新组织数据库以减少体积，数据不会丢失。",
+  "confirm": "确认",
   "closeAfterSave": "保存后关闭",
   "cmd": "命令",
   "collapseUITip": "是否默认折叠 UI 中的长列表",
@@ -55,6 +58,8 @@
   "connectionStatsDesc": "查看服务器连接成功率和历史记录",
   "container": "容器",
   "containerTrySudoTip": "例如：在应用内将用户设置为 aaa，但是 Docker 安装在root用户下，这时就需要启用此选项",
+  "containerSudoPasswordRequired": "需要 sudo 密码才能访问 Docker。请输入您的密码。",
+  "containerSudoPasswordIncorrect": "sudo 密码错误或无权限。请重试。",
   "convert": "转换",
   "copyPath": "复制路径",
   "cpuViewAsProgressTip": "以进度条样式显示每个 CPU 的使用率（旧版样式）",
@@ -122,6 +127,7 @@
   "install": "安装",
   "installDockerWithUrl": "请先前往 https://docs.docker.com/engine/install 安装 Docker",
   "invalid": "无效",
+  "invalidHostFormat": "主机格式无效，仅支持 IPv4、IPv6 和域名字符。",
   "jumpServer": "跳板服务器",
   "keepForeground": "请将应用保持在前台运行",
   "keepStatusWhenErr": "保留上次的服务器状态",
@@ -301,5 +307,6 @@
   "menuGitHubRepository": "GitHub 仓库",
   "menuWiki": "Wiki",
   "menuHelp": "帮助",
-  "logs": "日志"
+  "logs": "日志",
+  "podmanDockerEmulationDetected": "检测到 Podman Docker 仿真。请在设置中切换到 Podman。"
 }
