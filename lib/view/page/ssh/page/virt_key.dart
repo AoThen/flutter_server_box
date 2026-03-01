@@ -44,17 +44,12 @@ extension _VirtKey on SSHPageState {
         _terminal.keyInput(TerminalKey.backspace);
         break;
       case VirtualKeyFunc.clipboard:
-        final selected = terminalSelected;
-        if (selected != null) {
-          Pfs.copy(selected);
-        } else {
-          _paste();
-        }
+        await _onClipboardAction();
         break;
       case VirtualKeyFunc.snippet:
         final snippetState = ref.read(snippetProvider);
         final snippets = await context.showPickWithTagDialog<Snippet>(
-          title: l10n.snippet,
+          title: libL10n.snippet,
           tags: snippetState.tags.vn,
           itemsBuilder: (e) {
             if (e == TagSwitcher.kDefaultTag) {
@@ -125,25 +120,6 @@ extension _VirtKey on SSHPageState {
         SftpPage.route.go(context, args);
         break;
     }
-  }
-
-  void _paste() {
-    Clipboard.getData(Clipboard.kTextPlain).then((value) {
-      final text = value?.text;
-      if (text != null) {
-        _terminal.textInput(text);
-      } else {
-        context.showRoundDialog(title: libL10n.error, child: Text(libL10n.empty));
-      }
-    });
-  }
-
-  String? get terminalSelected {
-    final range = _terminalController.selection;
-    if (range == null) {
-      return null;
-    }
-    return _terminal.buffer.getText(range);
   }
 
   void _initVirtKeys() {

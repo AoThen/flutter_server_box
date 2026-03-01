@@ -4,6 +4,15 @@ part of 'edit.dart';
 final _hostReg = RegExp(r'^[a-zA-Z0-9\.\-_:%;]+$');
 
 extension _Actions on _ServerEditPageState {
+  bool _isInvalidJumpSelection(String? candidateJumpId) {
+    final currentServer = spi;
+    return wouldCreateJumpCycle(
+      currentServerId: currentServer?.id,
+      candidateJumpId: candidateJumpId,
+      serversById: ref.read(serversProvider).servers,
+    );
+  }
+
   Future<void> _onTapSSHDiscovery() async {
     try {
       final result = await SshDiscoveryPage.route.go(context);
@@ -16,7 +25,9 @@ extension _Actions on _ServerEditPageState {
     }
   }
 
-  Future<void> _processDiscoveredServers(List<SshDiscoveryResult> discoveredServers) async {
+  Future<void> _processDiscoveredServers(
+    List<SshDiscoveryResult> discoveredServers,
+  ) async {
     if (discoveredServers.length == 1) {
       // Single server - populate the current form
       final server = discoveredServers.first;
@@ -25,12 +36,16 @@ extension _Actions on _ServerEditPageState {
       if (_nameController.text.isEmpty) {
         _nameController.text = server.ip;
       }
-      context.showSnackBar('${libL10n.found} 1 ${l10n.server}');
+      context.showSnackBar('${libL10n.found} 1 ${libL10n.server}');
     } else {
       // Multiple servers - show import dialog
       final shouldImport = await context.showRoundDialog<bool>(
         title: libL10n.import,
-        child: Text(libL10n.askContinue('${libL10n.found} ${discoveredServers.length} ${l10n.servers}')),
+        child: Text(
+          libL10n.askContinue(
+            '${libL10n.found} ${discoveredServers.length} ${libL10n.servers}',
+          ),
+        ),
         actions: Btnx.cancelOk,
       );
 
@@ -46,7 +61,9 @@ extension _Actions on _ServerEditPageState {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('${libL10n.found} ${discoveredServers.length} ${l10n.servers}.'),
+              Text(
+                '${libL10n.found} ${discoveredServers.length} ${libL10n.servers}.',
+              ),
               const SizedBox(height: 8),
               Text(libL10n.setting),
               const SizedBox(height: 8),
@@ -64,8 +81,12 @@ extension _Actions on _ServerEditPageState {
         );
 
         if (shouldProceed == true) {
-          final username = usernameController.text.isNotEmpty ? usernameController.text : defaultUsername;
-          final keyId = keyIdController.text.isNotEmpty ? keyIdController.text : null;
+          final username = usernameController.text.isNotEmpty
+              ? usernameController.text
+              : defaultUsername;
+          final keyId = keyIdController.text.isNotEmpty
+              ? keyIdController.text
+              : null;
           final servers = discoveredServers
               .map(
                 (result) => Spi(
@@ -74,7 +95,9 @@ extension _Actions on _ServerEditPageState {
                   port: result.port,
                   user: username,
                   keyId: keyId,
-                  pwd: _passwordController.text.isEmpty ? null : _passwordController.text,
+                  pwd: _passwordController.text.isEmpty
+                      ? null
+                      : _passwordController.text,
                 ),
               )
               .toList();
@@ -99,7 +122,7 @@ extension _Actions on _ServerEditPageState {
         dprint('Failed to import server ${server.name}: $e');
       }
     }
-    context.showSnackBar('${libL10n.success}: $imported ${l10n.servers}');
+    context.showSnackBar('${libL10n.success}: $imported ${libL10n.servers}');
     if (mounted) context.pop(true);
   }
 
@@ -122,7 +145,8 @@ extension _Actions on _ServerEditPageState {
   void _handleImportSSHCfgPermissionIssue(Object e, StackTrace s) async {
     dprint('Error importing SSH config: $e');
     // Check if it's a permission error and offer file picker as fallback
-    if (e is PathAccessException || e.toString().contains('Operation not permitted')) {
+    if (e is PathAccessException ||
+        e.toString().contains('Operation not permitted')) {
       final useFilePicker = await context.showRoundDialog<bool>(
         title: l10n.sshConfigImport,
         child: Column(
@@ -164,10 +188,15 @@ extension _Actions on _ServerEditPageState {
           children: [
             Text(l10n.sshConfigFoundServers('${summary.total}')),
             if (summary.hasDuplicates)
-              Text(l10n.sshConfigDuplicatesSkipped('${summary.duplicates}'), style: UIs.textGrey),
+              Text(
+                l10n.sshConfigDuplicatesSkipped('${summary.duplicates}'),
+                style: UIs.textGrey,
+              ),
             Text(l10n.sshConfigServersToImport('${summary.toImport}')),
             const SizedBox(height: 16),
-            ...resolved.map((s) => Text('• ${s.name} (${s.user}@${s.ip}:${s.port})')),
+            ...resolved.map(
+              (s) => Text('• ${s.name} (${s.user}@${s.ip}:${s.port})'),
+            ),
           ],
         ),
       ),
@@ -205,7 +234,10 @@ extension _Actions on _ServerEditPageState {
   }
 
   void _onTapCustomItem() async {
-    final res = await KvEditor.route.go(context, KvEditorArgs(data: _customCmds.value));
+    final res = await KvEditor.route.go(
+      context,
+      KvEditorArgs(data: _customCmds.value),
+    );
     if (res == null) return;
     _customCmds.value = res;
   }
@@ -221,7 +253,7 @@ extension _Actions on _ServerEditPageState {
 
   void _onSave() async {
     if (_ipController.text.isEmpty) {
-      context.showSnackBar('${libL10n.empty} ${l10n.host}');
+      context.showSnackBar('${libL10n.empty} ${libL10n.host}');
       return;
     }
 
@@ -250,6 +282,11 @@ extension _Actions on _ServerEditPageState {
     if (_portController.text.isEmpty) {
       _portController.text = '22';
     }
+    if (_isInvalidJumpSelection(_jumpServer.value)) {
+      context.showSnackBar('${l10n.invalid}: ${l10n.jumpServer}');
+      return;
+    }
+
     final customCmds = _customCmds.value;
     final custom = ServerCustom(
       pveAddr: _pveAddrCtrl.text.selfNotEmptyOrNull,
@@ -261,10 +298,17 @@ extension _Actions on _ServerEditPageState {
       scriptDir: _scriptDirCtrl.text.selfNotEmptyOrNull,
     );
 
-    final wolEmpty = _wolMacCtrl.text.isEmpty && _wolIpCtrl.text.isEmpty && _wolPwdCtrl.text.isEmpty;
+    final wolEmpty =
+        _wolMacCtrl.text.isEmpty &&
+        _wolIpCtrl.text.isEmpty &&
+        _wolPwdCtrl.text.isEmpty;
     final wol = wolEmpty
         ? null
-        : WakeOnLanCfg(mac: _wolMacCtrl.text, ip: _wolIpCtrl.text, pwd: _wolPwdCtrl.text.selfNotEmptyOrNull);
+        : WakeOnLanCfg(
+            mac: _wolMacCtrl.text,
+            ip: _wolIpCtrl.text,
+            pwd: _wolPwdCtrl.text.selfNotEmptyOrNull,
+          );
     if (wol != null) {
       final wolValidation = wol.validate();
       if (!wolValidation.$2) {
@@ -274,7 +318,9 @@ extension _Actions on _ServerEditPageState {
     }
 
     final spi = Spi(
-      name: _nameController.text.isEmpty ? _ipController.text : _nameController.text,
+      name: _nameController.text.isEmpty
+          ? _ipController.text
+          : _nameController.text,
       ip: _ipController.text,
       port: int.parse(_portController.text),
       user: _usernameController.text,
@@ -291,7 +337,9 @@ extension _Actions on _ServerEditPageState {
       envs: _env.value.isEmpty ? null : _env.value,
       id: widget.args?.spi.id ?? ShortId.generate(),
       customSystemType: _systemType.value,
-      disabledCmdTypes: _disabledCmdTypes.value.isEmpty ? null : _disabledCmdTypes.value.toList(),
+      disabledCmdTypes: _disabledCmdTypes.value.isEmpty
+          ? null
+          : _disabledCmdTypes.value.toList(),
     );
 
     if (this.spi == null) {
@@ -369,7 +417,7 @@ extension _Utils on _ServerEditPageState {
 
   Future<void> _showCmdTypesDialog(Set<ShellCmdType> allCmdTypes) {
     return context.showRoundDialog(
-      title: '${libL10n.disabled} ${l10n.cmd}',
+      title: '${libL10n.disabled} ${libL10n.cmd}',
       child: SizedBox(
         width: 270,
         child: _disabledCmdTypes.listenVal((disabled) {
@@ -421,7 +469,10 @@ extension _Utils on _ServerEditPageState {
     if (spi.keyId == null) {
       _passwordController.text = spi.pwd ?? '';
     } else {
-      _keyIdx.value = ref.read(privateKeyProvider).keys.indexWhere((e) => e.id == spi.keyId);
+      _keyIdx.value = ref
+          .read(privateKeyProvider)
+          .keys
+          .indexWhere((e) => e.id == spi.keyId);
     }
 
     /// List in dart is passed by pointer, so you need to copy it here

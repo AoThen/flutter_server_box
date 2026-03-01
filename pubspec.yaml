@@ -4,8 +4,8 @@ publish_to: "none"
 version: 1.0.1316+1316
 
 environment:
-  sdk: ">=3.9.0"
-  flutter: ">=3.38.0"
+  sdk: ">=3.11.0"
+  flutter: ">=3.41.0"
 
 dependencies:
   flutter:
@@ -40,45 +40,25 @@ dependencies:
   xml: ^6.4.2 # for parsing nvidia-smi
   url_launcher: ^6.2.6
   dartssh2:
-    git:
-      url: https://github.com/lollipopkit/dartssh2
-      ref: v1.0.293
+    path: packages/dartssh2
   circle_chart:
-    git:
-      url: https://github.com/lollipopkit/circle_chart
-      ref: main
+    path: packages/circle_chart
   xterm:
-    git:
-      url: https://github.com/lollipopkit/xterm.dart
-      ref: v4.0.13
+    path: packages/xterm
   computer:
     git:
       url: https://github.com/lollipopkit/dart_computer
       ref: v1.0.88
   watch_connectivity:
-    git:
-      url: https://github.com/lollipopkit/watch_connectivity
-      ref: v1.0.85
+    path: packages/watch_connectivity
   plain_notification_token:
-    git:
-      url: https://github.com/lollipopkit/plain_notification_token
-      ref: v1.0.23
+    path: packages/plain_notification_token
   fl_lib:
-    git:
-      url: https://github.com/lollipopkit/fl_lib
-      ref: v1.0.363
+    path: packages/fl_lib
 
 dependency_overrides:
   # webdav_client_plus:
   #   path: ../webdav_client
-  # dartssh2:
-  #   path: ../dartssh2
-  # xterm:
-  #   path: ../xterm.dart
-  # fl_lib:
-  #   path: ../fl_lib
-  # fl_build:
-  #   path: ../fl_build
   gtk: # TODO: remove it after fixed in upstream
     git:
       url: https://github.com/lollipopkit/gtk.dart
@@ -101,9 +81,7 @@ dev_dependencies:
   #     url: https://github.com/lollipopkit/riverpod_reg
   #     ref: v0.0.2
   fl_build:
-    git:
-      url: https://github.com/lppcg/fl_build.git
-      ref: v1.0.53
+    path: packages/fl_build
 
 flutter:
   generate: true
