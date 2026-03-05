@@ -30,6 +30,8 @@ jobs:
           sudo chown $USER:$GROUPS /workdir
           git clone --depth 1 https://github.com/lollipopkit/flutter_server_box.git /workdir
           cd /workdir
+          git submodule init
+          git submodule update
           echo $PWD
           echo "action_dir=$PWD" >> "$GITHUB_OUTPUT"
           echo "action_dir=$PWD" >> "$GITHUB_ENV"
@@ -58,7 +60,7 @@ jobs:
           echo storeFile=key.jks >> ${{env.PROPERTIES_PATH}}
           echo "${{ secrets.KEYSTORE2 }}" | base64 --decode > android/app/key.jks
 
-      - name: Build arm64 APK 1
+      - name: upgrade
         run: |
           cd "$action_dir"
           echo $PWD
