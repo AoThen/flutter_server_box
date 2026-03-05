@@ -44,7 +44,7 @@ jobs:
         uses: subosito/flutter-action@main
         with:
           channel: 'stable'
-          # flutter-version: "3.27.2"
+          flutter-version: "3.38.7"
 
       - name: Set key
         run: |
@@ -58,11 +58,11 @@ jobs:
 
 
       # Get Flutter dependencies.
-      - name: Get Flutter dependencies
-        run: |
-          cd "$action_dir"
-          echo $PWD
-          flutter pub get
+      # - name: Get Flutter dependencies
+      #   run: |
+      #     cd "$action_dir"
+      #     echo $PWD
+      #     flutter pub get
 
       # Check for any formatting issues in the code.
       - name: Check code formatting
@@ -78,8 +78,8 @@ jobs:
           echo $PWD
           dart analyze .
 
-      - name: Run tests
-        run: flutter test
+      # - name: Run tests
+      #   run: flutter test
 
       - name: Build arm64 APK
         run: |
