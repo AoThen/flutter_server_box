@@ -46,7 +46,7 @@ jobs:
         uses: subosito/flutter-action@main
         with:
           channel: 'stable'
-          flutter-version: "3.38.7"
+          #flutter-version: "3.38.7"
 
       - name: Set key
         run: |
@@ -60,7 +60,12 @@ jobs:
 
       - name: Build arm64 APK 1
         run: |
-          dart run fl_build -p android
+          cd "$action_dir"
+          echo $PWD
+          flutter --version
+          flutter upgrade
+          dart --version
+          flutter pub get
           
       - name: Build arm64 APK 2
         run: |
