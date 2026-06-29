@@ -108,6 +108,7 @@
   "ignoreCert": "Ignorer le certificat",
   "image": "Image",
   "imagesList": "Liste des images",
+  "pull": "Tirer",
   "installDockerWithUrl": "Veuillez d'abord installer docker depuis https://docs.docker.com/engine/install.",
   "invalid": "Invalide",
   "jumpServer": "Aller au serveur",
@@ -117,14 +118,20 @@
   "keyAuth": "Authentification par clé",
   "lastFailure": "Dernier échec",
   "lastSuccess": "Dernier succès",
-  "letterCache": "Mise en cache des lettres",
-  "letterCacheTip": "Recommandé de désactiver, mais après désactivation, il sera impossible de saisir des caractères CJK.",
+  "letterCache": "Saisie clavier normale",
+  "letterCacheTip": "Lorsqu'elle est activée, la saisie passe par l'IME normal, ce qui peut éviter les invites de clavier sécurisé dans le terminal sur certains systèmes.",
   "madeWithLove": "Fabriqué avec ❤️ par {myGithub}",
   "max": "max",
   "maxConcurrency": "Concurrence maximale",
   "maxRetryCount": "Nombre de reconnexions au serveur",
   "maxRetryCountEqual0": "Il va réessayer encore et encore.",
   "min": "min",
+  "mismatchSystem": "Système non correspondant : {system}",
+  "@mismatchSystem": {
+    "placeholders": {
+      "system": {}
+    }
+  },
   "more": "Plus",
   "moveOutServerFuncBtnsHelp": "Activé : peut être affiché sous chaque carte sur la page de l'onglet Serveur. Désactivé : peut être affiché en haut de la page de détails du serveur.",
   "needHomeDir": "Si vous êtes utilisateur Synology, [consultez ici](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Les utilisateurs d'autres systèmes doivent rechercher comment créer un répertoire personnel.",
@@ -156,6 +163,7 @@
   "pveVersionLow": "Cette fonctionnalité est actuellement en phase de test et n'a été testée que sur PVE 8+. Veuillez l'utiliser avec prudence.",
   "read": "Lire",
   "recentConnections": "Connexions récentes",
+  "reconnecting": "Reconnexion...",
   "rememberPwdInMem": "Mémoriser le mot de passe en mémoire",
   "rememberPwdInMemTip": "Utilisé pour les conteneurs, la suspension, etc.",
   "rememberWindowSize": "Se souvenir de la taille de la fenêtre",
@@ -217,6 +225,7 @@
   "time": "Temps",
   "times": "Fois",
   "trySudo": "Essayer d'utiliser sudo",
+  "sudoPromptNotFound": "Aucune invite de mot de passe sudo n'est active.",
   "unknown": "Inconnu",
   "unkownConvertMode": "Mode de conversion inconnu",
   "update": "Mettre à jour",
@@ -243,5 +252,8 @@
   "write": "Écrire",
   "writeScriptFailTip": "Échec de l'écriture dans le script, probablement en raison d'un manque de permissions ou que le répertoire n'existe pas.",
   "writeScriptTip": "Après la connexion au serveur, un script sera écrit dans `~/.config/server_box` \n | `/tmp/server_box` pour surveiller l'état du système. Vous pouvez examiner le contenu du script.",
-  "podmanDockerEmulationDetected": "Émulation Podman Docker détectée. Veuillez passer à Podman dans les paramètres."
+  "podmanDockerEmulationDetected": "Émulation Podman Docker détectée. Veuillez passer à Podman dans les paramètres.",
+  "sponsor": "Soutenir",
+  "portForwardBetaTitle": "Transfert de port (Beta)",
+  "systemd": "Systemd"
 }

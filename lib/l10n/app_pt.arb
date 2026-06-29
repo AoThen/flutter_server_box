@@ -108,6 +108,7 @@
   "ignoreCert": "Ignorar certificado",
   "image": "Imagem",
   "imagesList": "Lista de imagens",
+  "pull": "Puxar",
   "installDockerWithUrl": "Por favor, instale o Docker primeiro em https://docs.docker.com/engine/install",
   "invalid": "Inválido",
   "jumpServer": "Servidor de salto",
@@ -117,14 +118,20 @@
   "keyAuth": "Autenticação por chave",
   "lastFailure": "Última falha",
   "lastSuccess": "Último sucesso",
-  "letterCache": "Cache de letras",
-  "letterCacheTip": "Recomendado desativar, mas após desativar, será impossível inserir caracteres CJK.",
+  "letterCache": "Entrada normal do teclado",
+  "letterCacheTip": "Quando ativada, a entrada passa pelo IME normal, o que pode evitar avisos de teclado seguro no terminal em alguns sistemas.",
   "madeWithLove": "Feito com ❤️ por {myGithub}",
   "max": "Máximo",
   "maxConcurrency": "Concorrência máxima",
   "maxRetryCount": "Número de tentativas de reconexão com o servidor",
   "maxRetryCountEqual0": "Irá tentar indefinidamente",
   "min": "Mínimo",
+  "mismatchSystem": "Sistema incompatível: {system}",
+  "@mismatchSystem": {
+    "placeholders": {
+      "system": {}
+    }
+  },
   "more": "Mais",
   "moveOutServerFuncBtnsHelp": "Ativado: Mostra abaixo de cada cartão na aba do servidor. Desativado: Mostra no topo da página de detalhes do servidor.",
   "needHomeDir": "Se você é usuário de Synology, [veja aqui](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Usuários de outros sistemas precisam pesquisar como criar um diretório home.",
@@ -156,6 +163,7 @@
   "pveVersionLow": "Esta funcionalidade está atualmente em fase de teste e foi testada apenas no PVE 8+. Por favor, use com cautela.",
   "read": "Leitura",
   "recentConnections": "Conexões recentes",
+  "reconnecting": "Reconectando...",
   "rememberPwdInMem": "Lembrar senha na memória",
   "rememberPwdInMemTip": "Usado para contêineres, suspensão, etc.",
   "rememberWindowSize": "Lembrar o tamanho da janela",
@@ -217,6 +225,7 @@
   "time": "Tempo",
   "times": "Vezes",
   "trySudo": "Tentar usar sudo",
+  "sudoPromptNotFound": "Nenhuma solicitação de senha sudo está ativa.",
   "unknown": "Desconhecido",
   "unkownConvertMode": "Modo de conversão desconhecido",
   "update": "Atualizar",
@@ -243,5 +252,8 @@
   "write": "Escrita",
   "writeScriptFailTip": "Falha ao escrever no script, possivelmente devido à falta de permissões ou o diretório não existe.",
   "writeScriptTip": "Após conectar ao servidor, um script será escrito em `~/.config/server_box` \n | `/tmp/server_box` para monitorar o status do sistema. Você pode revisar o conteúdo do script.",
-  "podmanDockerEmulationDetected": "Emulação Podman Docker detectada. Por favor, alterne para Podman nas configurações."
+  "podmanDockerEmulationDetected": "Emulação Podman Docker detectada. Por favor, alterne para Podman nas configurações.",
+  "sponsor": "Patrocinador",
+  "portForwardBetaTitle": "Port Forward (Beta)",
+  "systemd": "Systemd"
 }

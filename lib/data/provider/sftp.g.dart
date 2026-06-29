@@ -10,11 +10,11 @@ part of 'sftp.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(SftpNotifier)
-const sftpProvider = SftpNotifierProvider._();
+final sftpProvider = SftpNotifierProvider._();
 
 final class SftpNotifierProvider
     extends $NotifierProvider<SftpNotifier, SftpState> {
-  const SftpNotifierProvider._()
+  SftpNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -41,14 +41,13 @@ final class SftpNotifierProvider
   }
 }
 
-String _$sftpNotifierHash() => r'f8412a4bd1f2bc5919ec31a3eba1c27e9a578f41';
+String _$sftpNotifierHash() => r'aa7b1fd34729501dd8c88980e4d136233071f1ef';
 
 abstract class _$SftpNotifier extends $Notifier<SftpState> {
   SftpState build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<SftpState, SftpState>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$SftpNotifier extends $Notifier<SftpState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

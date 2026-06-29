@@ -108,6 +108,7 @@
   "ignoreCert": "Sertifikayı yok say",
   "image": "Görüntü",
   "imagesList": "Görüntü listesi",
+  "pull": "Çek",
   "installDockerWithUrl": "Lütfen önce https://docs.docker.com/engine/install adresinden Docker'ı kurun.",
   "invalid": "Geçersiz",
   "jumpServer": "Atlama sunucusu",
@@ -117,14 +118,20 @@
   "keyAuth": "Anahtar Kimlik Doğrulama",
   "lastFailure": "Son Başarısızlık",
   "lastSuccess": "Son Başarı",
-  "letterCache": "Harf önbelleği",
-  "letterCacheTip": "Devre dışı bırakılması önerilir, ancak devre dışı bırakıldığında CJK karakterlerini girmek mümkün olmayacaktır.",
+  "letterCache": "Normal klavye girişi",
+  "letterCacheTip": "Etkinleştirildiğinde giriş normal IME üzerinden yapılır; bu da bazı sistemlerde terminalde güvenli klavye istemlerini önleyebilir.",
   "madeWithLove": "{myGithub} tarafından ❤️ ile yapıldı",
   "max": "maks",
   "maxConcurrency": "Maksimum Eşzamanlılık",
   "maxRetryCount": "Sunucu yeniden bağlantı sayısı",
   "maxRetryCountEqual0": "Tekrar tekrar deneyecek.",
   "min": "min",
+  "mismatchSystem": "Eşleşmeyen sistem: {system}",
+  "@mismatchSystem": {
+    "placeholders": {
+      "system": {}
+    }
+  },
   "more": "Daha fazla",
   "moveOutServerFuncBtnsHelp": "Açık: Sunucu Sekmesi sayfasındaki her kartın altında görüntülenebilir. Kapalı: Sunucu Ayrıntıları sayfasının üstünde görüntülenebilir.",
   "needHomeDir": "Synology kullanıcısıysanız, [buraya bakın](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Diğer sistem kullanıcılarının bir ana dizin oluşturma yöntemini araması gerekir.",
@@ -156,6 +163,7 @@
   "pveVersionLow": "Bu özellik şu anda test aşamasında ve yalnızca PVE 8+ üzerinde test edildi. Lütfen dikkatli kullanın.",
   "read": "Oku",
   "recentConnections": "Son Bağlantılar",
+  "reconnecting": "Yeniden bağlanılıyor...",
   "rememberPwdInMem": "Şifreyi bellekte hatırla",
   "rememberPwdInMemTip": "Konteynerler, askıya alma vb. için kullanılır.",
   "rememberWindowSize": "Pencere boyutunu hatırla",
@@ -217,6 +225,7 @@
   "time": "Zaman",
   "times": "Kez",
   "trySudo": "Sudo ile dene",
+  "sudoPromptNotFound": "Aktif bir sudo parola istemi yok.",
   "unknown": "Bilinmeyen",
   "unkownConvertMode": "Bilinmeyen dönüşüm modu",
   "update": "Güncelle",
@@ -243,5 +252,8 @@
   "write": "Yaz",
   "writeScriptFailTip": "Betik yazma başarısız oldu, muhtemelen izin eksikliği veya dizin mevcut değil.",
   "writeScriptTip": "Sunucuya bağlandıktan sonra, sistem durumunu izlemek için `~/.config/server_box` \n | `/tmp/server_box` dizinine bir betik yazılacak. Betik içeriğini inceleyebilirsiniz.",
-  "podmanDockerEmulationDetected": "Podman Docker emülasyonu tespit edildi. Lütfen ayarlarda Podman'a geçin."
+  "podmanDockerEmulationDetected": "Podman Docker emülasyonu tespit edildi. Lütfen ayarlarda Podman'a geçin.",
+  "sponsor": "Sponsor",
+  "portForwardBetaTitle": "Port Forward (Beta)",
+  "systemd": "Systemd"
 }

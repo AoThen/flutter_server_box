@@ -21,6 +21,7 @@ import 'package:server_box/data/provider/server/all.dart';
 import 'package:server_box/data/provider/server/single.dart';
 import 'package:server_box/data/res/build_data.dart';
 import 'package:server_box/data/res/store.dart';
+import 'package:server_box/view/page/server/connection_stats.dart';
 import 'package:server_box/view/page/server/detail/view.dart';
 import 'package:server_box/view/page/server/edit/edit.dart';
 import 'package:server_box/view/page/setting/entry.dart';
@@ -48,7 +49,7 @@ const _cardPadSingle = 13.0;
 class _ServerPageState extends ConsumerState<ServerPage>
     with AutomaticKeepAliveClientMixin, AfterLayoutMixin {
   late double _textFactorDouble;
-  double _offset = 1;
+  final ValueNotifier<double> _offsetNotifier = ValueNotifier(1);
   late TextScaler _textFactor;
 
   final _cardsStatus = <String, _CardNotifier>{};
@@ -63,12 +64,13 @@ class _ServerPageState extends ConsumerState<ServerPage>
 
   @override
   void dispose() {
-    super.dispose();
     _timer?.cancel();
     _scrollController.dispose();
     _autoHideCtrl.dispose();
     _tag.dispose();
     _tags.dispose();
+    _offsetNotifier.dispose();
+    super.dispose();
   }
 
   @override
@@ -83,7 +85,6 @@ class _ServerPageState extends ConsumerState<ServerPage>
     super.didChangeDependencies();
     _updateOffset();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -107,9 +108,13 @@ class _ServerPageState extends ConsumerState<ServerPage>
 
   Widget _buildScaffold(Widget child) {
     return Scaffold(
-      appBar: _TopBar(tags: _tags, onTagChanged: (p0) => _tag.value = p0, initTag: _tag.value),
+      appBar: _TopBar(
+        tags: _tags,
+        onTagChanged: (p0) => _tag.value = p0,
+        initTag: _tag.value,
+      ),
       body: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+        behavior: HitTestBehavior.translucent,
         onTap: _autoHideCtrl.show,
         child: Stores.setting.textFactor.listenable().listenVal((val) {
           _updateTextScaler(val);
@@ -132,22 +137,15 @@ class _ServerPageState extends ConsumerState<ServerPage>
   }
 
   Widget _buildPortrait() {
-    // final isMobile = ResponsiveBreakpoints.of(context).isMobile;
-    final serverState = ref.watch(serversProvider);
+    // Watch serverOrder, tags, and servers to ensure filtered view rebuilds
+    // when individual server tags change without affecting the global tag set
+    final serverOrder = ref.watch(serversProvider.select((s) => s.serverOrder));
+    ref.watch(serversProvider.select((s) => s.tags));
+    ref.watch(serversProvider.select((s) => s.servers));
     return _tag.listenVal((val) {
-      final filtered = _filterServers(serverState.serverOrder);
+      final filtered = _filterServers(serverOrder);
       final child = _buildScaffold(_buildBodySmall(filtered: filtered));
-      // if (isMobile) {
       return child;
-      // }
-
-      // return SplitView(
-      //   controller: _splitViewCtrl,
-      //   leftWeight: 1,
-      //   rightWeight: 1.3,
-      //   initialRight: Center(child: CircularProgressIndicator()),
-      //   leftBuilder: (_, __) => child,
-      // );
     });
   }
 
@@ -159,7 +157,10 @@ class _ServerPageState extends ConsumerState<ServerPage>
     return LayoutBuilder(
       builder: (_, cons) {
         // Calculate number of columns based on available width
-        final columnsCount = math.max(1, (cons.maxWidth / UIs.columnWidth).floor());
+        final columnsCount = math.max(
+          1,
+          (cons.maxWidth / UIs.columnWidth).floor(),
+        );
         final padding = columnsCount > 1
             ? const EdgeInsets.fromLTRB(0, 0, 5, 7)
             : const EdgeInsets.fromLTRB(7, 0, 7, 7);
@@ -183,7 +184,9 @@ class _ServerPageState extends ConsumerState<ServerPage>
                   // Last item is just spacing
                   if (index == lens) return SizedBox(height: 77);
 
-                  final individualState = ref.watch(serverProvider(serversInThisColumn[index]));
+                  final individualState = ref.watch(
+                    serverProvider(serversInThisColumn[index]),
+                  );
 
                   return _buildEachServerCard(individualState);
                 },
@@ -216,7 +219,11 @@ class _ServerPageState extends ConsumerState<ServerPage>
 
   /// The child's width mat not equal to 1/4 of the screen width,
   /// so we need to wrap it with a SizedBox.
-  Widget _wrapWithSizedbox(Widget child, double maxWidth, [bool circle = false]) {
+  Widget _wrapWithSizedbox(
+    Widget child,
+    double maxWidth, [
+    bool circle = false,
+  ]) {
     return LayoutBuilder(
       builder: (_, cons) {
         final width = (maxWidth - _cardPad) / 4;
@@ -285,7 +292,7 @@ class _ServerPageState extends ConsumerState<ServerPage>
         textStyle: textStyle,
       ),
       Btn.column(
-        onTap: () => _onTapEdit(srv),
+        onTap: () => ServerEditPage.route.go(context, args: SpiRequiredArgs(srv.spi)),
         icon: const Icon(Icons.edit, color: color),
         text: libL10n.edit,
         textStyle: textStyle,
@@ -320,14 +327,23 @@ class _ServerPageState extends ConsumerState<ServerPage>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _wrapWithSizedbox(PercentCircle(percent: ss.cpu.usedPercent()), maxWidth, true),
-                _wrapWithSizedbox(PercentCircle(percent: ss.mem.usedPercent * 100), maxWidth, true),
+                _wrapWithSizedbox(
+                  PercentCircle(percent: ss.cpu.usedPercent()),
+                  maxWidth,
+                  true,
+                ),
+                _wrapWithSizedbox(
+                  PercentCircle(percent: ss.mem.usedPercent * 100),
+                  maxWidth,
+                  true,
+                ),
                 _wrapWithSizedbox(_buildNet(ss, spi.id), maxWidth),
                 _wrapWithSizedbox(_buildDisk(ss, spi.id), maxWidth),
               ],
             ),
             UIs.height13,
-            if (Stores.setting.moveServerFuncs.fetch()) SizedBox(height: 27, child: ServerFuncBtns(spi: spi)),
+            if (Stores.setting.moveServerFuncs.fetch())
+              SizedBox(height: 27, child: ServerFuncBtns(spi: spi)),
           ],
         );
       },

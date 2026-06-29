@@ -4,233 +4,165 @@ part of 'edit.dart';
 final _hostReg = RegExp(r'^[a-zA-Z0-9\.\-_:%;]+$');
 
 extension _Actions on _ServerEditPageState {
-  bool _isInvalidJumpSelection(String? candidateJumpId) {
-    final currentServer = spi;
-    return wouldCreateJumpCycle(
-      currentServerId: currentServer?.id,
-      candidateJumpId: candidateJumpId,
-      serversById: ref.read(serversProvider).servers,
-    );
-  }
+  Iterable<ShellCmdType> get _diskInfoCmdTypes => const [
+    StatusCmdType.disk,
+    BSDStatusCmdType.disk,
+    WindowsStatusCmdType.disk,
+  ];
 
-  Future<void> _onTapSSHDiscovery() async {
+  Iterable<ShellCmdType> get _diskHealthCmdTypes => const [
+    StatusCmdType.diskSmart,
+    WindowsStatusCmdType.diskSmart,
+  ];
+
+  Future<void> _refreshStoredSudoPasswordState() async {
+    String? storedValue;
     try {
-      final result = await SshDiscoveryPage.route.go(context);
-
-      if (result != null && result.isNotEmpty) {
-        await _processDiscoveredServers(result);
-      }
+      storedValue = await SudoPassword.readOverride(_serverId);
     } catch (e, s) {
-      context.showErrDialog(e, s);
-    }
-  }
-
-  Future<void> _processDiscoveredServers(
-    List<SshDiscoveryResult> discoveredServers,
-  ) async {
-    if (discoveredServers.length == 1) {
-      // Single server - populate the current form
-      final server = discoveredServers.first;
-      _ipController.text = server.ip;
-      _portController.text = server.port.toString();
-      if (_nameController.text.isEmpty) {
-        _nameController.text = server.ip;
-      }
-      context.showSnackBar('${libL10n.found} 1 ${libL10n.server}');
-    } else {
-      // Multiple servers - show import dialog
-      final shouldImport = await context.showRoundDialog<bool>(
-        title: libL10n.import,
-        child: Text(
-          libL10n.askContinue(
-            '${libL10n.found} ${discoveredServers.length} ${libL10n.servers}',
-          ),
-        ),
-        actions: Btnx.cancelOk,
-      );
-
-      if (shouldImport == true) {
-        // Prompt user to configure default values before importing
-        final defaultUsername = 'root';
-        final defaultKeyId = _keyIdx.value?.toString() ?? '';
-        final usernameController = TextEditingController(text: defaultUsername);
-        final keyIdController = TextEditingController(text: defaultKeyId);
-
-        final shouldProceed = await context.showRoundDialog<bool>(
-          title: libL10n.import,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${libL10n.found} ${discoveredServers.length} ${libL10n.servers}.',
-              ),
-              const SizedBox(height: 8),
-              Text(libL10n.setting),
-              const SizedBox(height: 8),
-              TextField(
-                controller: usernameController,
-                decoration: InputDecoration(labelText: libL10n.user),
-              ),
-              TextField(
-                controller: keyIdController,
-                decoration: InputDecoration(labelText: l10n.privateKey),
-              ),
-            ],
-          ),
-          actions: Btnx.cancelOk,
-        );
-
-        if (shouldProceed == true) {
-          final username = usernameController.text.isNotEmpty
-              ? usernameController.text
-              : defaultUsername;
-          final keyId = keyIdController.text.isNotEmpty
-              ? keyIdController.text
-              : null;
-          final servers = discoveredServers
-              .map(
-                (result) => Spi(
-                  name: result.ip,
-                  ip: result.ip,
-                  port: result.port,
-                  user: username,
-                  keyId: keyId,
-                  pwd: _passwordController.text.isEmpty
-                      ? null
-                      : _passwordController.text,
-                ),
-              )
-              .toList();
-
-          await _batchImportServers(servers);
-        }
-
-        usernameController.dispose();
-        keyIdController.dispose();
-      }
-    }
-  }
-
-  Future<void> _batchImportServers(List<Spi> servers) async {
-    final store = Stores.server;
-    int imported = 0;
-    for (final server in servers) {
-      try {
-        store.put(server);
-        imported++;
-      } catch (e) {
-        dprint('Failed to import server ${server.name}: $e');
-      }
-    }
-    context.showSnackBar('${libL10n.success}: $imported ${libL10n.servers}');
-    if (mounted) context.pop(true);
-  }
-
-  void _onTapSSHImport() async {
-    try {
-      final servers = await SSHConfig.parseConfig();
-      if (servers.isEmpty) {
-        context.showSnackBar(l10n.sshConfigNoServers);
-        return;
-      }
-
-      dprint('Parsed ${servers.length} servers from SSH config');
-      await _processSSHServers(servers);
-      dprint('Finished processing SSH config servers');
-    } catch (e, s) {
-      _handleImportSSHCfgPermissionIssue(e, s);
-    }
-  }
-
-  void _handleImportSSHCfgPermissionIssue(Object e, StackTrace s) async {
-    dprint('Error importing SSH config: $e');
-    // Check if it's a permission error and offer file picker as fallback
-    if (e is PathAccessException ||
-        e.toString().contains('Operation not permitted')) {
-      final useFilePicker = await context.showRoundDialog<bool>(
-        title: l10n.sshConfigImport,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.sshConfigPermissionDenied),
-            const SizedBox(height: 8),
-            Text(l10n.sshConfigManualSelect),
-          ],
-        ),
-        actions: Btnx.cancelOk,
-      );
-
-      if (useFilePicker == true) {
-        await _onTapSSHImportWithFilePicker();
-      }
-    } else {
-      context.showErrDialog(e, s);
-    }
-  }
-
-  Future<void> _processSSHServers(List<Spi> servers) async {
-    final deduplicated = ServerDeduplication.deduplicateServers(servers);
-    final resolved = ServerDeduplication.resolveNameConflicts(deduplicated);
-    final summary = ServerDeduplication.getImportSummary(servers, resolved);
-
-    if (!summary.hasItemsToImport) {
-      context.showSnackBar(l10n.sshConfigAllExist('${summary.duplicates}'));
+      Loggers.app.warning('Failed to read sudo password override', e, s);
       return;
     }
+    if (!mounted) return;
+    _pendingSudoPassword ??= storedValue;
+    _hasStoredSudoPassword.value =
+        _pendingSudoPassword != null && _pendingSudoPassword!.isNotEmpty;
+  }
 
-    final shouldImport = await context.showRoundDialog<bool>(
-      title: l10n.sshConfigImport,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.sshConfigFoundServers('${summary.total}')),
-            if (summary.hasDuplicates)
-              Text(
-                l10n.sshConfigDuplicatesSkipped('${summary.duplicates}'),
-                style: UIs.textGrey,
-              ),
-            Text(l10n.sshConfigServersToImport('${summary.toImport}')),
-            const SizedBox(height: 16),
-            ...resolved.map(
-              (s) => Text('• ${s.name} (${s.user}@${s.ip}:${s.port})'),
-            ),
-          ],
+  Future<void> _setPendingSudoPassword(String? value) async {
+    _pendingSudoPassword = value;
+    _sudoPasswordDirty = true;
+    _hasStoredSudoPassword.value = value != null && value.isNotEmpty;
+  }
+
+  Future<void> _onTapSudoPassword() async {
+    final controller = TextEditingController();
+    try {
+      controller.text = _pendingSudoPassword ?? '';
+      if (!mounted) return;
+
+      await context.showRoundDialog(
+        title: libL10n.sudoPwdTitle(libL10n.pwd),
+        child: Input(
+          controller: controller,
+          type: TextInputType.visiblePassword,
+          obscureText: true,
+          label: libL10n.pwd,
+          icon: Icons.password,
+          suggestion: false,
+          onSubmitted: (_) async => await _saveSudoPassword(controller.text),
         ),
-      ),
-      actions: Btnx.cancelOk,
-    );
-
-    if (shouldImport == true) {
-      for (final server in resolved) {
-        ref.read(serversProvider.notifier).addServer(server);
-      }
-      context.showSnackBar(l10n.sshConfigImported('${resolved.length}'));
+        actions: [
+          if (_hasStoredSudoPassword.value == true)
+            TextButton(
+              onPressed: () async {
+                await _setPendingSudoPassword(null);
+                if (!mounted) return;
+                context.pop();
+              },
+              child: Text(libL10n.clear),
+            ),
+          TextButton(onPressed: context.pop, child: Text(libL10n.cancel)),
+          TextButton(
+            onPressed: () async => await _saveSudoPassword(controller.text),
+            child: Text(libL10n.save),
+          ),
+        ],
+      );
+    } finally {
+      controller.dispose();
     }
   }
 
-  Future<void> _onTapSSHImportWithFilePicker() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-        allowMultiple: false,
-        dialogTitle: 'SSH ${libL10n.select}',
-      );
-
-      if (result?.files.single.path case final path?) {
-        final servers = await SSHConfig.parseConfig(path);
-        if (servers.isEmpty) {
-          context.showSnackBar(l10n.sshConfigNoServers);
-          return;
-        }
-
-        await _processSSHServers(servers);
-      }
-    } catch (e, s) {
-      context.showErrDialog(e, s);
+  Future<void> _saveSudoPassword(String value) async {
+    if (value.isEmpty) {
+      context.showSnackBar(libL10n.empty);
+      return;
     }
+    await _setPendingSudoPassword(value);
+    if (!mounted) return;
+    context.pop();
+  }
+
+  Future<bool> _persistPendingSudoPassword() async {
+    if (!_sudoPasswordDirty) return true;
+    try {
+      final pending = _pendingSudoPassword;
+      if (pending == null || pending.isEmpty) {
+        await SudoPassword.clearOverride(_serverId);
+      } else {
+        await SudoPassword.writeOverride(_serverId, pending);
+      }
+      await _refreshStoredSudoPasswordState();
+      _sudoPasswordDirty = false;
+      return true;
+    } catch (e, s) {
+      Loggers.app.warning('Failed to persist sudo password override', e, s);
+      if (mounted) {
+        context.showSnackBar(libL10n.saveFailed);
+      }
+      return false;
+    }
+  }
+
+  void _setCmdTypeDisabled(
+    String display,
+    bool disabled, {
+    bool notify = true,
+  }) {
+    if (disabled) {
+      _disabledCmdTypes.value.add(display);
+    } else {
+      _disabledCmdTypes.value.remove(display);
+    }
+    if (notify) {
+      _disabledCmdTypes.notify();
+    }
+  }
+
+  bool _isCmdGroupDisabled(Iterable<ShellCmdType> cmdTypes) {
+    final disabled = _disabledCmdTypes.value;
+    return cmdTypes.every((cmdType) => disabled.contains(cmdType.displayName));
+  }
+
+  void _setCmdGroupDisabled(Iterable<ShellCmdType> cmdTypes, bool disabled) {
+    for (final cmdType in cmdTypes) {
+      _setCmdTypeDisabled(cmdType.displayName, disabled, notify: false);
+    }
+    _disabledCmdTypes.notify();
+  }
+
+  String _cmdTypeTitle(ShellCmdType cmdType) {
+    return switch (cmdType) {
+      StatusCmdType.disk ||
+      BSDStatusCmdType.disk ||
+      WindowsStatusCmdType.disk => libL10n.disk,
+      StatusCmdType.diskSmart ||
+      WindowsStatusCmdType.diskSmart => l10n.diskHealth,
+      _ => cmdType.name,
+    };
+  }
+
+  String _validationErrorMessage(SpiValidationError error) {
+    switch (error) {
+      case SpiValidationError.jumpServerAndProxyCommandConflict:
+        return l10n.jumpServerAndProxyCommandCannotBeUsedTogether;
+    }
+  }
+
+  bool _isInvalidJumpSelection(String? candidateJumpId) {
+    return _areInvalidJumpSelections(
+      candidateJumpId == null ? const [] : [candidateJumpId],
+    );
+  }
+
+  bool _areInvalidJumpSelections(Iterable<String> candidateJumpIds) {
+    final currentServer = spi;
+    return wouldCreateJumpCycleForCandidates(
+      currentServerId: currentServer?.id,
+      candidateJumpIds: candidateJumpIds,
+      serversById: ref.read(serversProvider).servers,
+    );
   }
 
   void _onTapCustomItem() async {
@@ -282,17 +214,23 @@ extension _Actions on _ServerEditPageState {
     if (_portController.text.isEmpty) {
       _portController.text = '22';
     }
-    if (_isInvalidJumpSelection(_jumpServer.value)) {
+    if (_areInvalidJumpSelections(_jumpServers.value)) {
       context.showSnackBar('${l10n.invalid}: ${l10n.jumpServer}');
       return;
     }
-
+    final proxyCommandText = _proxyCommandCtrl.text.trim();
+    if (!isDesktop && proxyCommandText.isNotEmpty) {
+      context.showSnackBar(l10n.proxyCommandOnlySupportedOnDesktop);
+      return;
+    }
     final customCmds = _customCmds.value;
     final custom = ServerCustom(
       pveAddr: _pveAddrCtrl.text.selfNotEmptyOrNull,
       pveIgnoreCert: _pveIgnoreCert.value,
+      pvePwd: _pvePwdCtrl.text.selfNotEmptyOrNull,
       cmds: customCmds.isEmpty ? null : customCmds,
       preferTempDev: _preferTempDevCtrl.text.selfNotEmptyOrNull,
+      tempIsCelsius: _tempIsCelsius.value,
       logoUrl: _logoUrlCtrl.text.selfNotEmptyOrNull,
       netDev: _netDevCtrl.text.selfNotEmptyOrNull,
       scriptDir: _scriptDirCtrl.text.selfNotEmptyOrNull,
@@ -331,16 +269,23 @@ extension _Actions on _ServerEditPageState {
       tags: _tags.value.isEmpty ? null : _tags.value.toList(),
       alterUrl: _altUrlController.text.selfNotEmptyOrNull,
       autoConnect: _autoConnect.value,
-      jumpId: _jumpServer.value,
+      jumpId: _jumpServers.value.isEmpty ? null : _jumpServers.value.first,
+      jumpIds: _jumpServers.value.isEmpty ? null : _jumpServers.value,
+      proxyCommand: proxyCommandText.selfNotEmptyOrNull,
       custom: custom,
       wolCfg: wol,
       envs: _env.value.isEmpty ? null : _env.value,
-      id: widget.args?.spi.id ?? ShortId.generate(),
+      id: _serverId,
       customSystemType: _systemType.value,
       disabledCmdTypes: _disabledCmdTypes.value.isEmpty
           ? null
           : _disabledCmdTypes.value.toList(),
     );
+    final validationError = spi.validate();
+    if (validationError != null) {
+      context.showSnackBar(_validationErrorMessage(validationError));
+      return;
+    }
 
     if (this.spi == null) {
       final existsIds = ServerStore.instance.box.keys;
@@ -348,8 +293,10 @@ extension _Actions on _ServerEditPageState {
         context.showSnackBar('${l10n.sameIdServerExist}: ${spi.id}');
         return;
       }
+      if (!await _persistPendingSudoPassword()) return;
       ref.read(serversProvider.notifier).addServer(spi);
     } else {
+      if (!await _persistPendingSudoPassword()) return;
       ref.read(serversProvider.notifier).updateServer(this.spi!, spi);
     }
 
@@ -358,60 +305,67 @@ extension _Actions on _ServerEditPageState {
 }
 
 extension _Utils on _ServerEditPageState {
-  void _checkSSHConfigImport() async {
-    final prop = Stores.setting.firstTimeReadSSHCfg;
-    // Only check if it's first time and user hasn't disabled it
-    if (!prop.fetch()) return;
+  void _markSSHConfigImportHandled() {
+    Stores.setting.firstTimeReadSSHCfg.put(false);
+  }
+
+  Future<void> _checkSSHConfigImport() async {
+    final hasExistingServers = ref.read(serversProvider).servers.isNotEmpty;
+    if (hasExistingServers) {
+      _markSSHConfigImportHandled();
+      return;
+    }
 
     try {
-      // Check if SSH config exists
-      final (_, configExists) = SSHConfig.configExists();
-      if (!configExists) return;
+      final servers = await SSHConfig.parseConfig();
+      if (!mounted) return;
+      if (servers.isEmpty) {
+        _markSSHConfigImportHandled();
+        return;
+      }
 
-      // Ask for permission
-      final hasPermission = await context.showRoundDialog<bool>(
+      final shouldImport = await context.showRoundDialog<bool>(
         title: l10n.sshConfigImport,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(l10n.sshConfigFound),
-            UIs.height7,
+            const SizedBox(height: 8),
             Text(l10n.sshConfigImportPermission),
-            UIs.height7,
-            Text(l10n.sshConfigImportHelp, style: UIs.textGrey),
           ],
         ),
         actions: Btnx.cancelOk,
       );
 
-      prop.put(false);
+      if (!mounted) return;
 
-      if (hasPermission == true) {
-        // Parse and import SSH config
-        final servers = await SSHConfig.parseConfig();
-        if (servers.isEmpty) {
-          context.showSnackBar(l10n.sshConfigNoServers);
-          return;
-        }
+      _markSSHConfigImportHandled();
 
-        final deduplicated = ServerDeduplication.deduplicateServers(servers);
-        final resolved = ServerDeduplication.resolveNameConflicts(deduplicated);
-        final summary = ServerDeduplication.getImportSummary(servers, resolved);
-
-        if (!summary.hasItemsToImport) {
-          context.showSnackBar(l10n.sshConfigAllExist('${summary.duplicates}'));
-          return;
-        }
-
-        // Import without asking again since user already gave permission
-        for (final server in resolved) {
-          ref.read(serversProvider.notifier).addServer(server);
-        }
-        context.showSnackBar(l10n.sshConfigImported('${resolved.length}'));
+      if (shouldImport == true) {
+        await ServerDeduplication.importServersWithNotification(
+          servers: servers,
+          ref: ref,
+          context: context,
+          allExistMessage: l10n.sshConfigAllExist,
+          importedMessage: l10n.sshConfigImported,
+        );
       }
-    } catch (e, s) {
-      _handleImportSSHCfgPermissionIssue(e, s);
+    } catch (e) {
+      if (!mounted) return;
+      if (e is PathAccessException ||
+          e.toString().contains('Operation not permitted')) {
+        _markSSHConfigImportHandled();
+        context.showSnackBar(
+          '${l10n.sshConfigPermissionDenied} ${l10n.sshConfigManualSelect}',
+        );
+      } else {
+        dprint('Error checking SSH config: $e');
+        _markSSHConfigImportHandled();
+        if (e is SpiValidationException) {
+          context.showSnackBar(_validationErrorMessage(e.error));
+        }
+      }
     }
   }
 
@@ -423,34 +377,27 @@ extension _Utils on _ServerEditPageState {
         child: _disabledCmdTypes.listenVal((disabled) {
           return ListView.builder(
             itemCount: allCmdTypes.length,
-            itemExtent: 50,
+            itemExtent: 72,
             itemBuilder: (context, index) {
               final cmdType = allCmdTypes.elementAtOrNull(index);
               if (cmdType == null) return UIs.placeholder;
               final display = cmdType.displayName;
               return ListTile(
                 leading: Icon(cmdType.sysType.icon, size: 20),
-                title: Text(cmdType.name, style: const TextStyle(fontSize: 16)),
+                title: Text(
+                  _cmdTypeTitle(cmdType),
+                  style: const TextStyle(fontSize: 16),
+                ),
+                subtitle: Text(cmdType.displayName, style: UIs.text12Grey),
                 trailing: Checkbox(
                   value: disabled.contains(display),
                   onChanged: (value) {
                     if (value == null) return;
-                    if (value) {
-                      _disabledCmdTypes.value.add(display);
-                    } else {
-                      _disabledCmdTypes.value.remove(display);
-                    }
-                    _disabledCmdTypes.notify();
+                    _setCmdTypeDisabled(display, value);
                   },
                 ),
                 onTap: () {
-                  final isDisabled = disabled.contains(display);
-                  if (isDisabled) {
-                    _disabledCmdTypes.value.remove(display);
-                  } else {
-                    _disabledCmdTypes.value.add(display);
-                  }
-                  _disabledCmdTypes.notify();
+                  _setCmdTypeDisabled(display, !disabled.contains(display));
                 },
               );
             },
@@ -480,14 +427,17 @@ extension _Utils on _ServerEditPageState {
 
     _altUrlController.text = spi.alterUrl ?? '';
     _autoConnect.value = spi.autoConnect;
-    _jumpServer.value = spi.jumpId;
+    _jumpServers.value = spi.resolvedJumpIds;
+    _proxyCommandCtrl.text = spi.proxyCommand ?? '';
 
     final custom = spi.custom;
     if (custom != null) {
       _pveAddrCtrl.text = custom.pveAddr ?? '';
       _pveIgnoreCert.value = custom.pveIgnoreCert;
+      _pvePwdCtrl.text = custom.pvePwd ?? '';
       _customCmds.value = custom.cmds ?? {};
       _preferTempDevCtrl.text = custom.preferTempDev ?? '';
+      _tempIsCelsius.value = custom.tempIsCelsius;
       _logoUrlCtrl.text = custom.logoUrl ?? '';
     }
 

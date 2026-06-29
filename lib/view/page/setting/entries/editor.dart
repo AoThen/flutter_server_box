@@ -1,10 +1,23 @@
 part of '../entry.dart';
 
 extension _Editor on _AppSettingsPageState {
+  Future<void> _pickEditorTheme(HiveProp<String> property) async {
+    final selected = await context.showPickSingleDialog(
+      title: libL10n.theme,
+      items: themeMap.keys.toList(),
+      display: (p0) => p0,
+      initial: property.fetch(),
+    );
+    if (selected != null) {
+      property.put(selected);
+    }
+  }
+
   Widget _buildEditor() {
     return Column(
       children: [
         _buildEditorWrap(),
+        _buildEditorFontFamily(),
         _buildEditorFontSize(),
         _buildEditorTheme(),
         _buildEditorDarkTheme(),
@@ -25,8 +38,6 @@ extension _Editor on _AppSettingsPageState {
   Widget _buildEditorHighlight() {
     return ListTile(
       leading: const Icon(MingCute.code_line, size: _kIconSize),
-      // title: Text(l10n.highlight),
-      // subtitle: Text(l10n.editorHighlightTip, style: UIs.textGrey),
       title: TipText(l10n.highlight, l10n.editorHighlightTip),
       trailing: StoreSwitch(prop: _setting.editorHighlight),
     );
@@ -40,17 +51,7 @@ extension _Editor on _AppSettingsPageState {
         listenable: _setting.editorTheme.listenable(),
         builder: (val) => Text(val, style: UIs.text15),
       ),
-      onTap: () async {
-        final selected = await context.showPickSingleDialog(
-          title: libL10n.theme,
-          items: themeMap.keys.toList(),
-          display: (p0) => p0,
-          initial: _setting.editorTheme.fetch(),
-        );
-        if (selected != null) {
-          _setting.editorTheme.put(selected);
-        }
-      },
+      onTap: () => _pickEditorTheme(_setting.editorTheme),
     );
   }
 
@@ -62,17 +63,7 @@ extension _Editor on _AppSettingsPageState {
         listenable: _setting.editorDarkTheme.listenable(),
         builder: (val) => Text(val, style: UIs.text15),
       ),
-      onTap: () async {
-        final selected = await context.showPickSingleDialog(
-          title: libL10n.theme,
-          items: themeMap.keys.toList(),
-          display: (p0) => p0,
-          initial: _setting.editorDarkTheme.fetch(),
-        );
-        if (selected != null) {
-          _setting.editorDarkTheme.put(selected);
-        }
-      },
+      onTap: () => _pickEditorTheme(_setting.editorDarkTheme),
     );
   }
 
@@ -93,6 +84,32 @@ extension _Editor on _AppSettingsPageState {
         builder: (val) => Text(val.toString(), style: UIs.text15),
       ),
       onTap: () => _showFontSizeDialog(_setting.editorFontSize),
+    );
+  }
+
+  Widget _buildEditorFontFamily() {
+    return ListTile(
+      leading: const Icon(MingCute.font_fill),
+      title: Text(libL10n.font),
+      trailing: ValBuilder(
+        listenable: _setting.editorFontFamily.listenable(),
+        builder: (val) => Text(
+          val.isEmpty ? libL10n.auto.toLowerCase() : val,
+          style: UIs.text15,
+        ),
+      ),
+      onTap: () => _showFontFamilyDialog(_setting.editorFontFamily),
+    );
+  }
+
+  void _showFontFamilyDialog(HiveProp<String> property) {
+    showTextSettingDialog(
+      title: libL10n.font,
+      initialValue: property.fetch() ?? '',
+      label: libL10n.font,
+      hint: 'monospace / Consolas / Fira Code ...',
+      icon: Icons.font_download,
+      onSave: property.put,
     );
   }
 

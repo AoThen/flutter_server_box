@@ -4,6 +4,8 @@ import 'package:fl_lib/fl_lib.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:server_box/core/sync.dart';
+import 'package:server_box/core/utils/refresh_interval.dart';
+import 'package:server_box/core/utils/sudo_password.dart';
 import 'package:server_box/data/model/server/server.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/model/server/try_limiter.dart';
@@ -33,6 +35,7 @@ class ServersNotifier extends _$ServersNotifier {
   }
 
   Future<void> reload() async {
+    Stores.server.invalidateCache();
     final newState = _load();
     if (newState == state) return;
     state = newState;
@@ -63,8 +66,16 @@ class ServersNotifier extends _$ServersNotifier {
 
     final newTags = _calculateTags(newServers);
 
-    return stateOrNull?.copyWith(servers: newServers, serverOrder: newServerOrder, tags: newTags) ??
-        ServersState(servers: newServers, serverOrder: newServerOrder, tags: newTags);
+    return stateOrNull?.copyWith(
+          servers: newServers,
+          serverOrder: newServerOrder,
+          tags: newTags,
+        ) ??
+        ServersState(
+          servers: newServers,
+          serverOrder: newServerOrder,
+          tags: newTags,
+        );
   }
 
   Set<String> _calculateTags(Map<String, Spi> servers) {
@@ -77,6 +88,18 @@ class ServersNotifier extends _$ServersNotifier {
       }
     }
     return tags;
+  }
+
+  Future<void> _clearSudoPasswordOverrideBestEffort(String id) async {
+    try {
+      await SudoPassword.clearOverride(id);
+    } catch (e, s) {
+      Loggers.app.warning(
+        'Failed to clear sudo password override for server $id',
+        e,
+        s,
+      );
+    }
   }
 
   /// Get a [Spi] by [spi] or [id].
@@ -96,7 +119,9 @@ class ServersNotifier extends _$ServersNotifier {
   /// [onlyFailed] only refresh failed servers
   Future<void> refresh({Spi? spi, bool onlyFailed = false}) async {
     if (spi != null) {
-      final newManualDisconnected = Set<String>.from(state.manualDisconnectedIds)..remove(spi.id);
+      final newManualDisconnected = Set<String>.from(
+        state.manualDisconnectedIds,
+      )..remove(spi.id);
       state = state.copyWith(manualDisconnectedIds: newManualDisconnected);
       final serverNotifier = ref.read(serverProvider(spi.id).notifier);
       await serverNotifier.refresh();
@@ -115,11 +140,15 @@ class ServersNotifier extends _$ServersNotifier {
       final serverState = ref.read(serverProvider(serverId));
 
       if (onlyFailed) {
-        if (serverState.conn != ServerConn.failed) continue;
+        if (serverState.conn != ServerConn.failed) {
+          continue;
+        }
         idsToResetLimiter.add(serverId);
       }
 
-      if (serverState.conn == ServerConn.disconnected && !spi.autoConnect) continue;
+      if (serverState.conn == ServerConn.disconnected && !spi.autoConnect) {
+        continue;
+      }
 
       serversToRefresh.add(entry);
     }
@@ -135,12 +164,16 @@ class ServersNotifier extends _$ServersNotifier {
   }
 
   Future<void> startAutoRefresh() async {
-    var duration = Stores.setting.serverStatusUpdateInterval.fetch();
     stopAutoRefresh();
-    if (duration == 0) return;
-    if (duration <= 1 || duration > 10) {
-      Loggers.app.warning('Invalid duration: $duration, use default 3');
-      duration = 3;
+    final rawDuration = Stores.setting.serverStatusUpdateInterval.fetch();
+    final duration = normalizeServerStatusRefreshSeconds(rawDuration);
+    if (duration == null) {
+      return;
+    }
+    if (duration != rawDuration) {
+      Loggers.app.warning(
+        'Invalid duration: $rawDuration, use default $duration',
+      );
     }
     final timer = Timer.periodic(Duration(seconds: duration), (_) async {
       await refresh();
@@ -165,9 +198,11 @@ class ServersNotifier extends _$ServersNotifier {
 
       // Update SSH session status to disconnected
       final sessionId = 'ssh_$serverId';
-      TermSessionManager.updateStatus(sessionId, TermSessionStatus.disconnected);
+      TermSessionManager.updateStatus(
+        sessionId,
+        TermSessionStatus.disconnected,
+      );
     }
-    //TryLimiter.clear();
   }
 
   void closeServer({String? id}) {
@@ -190,7 +225,8 @@ class ServersNotifier extends _$ServersNotifier {
     final serverNotifier = ref.read(serverProvider(id).notifier);
     serverNotifier.closeConnection();
 
-    final newManualDisconnected = Set<String>.from(state.manualDisconnectedIds)..add(id);
+    final newManualDisconnected = Set<String>.from(state.manualDisconnectedIds)
+      ..add(id);
     state = state.copyWith(manualDisconnectedIds: newManualDisconnected);
 
     // Remove SSH session when server is manually closed
@@ -199,13 +235,22 @@ class ServersNotifier extends _$ServersNotifier {
   }
 
   void addServer(Spi spi) {
+    spi.validateOrThrow();
+
     final newServers = Map<String, Spi>.from(state.servers);
     newServers[spi.id] = spi;
 
     final newOrder = List<String>.from(state.serverOrder)..add(spi.id);
     final newTags = _calculateTags(newServers);
+    final newManualDisconnected = Set<String>.from(state.manualDisconnectedIds)
+      ..remove(spi.id);
 
-    state = state.copyWith(servers: newServers, serverOrder: newOrder, tags: newTags);
+    state = state.copyWith(
+      servers: newServers,
+      serverOrder: newOrder,
+      tags: newTags,
+      manualDisconnectedIds: newManualDisconnected,
+    );
 
     Stores.server.put(spi);
     Stores.setting.serverOrder.put(newOrder);
@@ -213,17 +258,27 @@ class ServersNotifier extends _$ServersNotifier {
     bakSync.sync(milliDelay: 1000);
   }
 
-  void delServer(String id) {
+  Future<void> delServer(String id) async {
     final newServers = Map<String, Spi>.from(state.servers);
     newServers.remove(id);
 
     final newOrder = List<String>.from(state.serverOrder)..remove(id);
     final newTags = _calculateTags(newServers);
+    final newManualDisconnected = Set<String>.from(state.manualDisconnectedIds)
+      ..remove(id);
 
-    state = state.copyWith(servers: newServers, serverOrder: newOrder, tags: newTags);
+    state = state.copyWith(
+      servers: newServers,
+      serverOrder: newOrder,
+      tags: newTags,
+      manualDisconnectedIds: newManualDisconnected,
+    );
 
     Stores.setting.serverOrder.put(newOrder);
-    Stores.server.delete(id);
+    Stores.server.deleteById(id);
+    await _clearSudoPasswordOverrideBestEffort(id);
+
+    await Stores.connectionStats.clearServerStats(id);
 
     // Remove SSH session when server is deleted
     final sessionId = 'ssh_$id';
@@ -232,9 +287,11 @@ class ServersNotifier extends _$ServersNotifier {
     bakSync.sync(milliDelay: 1000);
   }
 
-  void deleteAll() {
+  Future<void> deleteAll() async {
+    final serverIds = state.servers.keys.toList();
+
     // Remove all SSH sessions before clearing servers
-    for (final id in state.servers.keys) {
+    for (final id in serverIds) {
       final sessionId = 'ssh_$id';
       TermSessionManager.remove(sessionId);
     }
@@ -243,6 +300,8 @@ class ServersNotifier extends _$ServersNotifier {
 
     Stores.setting.serverOrder.put([]);
     Stores.server.clear();
+    await Future.wait(serverIds.map(_clearSudoPasswordOverrideBestEffort));
+    await Stores.connectionStats.clearAll();
     bakSync.sync(milliDelay: 1000);
   }
 
@@ -291,22 +350,31 @@ class ServersNotifier extends _$ServersNotifier {
   }
 
   Future<void> updateServer(Spi old, Spi newSpi) async {
+    newSpi.validateOrThrow();
+
     if (old != newSpi) {
       Stores.server.update(old, newSpi);
 
       final newServers = Map<String, Spi>.from(state.servers);
       final newOrder = List<String>.from(state.serverOrder);
+      final newManualDisconnected = Set<String>.from(
+        state.manualDisconnectedIds,
+      );
 
       if (newSpi.id != old.id) {
         newServers[newSpi.id] = newSpi;
         newServers.remove(old.id);
         newOrder.update(old.id, newSpi.id);
+        if (newManualDisconnected.remove(old.id)) {
+          newManualDisconnected.add(newSpi.id);
+        }
         Stores.setting.serverOrder.put(newOrder);
 
         // Update SSH session ID when server ID changes
         final oldSessionId = 'ssh_${old.id}';
         TermSessionManager.remove(oldSessionId);
         // Session will be re-added when reconnecting if necessary
+        await _clearSudoPasswordOverrideBestEffort(old.id);
       } else {
         newServers[old.id] = newSpi;
         // Update SPI in the corresponding IndividualServerNotifier
@@ -315,7 +383,12 @@ class ServersNotifier extends _$ServersNotifier {
       }
 
       final newTags = _calculateTags(newServers);
-      state = state.copyWith(servers: newServers, serverOrder: newOrder, tags: newTags);
+      state = state.copyWith(
+        servers: newServers,
+        serverOrder: newOrder,
+        tags: newTags,
+        manualDisconnectedIds: newManualDisconnected,
+      );
 
       // Only reconnect if neccessary
       if (newSpi.shouldReconnect(old)) {

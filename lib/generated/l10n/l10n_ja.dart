@@ -31,6 +31,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get askAi => 'AI に質問';
 
   @override
+  String get ai => 'AI';
+
+  @override
   String get askAiApiKey => 'API キー';
 
   @override
@@ -38,6 +41,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get askAiBaseUrl => 'ベース URL';
+
+  @override
+  String get askAiEndpointTip =>
+      'Enter the full Chat Completions endpoint, or a service base URL. If the address ends with /v1, the app will append /chat/completions.';
 
   @override
   String get askAiCommandInserted => 'コマンドをターミナルに挿入しました';
@@ -124,6 +131,35 @@ class AppLocalizationsJa extends AppLocalizations {
   String get backupVersionNotMatch => 'バックアップバージョンが一致しないため、復元できません';
 
   @override
+  String get icloudBackupStatusTitle => 'Backup status';
+
+  @override
+  String get icloudBackupStatusLoading => 'Loading iCloud backup status...';
+
+  @override
+  String get icloudBackupStatusError => 'Unable to read iCloud backup metadata';
+
+  @override
+  String get icloudBackupStatusEmpty => 'No iCloud backup file found yet';
+
+  @override
+  String get icloudBackupStateUploading => 'Uploading';
+
+  @override
+  String get icloudBackupStateConflict => 'Conflict detected';
+
+  @override
+  String get icloudBackupStateUploaded => 'Uploaded';
+
+  @override
+  String get icloudBackupStateWaiting => 'Waiting for iCloud';
+
+  @override
+  String icloudBackupStatusSummary(Object lastModified, Object remoteState) {
+    return 'Last backup: $lastModified\nStatus: $remoteState';
+  }
+
+  @override
   String get bgRun => 'バックグラウンド実行';
 
   @override
@@ -195,6 +231,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get cursorType => 'カーソルタイプ';
+
+  @override
+  String get configured => 'Configured';
 
   @override
   String get customCmd => 'カスタムコマンド';
@@ -333,6 +372,18 @@ class AppLocalizationsJa extends AppLocalizations {
       'デバイスが横向きに回転したときにフルスクリーンモードを有効にしますか？このオプションはサーバータブにのみ適用されます。';
 
   @override
+  String get githubGist => 'GitHub Gist';
+
+  @override
+  String get githubGistIdOptional => 'Gist ID (optional)';
+
+  @override
+  String get githubGistToken => 'GitHub Gist token';
+
+  @override
+  String get githubGistTokenEmpty => 'Token is empty';
+
+  @override
   String get goBackQ => '戻りますか？';
 
   @override
@@ -368,6 +419,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get imagesList => 'イメージリスト';
 
   @override
+  String get pull => 'プル';
+
+  @override
   String get installDockerWithUrl =>
       '最初に https://docs.docker.com/engine/install dockerをインストールしてください';
 
@@ -375,11 +429,26 @@ class AppLocalizationsJa extends AppLocalizations {
   String get invalid => '無効';
 
   @override
+  String get invalidUrl => 'Invalid URL';
+
+  @override
   String get invalidHostFormat =>
       'Invalid host format. Only IPv4, IPv6, and domain characters are allowed.';
 
   @override
   String get jumpServer => 'ジャンプサーバー';
+
+  @override
+  String jumpServersNotFoundFmt(Object serverName, Object jumpIds) {
+    return 'Jump servers not found for $serverName: $jumpIds';
+  }
+
+  @override
+  String get noJumpServerAvailable => 'No jump server available.';
+
+  @override
+  String get jumpServerAndProxyCommandCannotBeUsedTogether =>
+      'Jump server and ProxyCommand cannot be used together.';
 
   @override
   String get keepForeground => 'アプリを前面に保ってください！';
@@ -400,10 +469,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get lastSuccess => '最後の成功';
 
   @override
-  String get letterCache => '文字キャッシング';
+  String get letterCache => '通常キーボード入力';
 
   @override
-  String get letterCacheTip => '無効にすることを推奨しますが、無効にした後はCJK文字を入力することができなくなります。';
+  String get letterCacheTip =>
+      '有効にすると入力内容は通常のIMEを経由し、一部のシステムでターミナルにセキュアキーボードの案内が表示されるのを避けられます。';
 
   @override
   String madeWithLove(Object myGithub) {
@@ -424,6 +494,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get min => '最小';
+
+  @override
+  String mismatchSystem(Object system) {
+    return 'システムが一致しません: $system';
+  }
 
   @override
   String get more => 'もっと';
@@ -510,6 +585,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pushToken => 'プッシュトークン';
 
   @override
+  String get proxyCommandOnlySupportedOnDesktop =>
+      'ProxyCommand is only supported on desktop platforms.';
+
+  @override
   String get pveIgnoreCertTip =>
       'オプションを有効にすることは推奨されません、セキュリティリスクに注意してください！PVEのデフォルト証明書を使用している場合は、このオプションを有効にする必要があります。';
 
@@ -518,13 +597,80 @@ class AppLocalizationsJa extends AppLocalizations {
       'ログインに失敗しました。Linux PAMログインのためにサーバー構成からのユーザー名/パスワードで認証できません。';
 
   @override
+  String get pveServerClientMissing =>
+      'The SSH client for this server is not available.';
+
+  @override
+  String get pveAddressMissing =>
+      'The PVE address is missing. Please configure it in server settings.';
+
+  @override
+  String get pvePasswordRequired =>
+      'PVE password is required. Please set it in server settings.';
+
+  @override
+  String get pveOtpRequired =>
+      'Two-factor authentication is enabled on this PVE server. Please enter the OTP code.';
+
+  @override
+  String get pveOtpChallengeExpired =>
+      'The OTP challenge has expired. Please refresh and try again.';
+
+  @override
+  String get pveOtpCodeRequired => 'OTP code is required.';
+
+  @override
+  String get pveOtpVerificationFailed =>
+      'OTP verification failed. Please try again with a fresh code.';
+
+  @override
+  String get pveOtpTitle => 'OTP Verification';
+
+  @override
+  String get pveOtpLabel => 'OTP Code';
+
+  @override
+  String get pveInvalidResponseBody =>
+      'PVE login returned an invalid response body.';
+
+  @override
+  String get pveInvalidResponseData =>
+      'PVE login response did not contain a valid data payload.';
+
+  @override
+  String get pveMissingAuthTicket =>
+      'PVE login succeeded but no authentication ticket was returned.';
+
+  @override
   String get pveVersionLow => 'この機能は現在テスト段階にあり、PVE 8+でのみテストされています。ご利用の際は慎重に。';
+
+  @override
+  String get pveLoadingForwarding => 'Establishing SSH tunnel...';
+
+  @override
+  String get pveLoadingLogin => 'Authenticating with PVE...';
+
+  @override
+  String get pveLoadingData => 'Fetching cluster data...';
+
+  @override
+  String get pveLoadingConnect => 'Connecting...';
+
+  @override
+  String get pvePassword => 'PVE Password';
+
+  @override
+  String get pvePasswordHint =>
+      'Required when using key-based SSH authentication';
 
   @override
   String get read => '読み取り';
 
   @override
   String get recentConnections => '最近の接続';
+
+  @override
+  String get reconnecting => '再接続中...';
 
   @override
   String get rememberPwdInMem => 'メモリにパスワードを記憶する';
@@ -579,6 +725,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sftpSSHConnected => 'SFTPに接続されました...';
 
   @override
+  String get sftp => 'SFTP';
+
+  @override
   String get sftpShowFoldersFirst => 'フォルダーを先に表示';
 
   @override
@@ -598,6 +747,10 @@ class AppLocalizationsJa extends AppLocalizations {
       '例えば、ネットワークトラフィック統計はデフォルトですべてのデバイスに対するものです。ここで特定のデバイスを指定できます。';
 
   @override
+  String get tempIsCelsiusTip =>
+      'When enabled, the temperature value will be treated as Celsius instead of millicelsius. Turn on only if the temperature displays incorrectly (e.g., showing 0.1°C instead of 58°C).';
+
+  @override
   String get speed => '速度';
 
   @override
@@ -609,6 +762,28 @@ class AppLocalizationsJa extends AppLocalizations {
   String sshConfigAllExist(Object duplicateCount) {
     return 'すべてのサーバーがすでに存在します（$duplicateCount個の重複が見つかりました）';
   }
+
+  @override
+  String get ssh => 'SSH';
+
+  @override
+  String get sshConnectionMode => 'SSH connection mode';
+
+  @override
+  String get sshConnectionModeBuiltin => 'Built-in';
+
+  @override
+  String get sshConnectionModeSystem => 'System SSH';
+
+  @override
+  String get sshConnectionModeTip =>
+      'Built-in: use the app\'s terminal. System SSH: launch the system ssh command in an external terminal.';
+
+  @override
+  String get sshConnectionModeUseBuiltin => 'Use built-in terminal';
+
+  @override
+  String get sshConnectionModeUseSystem => 'Use system SSH';
 
   @override
   String sshConfigDuplicatesSkipped(Object duplicateCount) {
@@ -710,6 +885,13 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get syncAppSettings => 'Sync app settings';
+
+  @override
+  String get syncAppSettingsTip =>
+      'Include theme, layout, editor, terminal and other device preferences in automatic sync.';
+
+  @override
   String get syncTip => '再起動が必要な場合があります。一部の変更はその後に有効になります。';
 
   @override
@@ -740,6 +922,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get trySudo => 'sudoを試みる';
+
+  @override
+  String get sudoPromptNotFound => 'sudo のパスワード入力プロンプトがありません。';
 
   @override
   String get unknown => '不明';
@@ -810,6 +995,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get whenOpenApp => 'アプリを開くとき';
 
   @override
+  String get wiki => 'Wiki';
+
+  @override
   String get wolTip => 'WOL（Wake-on-LAN）を設定した後、サーバーに接続するたびにWOLリクエストが送信されます。';
 
   @override
@@ -829,4 +1017,68 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get podmanDockerEmulationDetected =>
       'Podman Docker エミュレーションが検出されました。設定で Podman に切り替えてください。';
+
+  @override
+  String get portForwardBeta =>
+      'This feature is still in beta testing. Functionality is not guaranteed.';
+
+  @override
+  String get portForward_startPrompt =>
+      'Add a port forward rule to get started';
+
+  @override
+  String get portForward_localHost => 'Local Host';
+
+  @override
+  String get portForward_localPort => 'Local Port';
+
+  @override
+  String get portForward_remoteHost => 'Remote Host';
+
+  @override
+  String get portForward_remotePort => 'Remote Port';
+
+  @override
+  String get portForward_type_local => 'Local';
+
+  @override
+  String get portForward_type_remote => 'Remote';
+
+  @override
+  String portForward_deleteConfirmFmt(Object name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get sponsor => '赞助';
+
+  @override
+  String get sort => 'Sort';
+
+  @override
+  String get sortByName => 'By name';
+
+  @override
+  String get sortByJoinTime => 'By join time';
+
+  @override
+  String get ascending => 'Ascending';
+
+  @override
+  String get descending => 'Descending';
+
+  @override
+  String get searchServer => 'Search server';
+
+  @override
+  String get serverHistory => 'Server history';
+
+  @override
+  String get clearHistory => 'Clear history';
+
+  @override
+  String get portForwardBetaTitle => 'Port Forward (Beta)';
+
+  @override
+  String get systemd => 'Systemd';
 }

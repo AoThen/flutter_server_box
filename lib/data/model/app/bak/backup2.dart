@@ -41,30 +41,59 @@ abstract class BackupV2 with _$BackupV2 implements Mergeable {
     required Map<String, Object?> settings,
   }) = _BackupV2;
 
-  factory BackupV2.fromJson(Map<String, dynamic> json) => _$BackupV2FromJson(json);
+  factory BackupV2.fromJson(Map<String, dynamic> json) =>
+      _$BackupV2FromJson(json);
 
   @override
   Future<void> merge({bool force = false}) async {
     _loggerV2.info('Merging...');
 
-    // Merge each store and check if changes were made
-    final serverChanged = await Mergeable.mergeStore(backupData: spis, store: Stores.server, force: force);
-    final snippetChanged = await Mergeable.mergeStore(backupData: snippets, store: Stores.snippet, force: force);
-    final keyChanged = await Mergeable.mergeStore(backupData: keys, store: Stores.key, force: force);
-    await Mergeable.mergeStore(backupData: container, store: Stores.container, force: force);
-    await Mergeable.mergeStore(backupData: history, store: Stores.history, force: force);
-    await Mergeable.mergeStore(backupData: settings, store: Stores.setting, force: force);
+    final results = await Future.wait([
+      Mergeable.mergeStore(
+        backupData: spis,
+        store: Stores.server,
+        force: force,
+      ),
+      Mergeable.mergeStore(
+        backupData: snippets,
+        store: Stores.snippet,
+        force: force,
+      ),
+      Mergeable.mergeStore(
+        backupData: keys,
+        store: Stores.key,
+        force: force,
+      ),
+      Mergeable.mergeStore(
+        backupData: container,
+        store: Stores.container,
+        force: force,
+      ),
+      Mergeable.mergeStore(
+        backupData: history,
+        store: Stores.history,
+        force: force,
+      ),
+      if (settings.isNotEmpty)
+        Mergeable.mergeStore(
+          backupData: settings,
+          store: Stores.setting,
+          force: force,
+        )
+      else
+        Future.value(false),
+    ]);
 
-    if (serverChanged) GlobalRef.gRef?.read(serversProvider.notifier).reload();
-    if (snippetChanged) GlobalRef.gRef?.read(snippetProvider.notifier).reload();
-    if (keyChanged) GlobalRef.gRef?.read(privateKeyProvider.notifier).reload();
+    if (results[0]) GlobalRef.gRef?.read(serversProvider.notifier).reload();
+    if (results[1]) GlobalRef.gRef?.read(snippetProvider.notifier).reload();
+    if (results[2]) GlobalRef.gRef?.read(privateKeyProvider.notifier).reload();
 
     _loggerV2.info('Merge completed');
   }
 
   static const formatVer = 2;
 
-  static Future<BackupV2> loadFromStore() async {
+  static Future<BackupV2> loadFromStore({bool includeSettings = true}) async {
     return BackupV2(
       version: formatVer,
       date: DateTimeX.timestamp,
@@ -73,13 +102,19 @@ abstract class BackupV2 with _$BackupV2 implements Mergeable {
       keys: Stores.key.getAllMap(includeInternalKeys: true),
       container: Stores.container.getAllMap(includeInternalKeys: true),
       history: Stores.history.getAllMap(includeInternalKeys: true),
-      settings: Stores.setting.getAllMap(includeInternalKeys: true),
+      settings: includeSettings
+          ? Stores.setting.getAllMap(includeInternalKeys: true)
+          : const {},
     );
   }
 
-  static Future<String> backup([String? name, String? password]) async {
-    final bak = await BackupV2.loadFromStore();
-    var result = json.encode(bak.toJson());
+  static Future<String> backup([
+    String? name,
+    String? password,
+    bool includeSettings = true,
+  ]) async {
+    final bak = await BackupV2.loadFromStore(includeSettings: includeSettings);
+    var result = json.encode(bak.toJson(), toEncodable: _toEncodable);
 
     if (password != null && password.isNotEmpty) {
       result = Cryptor.encrypt(result, password);
@@ -101,4 +136,11 @@ abstract class BackupV2 with _$BackupV2 implements Mergeable {
     final map = json.decode(jsonString) as Map<String, dynamic>;
     return BackupV2.fromJson(map);
   }
+}
+
+Object? _toEncodable(Object? value) {
+  if (value is Enum) return value.name;
+  _loggerV2.warning('Non-JSON-encodable type: ${value.runtimeType}, '
+      'serialized via toString() and may not be deserializable');
+  return value.toString();
 }

@@ -6,10 +6,22 @@ import 'dart:io';
 import 'package:fl_lib/fl_lib.dart';
 import 'package:server_box/data/model/server/discovery_result.dart';
 
+// Pre-compiled RegExp patterns for SSH discovery
+final _whitespaceRegExp = RegExp(r'\s+');
+final _ipv4InParenthesesRegExp = RegExp(r'\((\d+\.\d+\.\d+\.\d+)\)');
+final _interfaceRegExp = RegExp(r'^([a-z0-9]+):');
+final _ipv4AddrRegExp = RegExp(r'inet (\d+\.\d+\.\d+\.\d+)/(\d+)');
+final _ifconfigAddrRegExp = RegExp(r'inet\s+(\d+\.\d+\.\d+\.\d+)\s+netmask\s+0x([0-9a-fA-F]+)(?:\s+broadcast\s+(\d+\.\d+\.\d+\.\d+))?');
+final _sshServiceRegExp = RegExp(r'Add\s+\d+\s+(\S+)\.\s+_ssh\._tcp\.');
+final _dnsSdAddressRegExp = RegExp(r'Address\s*=\s*([0-9a-fA-F:\.]+)');
+final _avahiAddressRegExp = RegExp(r'address = \[(.*?)\]');
+
 class SshDiscoveryService {
   static const _sshPort = 22;
 
-  static Future<SshDiscoveryReport> discover([SshDiscoveryConfig config = const SshDiscoveryConfig()]) async {
+  static Future<SshDiscoveryReport> discover([
+    SshDiscoveryConfig config = const SshDiscoveryConfig(),
+  ]) async {
     final t0 = DateTime.now();
     final candidates = <InternetAddress>{};
 
@@ -32,7 +44,11 @@ class SshDiscoveryService {
 
     // Filter out unwanted addresses: loopback, link-local, 0.0.0.0, broadcast, multicast
     candidates.removeWhere(
-      (a) => a.isLoopback || a.isLinkLocal || a.address == '0.0.0.0' || _isBroadcastOrMulticast(a),
+      (a) =>
+          a.isLoopback ||
+          a.isLinkLocal ||
+          a.address == '0.0.0.0' ||
+          _isBroadcastOrMulticast(a),
     );
 
     // 4) Concurrent SSH port scanning
@@ -45,7 +61,13 @@ class SshDiscoveryService {
     results.sort((a, b) => a.addr.address.compareTo(b.addr.address));
 
     final discoveryResults = results
-        .map((r) => SshDiscoveryResult(ip: r.addr.address, port: _sshPort, banner: r.banner?.trim()))
+        .map(
+          (r) => SshDiscoveryResult(
+            ip: r.addr.address,
+            port: _sshPort,
+            banner: r.banner?.trim(),
+          ),
+        )
         .toList();
 
     return SshDiscoveryReport(
@@ -56,7 +78,11 @@ class SshDiscoveryService {
     );
   }
 
-  static Future<String?> _run(String exe, List<String> args, {Duration? timeout}) async {
+  static Future<String?> _run(
+    String exe,
+    List<String> args, {
+    Duration? timeout,
+  }) async {
     try {
       final p = await Process.start(exe, args, runInShell: false);
       final out = await p.stdout
@@ -75,7 +101,11 @@ class SshDiscoveryService {
       if (out.trim().isNotEmpty) return out;
       return null;
     } catch (e, s) {
-      Loggers.app.warning('Failed to run command: $exe ${args.join(' ')}', e, s);
+      Loggers.app.warning(
+        'Failed to run command: $exe ${args.join(' ')}',
+        e,
+        s,
+      );
       return null;
     }
   }
@@ -89,10 +119,11 @@ class SshDiscoveryService {
       final s = await _run('ip', ['neigh']);
       if (s != null) {
         for (final line in const LineSplitter().convert(s)) {
-          final tok = line.split(RegExp(r'\s+'));
+          final tok = line.split(_whitespaceRegExp);
           if (tok.isNotEmpty) {
             final ip = tok[0];
-            if (InternetAddress.tryParse(ip)?.type == InternetAddressType.IPv4) {
+            if (InternetAddress.tryParse(ip)?.type ==
+                InternetAddressType.IPv4) {
               set.add(InternetAddress(ip));
             }
           }
@@ -103,7 +134,7 @@ class SshDiscoveryService {
       if (s != null) {
         int matchCount = 0;
         for (final line in const LineSplitter().convert(s)) {
-          final m = RegExp(r'\((\d+\.\d+\.\d+\.\d+)\)').firstMatch(line);
+          final m = _ipv4InParenthesesRegExp.firstMatch(line);
           if (m != null) {
             set.add(InternetAddress(m.group(1)!));
             matchCount++;
@@ -125,8 +156,9 @@ class SshDiscoveryService {
       final s = await _run('ip', ['-6', 'neigh']);
       if (s != null) {
         for (final line in const LineSplitter().convert(s)) {
-          final ip = line.split(RegExp(r'\s+')).firstOrNull;
-          if (ip != null && InternetAddress.tryParse(ip)?.type == InternetAddressType.IPv6) {
+          final ip = line.split(_whitespaceRegExp).firstOrNull;
+          if (ip != null &&
+              InternetAddress.tryParse(ip)?.type == InternetAddressType.IPv6) {
             set.add(InternetAddress(ip));
           }
         }
@@ -135,8 +167,9 @@ class SshDiscoveryService {
       final s = await _run('/usr/sbin/ndp', ['-a']);
       if (s != null) {
         for (final line in const LineSplitter().convert(s)) {
-          final ip = line.trim().split(RegExp(r'\s+')).firstOrNull;
-          if (ip != null && InternetAddress.tryParse(ip)?.type == InternetAddressType.IPv6) {
+          final ip = line.trim().split(_whitespaceRegExp).firstOrNull;
+          if (ip != null &&
+              InternetAddress.tryParse(ip)?.type == InternetAddressType.IPv6) {
             set.add(InternetAddress(ip));
           }
         }
@@ -148,10 +181,17 @@ class SshDiscoveryService {
   static Future<List<_Cidr>> _localIPv4Cidrs() async {
     final res = <_Cidr>[];
     if (_isLinux) {
-      final s = await _run('ip', ['-o', '-4', 'addr', 'show', 'scope', 'global']);
+      final s = await _run('ip', [
+        '-o',
+        '-4',
+        'addr',
+        'show',
+        'scope',
+        'global',
+      ]);
       if (s != null) {
         for (final line in const LineSplitter().convert(s)) {
-          final m = RegExp(r'inet\s+(\d+\.\d+\.\d+\.\d+)\/(\d+)').firstMatch(line);
+          final m = _ipv4AddrRegExp.firstMatch(line);
           if (m != null) {
             final ip = InternetAddress(m.group(1)!);
             final prefix = int.parse(m.group(2)!);
@@ -167,17 +207,17 @@ class SshDiscoveryService {
       if (s != null) {
         for (final raw in const LineSplitter().convert(s)) {
           final line = raw.trimRight();
-          final ifMatch = RegExp(r'^([a-z0-9]+):').firstMatch(line);
+          final ifMatch = _interfaceRegExp.firstMatch(line);
           if (ifMatch != null) {
             continue;
           }
           if (line.contains('inet ') && !line.contains('127.0.0.1')) {
             try {
-              final ipm = RegExp(
-                r'inet\s+(\d+\.\d+\.\d+\.\d+)\s+netmask\s+0x([0-9a-fA-F]+)(?:\s+broadcast\s+(\d+\.\d+\.\d+\.\d+))?',
-              ).firstMatch(line);
+              final ipm = _ifconfigAddrRegExp.firstMatch(line);
               if (ipm == null) {
-                Loggers.app.warning('[ssh_discovery] Warning: Unexpected ifconfig line format: $line');
+                Loggers.app.warning(
+                  '[ssh_discovery] Warning: Unexpected ifconfig line format: $line',
+                );
                 continue;
               }
               final ip = InternetAddress(ipm.group(1)!);
@@ -187,10 +227,14 @@ class SshDiscoveryService {
               final mask = InternetAddress(dotted);
               final prefix = _maskToPrefix(mask.address);
               final net = _networkAddress(ip, mask);
-              final brd = InternetAddress(ipm.group(3) ?? _broadcastAddress(ip, mask).address);
+              final brd = InternetAddress(
+                ipm.group(3) ?? _broadcastAddress(ip, mask).address,
+              );
               res.add(_Cidr(ip, prefix, mask, net, brd));
             } catch (e) {
-              Loggers.app.warning('[ssh_discovery] Error parsing ifconfig output: $e, line: $line');
+              Loggers.app.warning(
+                '[ssh_discovery] Error parsing ifconfig output: $e, line: $line',
+              );
               continue;
             }
           }
@@ -219,7 +263,10 @@ class SshDiscoveryService {
     final set = <InternetAddress>{};
     if (_isMac) {
       try {
-        final proc = await Process.start('/usr/bin/dns-sd', ['-B', '_ssh._tcp']);
+        final proc = await Process.start('/usr/bin/dns-sd', [
+          '-B',
+          '_ssh._tcp',
+        ]);
         final lines = <String>[];
         final subscription = proc.stdout
             .transform(utf8.decoder)
@@ -230,7 +277,7 @@ class SshDiscoveryService {
         await subscription.cancel();
 
         for (final l in lines) {
-          final m = RegExp(r'Add\s+\d+\s+(\S+)\.\s+_ssh\._tcp\.').firstMatch(l);
+          final m = _sshServiceRegExp.firstMatch(l);
           if (m != null) {
             final name = m.group(1)!;
             final det = await _run('/usr/bin/dns-sd', [
@@ -240,9 +287,7 @@ class SshDiscoveryService {
               'local.',
             ], timeout: const Duration(seconds: 3));
             if (det != null) {
-              for (final ip in RegExp(
-                r'Address\s*=\s*([0-9a-fA-F:\.]+)',
-              ).allMatches(det).map((e) => e.group(1)!)) {
+              for (final ip in _dnsSdAddressRegExp.allMatches(det).map((e) => e.group(1)!)) {
                 final parsed = InternetAddress.tryParse(ip);
                 if (parsed != null) set.add(parsed);
               }
@@ -250,14 +295,16 @@ class SshDiscoveryService {
           }
         }
       } catch (e, s) {
-        Loggers.app.warning('Failed to discover mDNS SSH candidates on macOS', e, s);
+        Loggers.app.warning(
+          'Failed to discover mDNS SSH candidates on macOS',
+          e,
+          s,
+        );
       }
     } else if (_isLinux) {
       final s = await _run('/usr/bin/avahi-browse', ['-rat', '_ssh._tcp']);
       if (s != null) {
-        for (final ip in RegExp(
-          r'address = \[(.*?)\]',
-        ).allMatches(s).map((m) => m.group(1)!).where((e) => e.isNotEmpty)) {
+        for (final ip in _avahiAddressRegExp.allMatches(s).map((m) => m.group(1)!).where((e) => e.isNotEmpty)) {
           final parsed = InternetAddress.tryParse(ip);
           if (parsed != null) set.add(parsed);
         }
@@ -316,7 +363,11 @@ class _Scanner {
     Socket? socket;
     StreamSubscription? sub;
     try {
-      socket = await Socket.connect(ip, SshDiscoveryService._sshPort, timeout: timeout);
+      socket = await Socket.connect(
+        ip,
+        SshDiscoveryService._sshPort,
+        timeout: timeout,
+      );
       socket.timeout(timeout);
       final c = Completer<String?>();
       sub = socket.listen(
@@ -370,7 +421,8 @@ class _Semaphore {
   }
 }
 
-Future<T> _guarded<T>(_Semaphore sem, Future<T> Function() fn) => sem.withPermit(fn);
+Future<T> _guarded<T>(_Semaphore sem, Future<T> Function() fn) =>
+    sem.withPermit(fn);
 
 // IPv4 utilities
 
@@ -379,7 +431,8 @@ int _ipv4ToInt(String ip) {
   return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
 
-String _intToIPv4(int v) => '${(v >> 24) & 0xff}.${(v >> 16) & 0xff}.${(v >> 8) & 0xff}.${v & 0xff}';
+String _intToIPv4(int v) =>
+    '${(v >> 24) & 0xff}.${(v >> 16) & 0xff}.${(v >> 8) & 0xff}.${v & 0xff}';
 
 InternetAddress _prefixToMask(int prefix) {
   final mask = prefix == 0 ? 0 : 0xffffffff << (32 - prefix);

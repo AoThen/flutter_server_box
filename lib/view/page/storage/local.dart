@@ -7,11 +7,11 @@ import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/core/utils/host_key_helper.dart';
 import 'package:server_box/data/model/app/path_with_prefix.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
-import 'package:server_box/data/model/sftp/worker.dart';
+import 'package:server_box/data/model/sftp/req.dart';
 import 'package:server_box/data/provider/server/all.dart';
 import 'package:server_box/data/provider/sftp.dart';
 import 'package:server_box/data/res/misc.dart';
-import 'package:server_box/data/store/setting.dart';
+import 'package:server_box/data/res/store.dart';
 import 'package:server_box/view/page/storage/sftp.dart';
 import 'package:server_box/view/page/storage/sftp_mission.dart';
 
@@ -26,16 +26,21 @@ class LocalFilePage extends ConsumerStatefulWidget {
 
   const LocalFilePage({super.key, this.args});
 
-  static const route = AppRoute<String, LocalFilePageArgs>(page: LocalFilePage.new, path: '/files/local');
+  static const route = AppRoute<String, LocalFilePageArgs>(
+    page: LocalFilePage.new,
+    path: '/files/local',
+  );
 
   @override
   ConsumerState<LocalFilePage> createState() => _LocalFilePageState();
 }
 
-class _LocalFilePageState extends ConsumerState<LocalFilePage> with AutomaticKeepAliveClientMixin {
+class _LocalFilePageState extends ConsumerState<LocalFilePage>
+    with AutomaticKeepAliveClientMixin {
   late final _path = LocalPath(widget.args?.initDir ?? Paths.file);
   final _sortType = _SortType.name.vn;
-  late Future<List<(FileSystemEntity, FileStat)>> _entitiesFuture = _getEntities();
+  late Future<List<(FileSystemEntity, FileStat)>> _entitiesFuture =
+      _getEntities();
   bool get isPickFile => widget.args?.isPickFile ?? false;
 
   @override
@@ -80,7 +85,9 @@ class _LocalFilePageState extends ConsumerState<LocalFilePage> with AutomaticKee
           if (!isMobile)
             IconButton(
               icon: const Icon(Icons.refresh),
-              tooltip: MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
+              tooltip: MaterialLocalizations.of(
+                context,
+              ).refreshIndicatorSemanticLabel,
               onPressed: _refresh,
             ),
           if (!isPickFile) _buildMissionBtn(),
@@ -126,7 +133,12 @@ class _LocalFilePageState extends ConsumerState<LocalFilePage> with AutomaticKee
             final stat = item.$2;
             final isDir = stat.type == FileSystemEntityType.directory;
 
-            return _buildItem(file: file, fileName: fileName, stat: stat, isDir: isDir);
+            return _buildItem(
+              file: file,
+              fileName: fileName,
+              stat: stat,
+              isDir: isDir,
+            );
           },
         );
       },
@@ -151,7 +163,9 @@ class _LocalFilePageState extends ConsumerState<LocalFilePage> with AutomaticKee
 
     return CardX(
       child: ListTile(
-        leading: isDir ? const Icon(Icons.folder_open) : const Icon(Icons.insert_drive_file),
+        leading: isDir
+            ? const Icon(Icons.folder_open)
+            : const Icon(Icons.insert_drive_file),
         title: Text(serverName ?? fileName),
         subtitle: isDir
             ? (serverName != null ? Text(fileName, style: UIs.textGrey) : null)
@@ -166,7 +180,11 @@ class _LocalFilePageState extends ConsumerState<LocalFilePage> with AutomaticKee
         },
         onTap: () {
           if (!isDir) {
-            _showFileActionDialog(file);
+            if (isPickFile) {
+              _showFileActionDialog(file);
+            } else {
+              _onTapEdit(file, fileName, popMenu: false);
+            }
             return;
           }
           _path.update(fileName);
@@ -185,7 +203,9 @@ class _LocalFilePageState extends ConsumerState<LocalFilePage> with AutomaticKee
 
   Future<List<(FileSystemEntity, FileStat)>> _getEntities() async {
     final files = await Directory(_path.path).list().toList();
-    final stats = await Future.wait(files.map((e) async => (e, await e.stat())));
+    final stats = await Future.wait(
+      files.map((e) async => (e, await e.stat())),
+    );
     stats.sort(_sortType.value.compareTuple);
     return stats;
   }
@@ -347,8 +367,12 @@ extension _Actions on _LocalFilePageState {
 }
 
 extension _OnTapFile on _LocalFilePageState {
-  void _onTapEdit(FileSystemEntity file, String fileName) async {
-    context.pop();
+  void _onTapEdit(
+    FileSystemEntity file,
+    String fileName, {
+    bool popMenu = true,
+  }) async {
+    if (popMenu) context.pop();
     final stat = await file.stat();
     if (stat.size > Miscs.editorMaxSize) {
       context.showRoundDialog(
@@ -366,9 +390,19 @@ extension _OnTapFile on _LocalFilePageState {
           context.showSnackBar(libL10n.saved);
           setStateSafe(() {});
         },
-        closeAfterSave: SettingStore.instance.closeAfterSave.fetch(),
-        softWrap: SettingStore.instance.editorSoftWrap.fetch(),
-        enableHighlight: SettingStore.instance.editorHighlight.fetch(),
+        closeAfterSave: Stores.setting.closeAfterSave.fetch(),
+        softWrap: Stores.setting.editorSoftWrap.fetch(),
+        enableHighlight: Stores.setting.editorHighlight.fetch(),
+        lightTheme: HighlightTheme.fromThemeMapKey(
+          Stores.setting.editorTheme.fetch(),
+        ),
+        darkTheme: HighlightTheme.fromThemeMapKey(
+          Stores.setting.editorDarkTheme.fetch(),
+        ),
+        fontFamily: () {
+          final font = Stores.setting.editorFontFamily.fetch();
+          return font.isEmpty ? null : font;
+        }(),
       ),
     );
   }
@@ -393,7 +427,16 @@ extension _OnTapFile on _LocalFilePageState {
       return;
     }
 
-    ref.read(sftpProvider.notifier).add(SftpReq(spi, '$remotePath/$fileName', file.absolute.path, SftpReqType.upload));
+    ref
+        .read(sftpProvider.notifier)
+        .add(
+          SftpReq(
+            spi,
+            '$remotePath/$fileName',
+            file.absolute.path,
+            SftpReqType.upload,
+          ),
+        );
     context.showSnackBar(l10n.added2List);
   }
 }
@@ -403,7 +446,10 @@ enum _SortType {
   size,
   time;
 
-  int compareTuple((FileSystemEntity, FileStat) a, (FileSystemEntity, FileStat) b) {
+  int compareTuple(
+    (FileSystemEntity, FileStat) a,
+    (FileSystemEntity, FileStat) b,
+  ) {
     return switch (this) {
       _SortType.name => a.$1.path.compareTo(b.$1.path),
       _SortType.size => a.$2.size.compareTo(b.$2.size),
@@ -426,7 +472,10 @@ enum _SortType {
   PopupMenuItem<_SortType> get menuItem {
     return PopupMenuItem(
       value: this,
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [Icon(icon), Text(i18n)]),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [Icon(icon), Text(i18n)],
+      ),
     );
   }
 }

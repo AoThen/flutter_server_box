@@ -5,16 +5,8 @@ part of 'tab.dart';
 extension _Actions on _ServerPageState {
   void _onTapCard(ServerState srv) {
     if (srv.canViewDetails) {
-      // _splitViewCtrl.replace(ServerDetailPage(
-      //   key: ValueKey(srv.spi.id),
-      //   args: SpiRequiredArgs(srv.spi),
-      // ));
       ServerDetailPage.route.go(context, SpiRequiredArgs(srv.spi));
     } else {
-      // _splitViewCtrl.replace(ServerEditPage(
-      //   key: ValueKey(srv.spi.id),
-      //   args: SpiRequiredArgs(srv.spi),
-      // ));
       ServerEditPage.route.go(context, args: SpiRequiredArgs(srv.spi));
     }
   }
@@ -23,21 +15,16 @@ extension _Actions on _ServerPageState {
     if (srv.conn == ServerConn.finished) {
       final id = srv.spi.id;
       final cardStatus = _getCardNoti(id);
-      cardStatus.value = cardStatus.value.copyWith(flip: !cardStatus.value.flip);
+      cardStatus.value = cardStatus.value.copyWith(
+        flip: !cardStatus.value.flip,
+      );
     } else {
       ServerEditPage.route.go(context, args: SpiRequiredArgs(srv.spi));
     }
   }
 
   void _onTapAddServer() {
-    //   final isMobile = ResponsiveBreakpoints.of(context).isMobile;
-    //   if (isMobile) {
     ServerEditPage.route.go(context);
-    //   } else {
-    //     _splitViewCtrl.replace(const ServerEditPage(
-    //       key: ValueKey('addServer'),
-    //     ));
-    //   }
   }
 }
 
@@ -46,14 +33,21 @@ extension _Operation on _ServerPageState {
     _askFor(
       func: () async {
         if (Stores.setting.showSuspendTip.fetch()) {
-          await context.showRoundDialog(title: libL10n.attention, child: Text(l10n.suspendTip));
+          await context.showRoundDialog(
+            title: libL10n.attention,
+            child: Text(l10n.suspendTip),
+          );
           Stores.setting.showSuspendTip.put(false);
         }
         await srv.client?.execWithPwd(
-          ShellFunc.suspend.exec(srv.spi.id, systemType: srv.status.system, customDir: null),
-          context: context,
-          id: srv.id,
-        ) ??
+              ShellFunc.suspend.exec(
+                srv.spi.id,
+                systemType: srv.status.system,
+                customDir: null,
+              ),
+              context: context,
+              id: srv.id,
+            ) ??
             (null, '');
       },
       typ: libL10n.suspend,
@@ -65,7 +59,11 @@ extension _Operation on _ServerPageState {
     _askFor(
       func: () async {
         await srv.client?.execWithPwd(
-          ShellFunc.shutdown.exec(srv.spi.id, systemType: srv.status.system, customDir: null),
+          ShellFunc.shutdown.exec(
+            srv.spi.id,
+            systemType: srv.status.system,
+            customDir: null,
+          ),
           context: context,
           id: srv.id,
         );
@@ -79,10 +77,14 @@ extension _Operation on _ServerPageState {
     _askFor(
       func: () async {
         await srv.client?.execWithPwd(
-          ShellFunc.reboot.exec(srv.spi.id, systemType: srv.status.system, customDir: null),
-          context: context,
-          id: srv.id,
-        ) ??
+              ShellFunc.reboot.exec(
+                srv.spi.id,
+                systemType: srv.status.system,
+                customDir: null,
+              ),
+              context: context,
+              id: srv.id,
+            ) ??
             (null, '');
       },
       typ: libL10n.reboot,
@@ -90,13 +92,6 @@ extension _Operation on _ServerPageState {
     );
   }
 
-  void _onTapEdit(ServerState srv) {
-    if (srv.canViewDetails) {
-      ServerDetailPage.route.go(context, SpiRequiredArgs(srv.spi));
-    } else {
-      ServerEditPage.route.go(context, args: SpiRequiredArgs(srv.spi));
-    }
-  }
 }
 
 extension _Utils on _ServerPageState {
@@ -124,7 +119,11 @@ extension _Utils on _ServerPageState {
     return _ServerPageState._kCardHeightNormal;
   }
 
-  void _askFor({required void Function() func, required String typ, required String name}) {
+  void _askFor({
+    required void Function() func,
+    required String typ,
+    required String name,
+  }) {
     context.showRoundDialog(
       title: libL10n.attention,
       child: Text(libL10n.askContinue('$typ ${libL10n.server}($name)')),
@@ -145,7 +144,7 @@ extension _Utils on _ServerPageState {
     final x = MediaQuery.sizeOf(context).height * 0.03;
     final r = math.Random().nextDouble();
     final n = math.Random().nextBool() ? 1 : -1;
-    _offset = x * r * n;
+    _offsetNotifier.value = x * r * n;
   }
 
   void _updateTextScaler(double val) {
@@ -158,7 +157,6 @@ extension _Utils on _ServerPageState {
     _timer = Timer.periodic(const Duration(seconds: 30), (_) {
       if (mounted) {
         _updateOffset();
-        setState(() {});
       } else {
         _timer?.cancel();
       }
@@ -205,7 +203,10 @@ extension _ServerX on ServerState {
         }();
         final upTime = status.more[StatusCmdType.uptime];
         final items = [
-          cmdTemp ?? (temperatureVal != null ? '${temperatureVal.toStringAsFixed(1)}°C' : null),
+          cmdTemp ??
+              (temperatureVal != null
+                  ? '${temperatureVal.toStringAsFixed(1)}°C'
+                  : null),
           upTime,
         ];
         final str = items.where((e) => e != null && e.isNotEmpty).join(' | ');

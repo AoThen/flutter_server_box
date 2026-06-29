@@ -31,6 +31,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get askAi => 'AI에게 질문';
 
   @override
+  String get ai => 'AI';
+
+  @override
   String get askAiApiKey => 'API 키';
 
   @override
@@ -38,6 +41,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get askAiBaseUrl => '기본 URL';
+
+  @override
+  String get askAiEndpointTip =>
+      'Enter the full Chat Completions endpoint, or a service base URL. If the address ends with /v1, the app will append /chat/completions.';
 
   @override
   String get askAiCommandInserted => '명령어가 터미널에 삽입되었습니다';
@@ -124,6 +131,35 @@ class AppLocalizationsKo extends AppLocalizations {
   String get backupVersionNotMatch => '백업 버전이 일치하지 않습니다.';
 
   @override
+  String get icloudBackupStatusTitle => 'Backup status';
+
+  @override
+  String get icloudBackupStatusLoading => 'Loading iCloud backup status...';
+
+  @override
+  String get icloudBackupStatusError => 'Unable to read iCloud backup metadata';
+
+  @override
+  String get icloudBackupStatusEmpty => 'No iCloud backup file found yet';
+
+  @override
+  String get icloudBackupStateUploading => 'Uploading';
+
+  @override
+  String get icloudBackupStateConflict => 'Conflict detected';
+
+  @override
+  String get icloudBackupStateUploaded => 'Uploaded';
+
+  @override
+  String get icloudBackupStateWaiting => 'Waiting for iCloud';
+
+  @override
+  String icloudBackupStatusSummary(Object lastModified, Object remoteState) {
+    return 'Last backup: $lastModified\nStatus: $remoteState';
+  }
+
+  @override
   String get bgRun => '백그라운드 실행';
 
   @override
@@ -195,6 +231,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get cursorType => '커서 유형';
+
+  @override
+  String get configured => 'Configured';
 
   @override
   String get customCmd => '사용자 정의 명령어';
@@ -331,6 +370,18 @@ class AppLocalizationsKo extends AppLocalizations {
       '기기를 가로 모드로 회전할 때 전체 화면 모드를 활성화하시겠습니까? 이 옵션은 서버 탭에만 적용됩니다.';
 
   @override
+  String get githubGist => 'GitHub Gist';
+
+  @override
+  String get githubGistIdOptional => 'Gist ID (optional)';
+
+  @override
+  String get githubGistToken => 'GitHub Gist token';
+
+  @override
+  String get githubGistTokenEmpty => 'Token is empty';
+
+  @override
   String get goBackQ => '돌아가시겠습니까?';
 
   @override
@@ -366,6 +417,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get imagesList => '이미지 목록';
 
   @override
+  String get pull => '풀';
+
+  @override
   String get installDockerWithUrl =>
       '먼저 https://docs.docker.com/engine/install 에서 Docker를 설치해 주세요.';
 
@@ -373,10 +427,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get invalid => '유효하지 않음';
 
   @override
+  String get invalidUrl => 'Invalid URL';
+
+  @override
   String get invalidHostFormat => '잘못된 호스트 형식입니다. IPv4, IPv6, 도메인 문자만 허용됩니다.';
 
   @override
   String get jumpServer => '점프 서버';
+
+  @override
+  String jumpServersNotFoundFmt(Object serverName, Object jumpIds) {
+    return 'Jump servers not found for $serverName: $jumpIds';
+  }
+
+  @override
+  String get noJumpServerAvailable => 'No jump server available.';
+
+  @override
+  String get jumpServerAndProxyCommandCannotBeUsedTogether =>
+      'Jump server and ProxyCommand cannot be used together.';
 
   @override
   String get keepForeground => '앱을 포그라운드에 유지해 주세요!';
@@ -397,10 +466,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get lastSuccess => '마지막 성공';
 
   @override
-  String get letterCache => '문자 캐싱';
+  String get letterCache => '일반 키보드 입력';
 
   @override
-  String get letterCacheTip => '비활성화를 권장하지만, 비활성화하면 CJK 문자를 입력할 수 없습니다.';
+  String get letterCacheTip =>
+      '이 옵션을 켜면 입력 내용이 일반 IME를 거치며, 일부 시스템에서는 터미널의 보안 키보드 안내를 피할 수 있습니다.';
 
   @override
   String madeWithLove(Object myGithub) {
@@ -421,6 +491,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get min => '최소';
+
+  @override
+  String mismatchSystem(Object system) {
+    return '시스템이 일치하지 않습니다: $system';
+  }
 
   @override
   String get more => '더 보기';
@@ -507,6 +582,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pushToken => '푸시 토큰';
 
   @override
+  String get proxyCommandOnlySupportedOnDesktop =>
+      'ProxyCommand is only supported on desktop platforms.';
+
+  @override
   String get pveIgnoreCertTip =>
       '활성화를 권장하지 않습니다. 보안 위험에 주의하세요! PVE 기본 인증서를 사용하는 경우 이 옵션을 활성화해야 합니다.';
 
@@ -515,14 +594,81 @@ class AppLocalizationsKo extends AppLocalizations {
       '로그인에 실패했습니다. 서버 설정의 사용자 이름/비밀번호로 Linux PAM 인증을 할 수 없습니다.';
 
   @override
+  String get pveServerClientMissing =>
+      'The SSH client for this server is not available.';
+
+  @override
+  String get pveAddressMissing =>
+      'The PVE address is missing. Please configure it in server settings.';
+
+  @override
+  String get pvePasswordRequired =>
+      'PVE password is required. Please set it in server settings.';
+
+  @override
+  String get pveOtpRequired =>
+      'Two-factor authentication is enabled on this PVE server. Please enter the OTP code.';
+
+  @override
+  String get pveOtpChallengeExpired =>
+      'The OTP challenge has expired. Please refresh and try again.';
+
+  @override
+  String get pveOtpCodeRequired => 'OTP code is required.';
+
+  @override
+  String get pveOtpVerificationFailed =>
+      'OTP verification failed. Please try again with a fresh code.';
+
+  @override
+  String get pveOtpTitle => 'OTP Verification';
+
+  @override
+  String get pveOtpLabel => 'OTP Code';
+
+  @override
+  String get pveInvalidResponseBody =>
+      'PVE login returned an invalid response body.';
+
+  @override
+  String get pveInvalidResponseData =>
+      'PVE login response did not contain a valid data payload.';
+
+  @override
+  String get pveMissingAuthTicket =>
+      'PVE login succeeded but no authentication ticket was returned.';
+
+  @override
   String get pveVersionLow =>
       '이 기능은 현재 테스트 단계이며 PVE 8+에서만 테스트되었습니다. 주의하여 사용해 주세요.';
+
+  @override
+  String get pveLoadingForwarding => 'Establishing SSH tunnel...';
+
+  @override
+  String get pveLoadingLogin => 'Authenticating with PVE...';
+
+  @override
+  String get pveLoadingData => 'Fetching cluster data...';
+
+  @override
+  String get pveLoadingConnect => 'Connecting...';
+
+  @override
+  String get pvePassword => 'PVE Password';
+
+  @override
+  String get pvePasswordHint =>
+      'Required when using key-based SSH authentication';
 
   @override
   String get read => '읽기';
 
   @override
   String get recentConnections => '최근 연결';
+
+  @override
+  String get reconnecting => '재연결 중...';
 
   @override
   String get rememberPwdInMem => '메모리에 비밀번호 저장';
@@ -577,6 +723,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get sftpSSHConnected => 'SFTP 연결됨';
 
   @override
+  String get sftp => 'SFTP';
+
+  @override
   String get sftpShowFoldersFirst => '폴더 우선 표시';
 
   @override
@@ -596,6 +745,10 @@ class AppLocalizationsKo extends AppLocalizations {
       '예를 들어, 네트워크 트래픽 통계는 기본적으로 모든 장치를 대상으로 합니다. 여기서 특정 장치를 지정할 수 있습니다.';
 
   @override
+  String get tempIsCelsiusTip =>
+      'When enabled, the temperature value will be treated as Celsius instead of millicelsius. Turn on only if the temperature displays incorrectly (e.g., showing 0.1°C instead of 58°C).';
+
+  @override
   String get speed => '속도';
 
   @override
@@ -607,6 +760,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String sshConfigAllExist(Object duplicateCount) {
     return '모든 서버가 이미 존재합니다 (중복 $duplicateCount개 발견)';
   }
+
+  @override
+  String get ssh => 'SSH';
+
+  @override
+  String get sshConnectionMode => 'SSH connection mode';
+
+  @override
+  String get sshConnectionModeBuiltin => 'Built-in';
+
+  @override
+  String get sshConnectionModeSystem => 'System SSH';
+
+  @override
+  String get sshConnectionModeTip =>
+      'Built-in: use the app\'s terminal. System SSH: launch the system ssh command in an external terminal.';
+
+  @override
+  String get sshConnectionModeUseBuiltin => 'Use built-in terminal';
+
+  @override
+  String get sshConnectionModeUseSystem => 'Use system SSH';
 
   @override
   String sshConfigDuplicatesSkipped(Object duplicateCount) {
@@ -709,6 +884,13 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get syncAppSettings => 'Sync app settings';
+
+  @override
+  String get syncAppSettingsTip =>
+      'Include theme, layout, editor, terminal and other device preferences in automatic sync.';
+
+  @override
   String get syncTip => '일부 변경 사항은 재시작해야 적용될 수 있습니다.';
 
   @override
@@ -739,6 +921,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get trySudo => 'sudo 사용 시도';
+
+  @override
+  String get sudoPromptNotFound => 'sudo 비밀번호 프롬프트가 없습니다.';
 
   @override
   String get unknown => '알 수 없음';
@@ -809,6 +994,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get whenOpenApp => '앱을 열 때';
 
   @override
+  String get wiki => 'Wiki';
+
+  @override
   String get wolTip => 'WOL (Wake-on-LAN)을 설정하면 서버에 연결할 때마다 WOL 요청이 전송됩니다.';
 
   @override
@@ -828,4 +1016,68 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get podmanDockerEmulationDetected =>
       'Podman Docker 에뮬레이션이 감지되었습니다. 설정에서 Podman으로 전환해 주세요.';
+
+  @override
+  String get portForwardBeta =>
+      'This feature is still in beta testing. Functionality is not guaranteed.';
+
+  @override
+  String get portForward_startPrompt =>
+      'Add a port forward rule to get started';
+
+  @override
+  String get portForward_localHost => 'Local Host';
+
+  @override
+  String get portForward_localPort => 'Local Port';
+
+  @override
+  String get portForward_remoteHost => 'Remote Host';
+
+  @override
+  String get portForward_remotePort => 'Remote Port';
+
+  @override
+  String get portForward_type_local => 'Local';
+
+  @override
+  String get portForward_type_remote => 'Remote';
+
+  @override
+  String portForward_deleteConfirmFmt(Object name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get sponsor => '후원';
+
+  @override
+  String get sort => 'Sort';
+
+  @override
+  String get sortByName => 'By name';
+
+  @override
+  String get sortByJoinTime => 'By join time';
+
+  @override
+  String get ascending => 'Ascending';
+
+  @override
+  String get descending => 'Descending';
+
+  @override
+  String get searchServer => 'Search server';
+
+  @override
+  String get serverHistory => 'Server history';
+
+  @override
+  String get clearHistory => 'Clear history';
+
+  @override
+  String get portForwardBetaTitle => '포트 포워딩 (Beta)';
+
+  @override
+  String get systemd => 'Systemd';
 }

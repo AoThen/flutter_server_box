@@ -15,8 +15,6 @@ extension _SFTP on _AppSettingsPageState {
   Widget _buildSftpOpenLastPath() {
     return ListTile(
       leading: const Icon(MingCute.history_line),
-      // title: Text(l10n.openLastPath),
-      // subtitle: Text(l10n.openLastPathTip, style: UIs.textGrey),
       title: TipText(l10n.openLastPath, l10n.openLastPathTip),
       trailing: StoreSwitch(prop: _setting.sftpOpenLastPath),
     );
@@ -44,29 +42,14 @@ extension _SFTP on _AppSettingsPageState {
         leading: const Icon(MingCute.edit_fill),
         title: TipText(libL10n.editor, l10n.sftpEditorTip),
         trailing: Text(val.isEmpty ? libL10n.inner : val, style: UIs.text15),
-        onTap: () {
-          withTextFieldController((ctrl) async {
-            void onSave() {
-              final s = ctrl.text.trim();
-              _setting.sftpEditor.put(s);
-              context.pop();
-            }
-
-            await context.showRoundDialog<bool>(
-              title: libL10n.select,
-              child: Input(
-                controller: ctrl,
-                autoFocus: true,
-                label: libL10n.editor,
-                hint: '\$EDITOR / vim / nano ...',
-                icon: Icons.edit,
-                suggestion: false,
-                onSubmitted: (_) => onSave(),
-              ),
-              actions: Btn.ok(onTap: onSave).toList,
-            );
-          });
-        },
+        onTap: () => showTextSettingDialog(
+          title: libL10n.select,
+          initialValue: val,
+          label: libL10n.editor,
+          hint: '\$EDITOR / vim / nano ...',
+          icon: Icons.edit,
+          onSave: _setting.sftpEditor.put,
+        ),
       );
     });
   }

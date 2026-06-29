@@ -108,6 +108,7 @@
   "ignoreCert": "Ignora certificato",
   "image": "Immagine",
   "imagesList": "Elenco immagini",
+  "pull": "Pull",
   "installDockerWithUrl": "Installa prima docker da https://docs.docker.com/engine/install .",
   "invalid": "Non valido",
   "invalidHostFormat": "Formato host non valido. Sono consentiti solo caratteri IPv4, IPv6 e di dominio.",
@@ -118,14 +119,20 @@
   "keyAuth": "Autenticazione chiave",
   "lastFailure": "Ultimo fallimento",
   "lastSuccess": "Ultimo successo",
-  "letterCache": "Cache lettere",
-  "letterCacheTip": "Si consiglia di disabilitare, ma dopo aver disabilitato, non sarà possibile inserire caratteri CJK.",
+  "letterCache": "Input da tastiera normale",
+  "letterCacheTip": "Quando è attiva, l'input passa attraverso l'IME normale, il che può evitare i prompt della tastiera sicura nel terminale su alcuni sistemi.",
   "madeWithLove": "Realizzato con ❤️ da {myGithub}",
   "max": "max",
   "maxConcurrency": "Massima concorrenza",
   "maxRetryCount": "Numero di riconnessioni del server",
   "maxRetryCountEqual0": "Proverà di nuovo e ancora.",
   "min": "min",
+  "mismatchSystem": "Sistema non corrispondente: {system}",
+  "@mismatchSystem": {
+    "placeholders": {
+      "system": {}
+    }
+  },
   "more": "Altro",
   "moveOutServerFuncBtnsHelp": "Attivo: può essere visualizzato sotto ogni carta nella pagina Scheda Server. Disattivato: può essere visualizzato nella parte superiore della pagina Dettagli Server.",
   "needHomeDir": "Se sei un utente Synology, [vedi qui](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Gli utenti di altri sistemi devono cercare come creare una directory home.",
@@ -157,6 +164,7 @@
   "pveVersionLow": "Questa funzionalità è attualmente nella fase di test ed è stata testata solo su PVE 8+. Usala con cautela.",
   "read": "Leggi",
   "recentConnections": "Connessioni recenti",
+  "reconnecting": "Riconnessione...",
   "rememberPwdInMem": "Ricorda password in memoria",
   "rememberPwdInMemTip": "Utilizzato per container, sospensione, ecc.",
   "rememberWindowSize": "Ricorda dimensione finestra",
@@ -221,6 +229,7 @@
   "time": "Tempo",
   "times": "Volte",
   "trySudo": "Prova a usare sudo",
+  "sudoPromptNotFound": "Nessuna richiesta di password sudo è attiva.",
   "unknown": "Sconosciuto",
   "unkownConvertMode": "Modalità di conversione sconosciuta",
   "update": "Aggiorna",
@@ -248,5 +257,8 @@
   "writeScriptFailTip": "Scrittura dello script fallita, forse a causa di mancanza di permessi o la directory non esiste.",
   "writeScriptTip": "Dopo essersi connessi al server, uno script verrà scritto in `~/.config/server_box` \n | `/tmp/server_box` per monitorare lo stato del sistema. Puoi rivedere il contenuto dello script.",
   "menuGitHubRepository": "Repository GitHub",
-  "podmanDockerEmulationDetected": "Rilevata emulazione Docker Podman. Passa a Podman nelle impostazioni."
+  "podmanDockerEmulationDetected": "Rilevata emulazione Docker Podman. Passa a Podman nelle impostazioni.",
+  "sponsor": "Sponsor",
+  "portForwardBetaTitle": "Port Forward (Beta)",
+  "systemd": "Systemd"
 }

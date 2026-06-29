@@ -4,11 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/data/model/app/tab.dart';
 import 'package:server_box/data/res/store.dart';
+import 'package:server_box/view/page/home_tab.dart';
 
 class HomeTabsConfigPage extends ConsumerStatefulWidget {
   const HomeTabsConfigPage({super.key});
 
-  static final route = AppRouteNoArg(page: HomeTabsConfigPage.new, path: '/settings/home-tabs');
+  static final route = AppRouteNoArg(
+    page: HomeTabsConfigPage.new,
+    path: '/settings/home-tabs',
+  );
 
   @override
   ConsumerState<HomeTabsConfigPage> createState() => _HomeTabsConfigPageState();
@@ -17,6 +21,10 @@ class HomeTabsConfigPage extends ConsumerStatefulWidget {
 class _HomeTabsConfigPageState extends ConsumerState<HomeTabsConfigPage> {
   final _availableTabs = AppTab.values;
   var _selectedTabs = List<AppTab>.from(Stores.setting.homeTabs.fetch());
+
+  void _showHomeTabConstraint(String message) {
+    context.showSnackBar(message);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +40,15 @@ class _HomeTabsConfigPageState extends ConsumerState<HomeTabsConfigPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(l10n.homeTabsCustomizeDesc, style: context.theme.textTheme.bodyMedium),
+            child: Text(
+              l10n.homeTabsCustomizeDesc,
+              style: context.theme.textTheme.bodyMedium,
+            ),
           ),
           Expanded(
             child: ReorderableListView.builder(
               itemCount: _selectedTabs.length,
-              onReorder: _onReorder,
+              onReorderItem: _onReorder,
               buildDefaultDragHandles: false,
               itemBuilder: (context, index) {
                 final tab = _selectedTabs[index];
@@ -48,7 +59,10 @@ class _HomeTabsConfigPageState extends ConsumerState<HomeTabsConfigPage> {
           const Divider(),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(l10n.availableTabs, style: context.theme.textTheme.titleMedium),
+            child: Text(
+              l10n.availableTabs,
+              style: context.theme.textTheme.titleMedium,
+            ),
           ),
           Expanded(
             child: ListView.builder(
@@ -77,24 +91,32 @@ class _HomeTabsConfigPageState extends ConsumerState<HomeTabsConfigPage> {
               icon: const Icon(Icons.delete),
               onPressed: canRemove ? () => _removeTab(tab) : null,
               color: canRemove ? null : Theme.of(context).disabledColor,
-              tooltip: canRemove ? libL10n.delete : (tab == AppTab.server ? l10n.serverTabRequired : l10n.atLeastOneTab),
+              tooltip: canRemove
+                  ? libL10n.delete
+                  : (tab == AppTab.server
+                        ? l10n.serverTabRequired
+                        : l10n.atLeastOneTab),
             )
-          : IconButton(icon: const Icon(Icons.add), onPressed: () => _addTab(tab)),
+          : IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => _addTab(tab),
+            ),
       onTap: isSelected && canRemove ? () => _removeTab(tab) : null,
     );
 
     return Padding(
       key: ValueKey(tab.name),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-      child: (isSelected ? ReorderableDragStartListener(index: index, child: child) : child).cardx,
+      child:
+          (isSelected
+                  ? ReorderableDragStartListener(index: index, child: child)
+                  : child)
+              .cardx,
     );
   }
 
   void _onReorder(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
       final tab = _selectedTabs.removeAt(oldIndex);
       _selectedTabs.insert(newIndex, tab);
     });
@@ -108,11 +130,11 @@ class _HomeTabsConfigPageState extends ConsumerState<HomeTabsConfigPage> {
 
   void _removeTab(AppTab tab) {
     if (_selectedTabs.length <= 1) {
-      context.showSnackBar(l10n.atLeastOneTab);
+      _showHomeTabConstraint(l10n.atLeastOneTab);
       return;
     }
     if (tab == AppTab.server) {
-      context.showSnackBar(l10n.serverTabRequired);
+      _showHomeTabConstraint(l10n.serverTabRequired);
       return;
     }
     setState(() {

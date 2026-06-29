@@ -1,6 +1,14 @@
 part of '../entry.dart';
 
 extension _Server on _AppSettingsPageState {
+  void _showInvalidUrlDialog() {
+    context.showRoundDialog(
+      title: libL10n.fail,
+      child: Text(l10n.invalidUrl),
+      actions: Btnx.oks,
+    );
+  }
+
   Widget _buildServer() {
     return Column(
       children: [
@@ -9,6 +17,7 @@ extension _Server on _AppSettingsPageState {
         _buildNetViewType(),
         _buildServerSeq(),
         _buildServerDetailCardSeq(),
+        _buildConnectionStats(),
         _buildDeleteServers(),
         _buildCpuView(),
         _buildServerMore(),
@@ -38,6 +47,18 @@ extension _Server on _AppSettingsPageState {
     );
   }
 
+  Widget _buildConnectionStats() {
+    return ListTile(
+      leading: const Icon(Icons.analytics, size: _kIconSize),
+      title: Text(l10n.connectionStats),
+      subtitle: Text(l10n.connectionStatsDesc),
+      trailing: const Icon(Icons.keyboard_arrow_right),
+      onTap: () {
+        ConnectionStatsPage.route.go(context);
+      },
+    );
+  }
+
   Widget _buildDeleteServers() {
     return ListTile(
       title: Text(l10n.deleteServers),
@@ -46,7 +67,9 @@ extension _Server on _AppSettingsPageState {
       onTap: () async {
         final keys = Stores.server.keys();
         final names = Map.fromEntries(
-          keys.map((e) => MapEntry(e, ref.read(serversProvider).servers[e]?.name ?? e)),
+          keys.map(
+            (e) => MapEntry(e, ref.read(serversProvider).servers[e]?.name ?? e),
+          ),
         );
         final deleteKeys = await context.showPickDialog<String>(
           clearable: true,
@@ -73,8 +96,6 @@ extension _Server on _AppSettingsPageState {
 
   Widget _buildTextScaler() {
     return ListTile(
-      // title: Text(l10n.textScaler),
-      // subtitle: Text(l10n.textScalerTip, style: UIs.textGrey),
       title: TipText(l10n.textScaler, l10n.textScalerTip),
       trailing: ValBuilder(
         listenable: _setting.textFactor.listenable(),
@@ -91,7 +112,9 @@ extension _Server on _AppSettingsPageState {
           onSubmitted: _onSaveTextScaler,
           suggestion: false,
         ),
-        actions: Btn.ok(onTap: () => _onSaveTextScaler(_textScalerCtrl.text)).toList,
+        actions: Btn.ok(
+          onTap: () => _onSaveTextScaler(_textScalerCtrl.text),
+        ).toList,
       ),
     );
   }
@@ -117,8 +140,6 @@ extension _Server on _AppSettingsPageState {
 
   Widget _buildServerFuncBtnsSwitch() {
     return ListTile(
-      // title: Text(libL10n.location),
-      // subtitle: Text(l10n.moveOutServerFuncBtnsHelp, style: UIs.text13Grey),
       title: TipText(libL10n.location, l10n.moveOutServerFuncBtnsHelp),
       trailing: StoreSwitch(prop: _setting.moveServerFuncs),
     );
@@ -152,8 +173,6 @@ extension _Server on _AppSettingsPageState {
 
   Widget _buildDoubleColumnServersPage() {
     return ListTile(
-      // title: Text(l10n.doubleColumnMode),
-      // subtitle: Text(l10n.doubleColumnTip, style: UIs.textGrey),
       title: TipText(l10n.doubleColumnMode, l10n.doubleColumnTip),
       trailing: StoreSwitch(prop: _setting.doubleColumnServersPage),
     );
@@ -180,15 +199,13 @@ extension _Server on _AppSettingsPageState {
         _buildDoubleColumnServersPage(),
         _buildUpdateInterval(),
         _buildMaxRetry(),
-        _buildSSHConfigImport(),
+        if (isDesktop) _buildSSHConfigAutoImportToggle(),
       ],
     );
   }
 
   Widget _buildRememberPwdInMem() {
     return ListTile(
-      // title: Text(l10n.rememberPwdInMem),
-      // subtitle: Text(l10n.rememberPwdInMemTip, style: UIs.textGrey),
       title: TipText(l10n.rememberPwdInMem, l10n.rememberPwdInMemTip),
       trailing: StoreSwitch(prop: _setting.rememberPwdInMem),
     );
@@ -215,7 +232,7 @@ extension _Server on _AppSettingsPageState {
   Widget _buildServerLogoUrl() {
     void onSave(String url) {
       if (url.isEmpty || !url.startsWith('http')) {
-        context.showRoundDialog(title: libL10n.fail, child: Text('${l10n.invalid} URL'), actions: Btnx.oks);
+        _showInvalidUrlDialog();
         return;
       }
       _setting.serverLogoUrl.put(url);
@@ -261,7 +278,7 @@ extension _Server on _AppSettingsPageState {
     );
   }
 
-  Widget _buildSSHConfigImport() {
+  Widget _buildSSHConfigAutoImportToggle() {
     return ListTile(
       title: Text(l10n.sshConfigImport),
       subtitle: Text(l10n.sshConfigImportTip, style: UIs.textGrey),

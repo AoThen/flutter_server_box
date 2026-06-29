@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/data/model/server/server_private_info.dart';
 import 'package:server_box/data/provider/server/all.dart';
+import 'package:server_box/view/page/setting/seq/reorder_proxy_decorator.dart';
 
 class ServerOrderPage extends ConsumerStatefulWidget {
   const ServerOrderPage({super.key});
@@ -13,7 +13,10 @@ class ServerOrderPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<ServerOrderPage> createState() => _ServerOrderPageState();
 
-  static const route = AppRouteNoArg(page: ServerOrderPage.new, path: '/settings/order/server');
+  static const route = AppRouteNoArg(
+    page: ServerOrderPage.new,
+    path: '/settings/order/server',
+  );
 }
 
 class _ServerOrderPageState extends ConsumerState<ServerOrderPage> {
@@ -42,22 +45,6 @@ class _ServerOrderPageState extends ConsumerState<ServerOrderPage> {
     );
   }
 
-  Widget _proxyDecorator(Widget child, int _, Animation<double> animation) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (BuildContext context, Widget? child) {
-        final double animValue = Curves.easeInOut.transform(animation.value);
-        final double elevation = lerpDouble(1, 6, animValue)!;
-        final double scale = lerpDouble(1, 1.02, animValue)!;
-        return Transform.scale(
-          scale: scale,
-          child: Card(elevation: elevation, child: child),
-        );
-      },
-      child: child,
-    );
-  }
-
   Widget _buildBody() {
     final serverState = ref.watch(serversProvider);
     final order = _order;
@@ -67,11 +54,8 @@ class _ServerOrderPageState extends ConsumerState<ServerOrderPage> {
     }
     return ReorderableListView.builder(
       footer: const SizedBox(height: 77),
-      onReorder: (oldIndex, newIndex) {
-        var targetIndex = newIndex;
-        if (targetIndex > oldIndex) {
-          targetIndex -= 1;
-        }
+      onReorderItem: (oldIndex, newIndex) {
+        final targetIndex = newIndex;
         if (targetIndex == oldIndex) {
           return;
         }
@@ -93,7 +77,7 @@ class _ServerOrderPageState extends ConsumerState<ServerOrderPage> {
         return _buildItem(idx, id, spi);
       },
       itemCount: order.length,
-      proxyDecorator: _proxyDecorator,
+      proxyDecorator: reorderProxyDecorator,
     );
   }
 
@@ -116,12 +100,16 @@ class _ServerOrderPageState extends ConsumerState<ServerOrderPage> {
     final name = spi.name.characters.firstOrNull ?? '?';
 
     return ListTile(
-      title: Text(spi.name, style: const TextStyle(fontWeight: FontWeight.w500)),
-      subtitle: Text(spi.oldId, style: UIs.textGrey),
-      leading: CircleAvatar(
-        child: Text(name),
+      title: Text(
+        spi.name,
+        style: const TextStyle(fontWeight: FontWeight.w500),
       ),
-      trailing: ReorderableDragStartListener(index: index, child: const Icon(Icons.drag_handle)),
+      subtitle: Text(spi.oldId, style: UIs.textGrey),
+      leading: CircleAvatar(child: Text(name)),
+      trailing: ReorderableDragStartListener(
+        index: index,
+        child: const Icon(Icons.drag_handle),
+      ),
     );
   }
 }

@@ -1,50 +1,41 @@
 import 'package:fl_lib/fl_lib.dart';
 
 import 'package:server_box/data/model/server/private_key_info.dart';
+import 'package:server_box/data/store/cached_store.dart';
 
-class PrivateKeyStore extends HiveStore {
+class PrivateKeyStore extends CachedHiveStore<PrivateKeyInfo> {
   PrivateKeyStore._() : super('key');
 
   static final instance = PrivateKeyStore._();
 
-  void put(PrivateKeyInfo info) {
-    set(info.id, info);
-  }
+  @override
+  String getKey(PrivateKeyInfo item) => item.id;
 
-  List<PrivateKeyInfo> fetch() {
-    final ps = <PrivateKeyInfo>[];
-    for (final key in keys()) {
-      final s = get<PrivateKeyInfo>(
-        key,
-        fromObj: (val) {
-          if (val is PrivateKeyInfo) return val;
-          if (val is Map<dynamic, dynamic>) {
-            final map = val.toStrDynMap;
-            if (map == null) return null;
-            try {
-              final pki = PrivateKeyInfo.fromJson(map as Map<String, dynamic>);
-              put(pki);
-              return pki;
-            } catch (e) {
-              dprint('Parsing PrivateKeyInfo from JSON', e);
-            }
-          }
-          return null;
-        },
-      );
-      if (s != null) {
-        ps.add(s);
-      }
-    }
-    return ps;
-  }
+  @override
+  PrivateKeyInfo? fromJson(Map<String, dynamic> json) =>
+      PrivateKeyInfo.fromJson(json);
 
   PrivateKeyInfo? fetchOne(String? id) {
     if (id == null) return null;
-    return box.get(id);
+    if (cachedItems != null) {
+      for (final pki in cachedItems!) {
+        if (pki.id == id) return pki;
+      }
+    }
+    return _decode(box.get(id));
   }
 
-  void delete(PrivateKeyInfo s) {
-    remove(s.id);
+  PrivateKeyInfo? _decode(dynamic val) {
+    if (val is PrivateKeyInfo) return val;
+    if (val is Map<dynamic, dynamic>) {
+      final map = val.toStrDynMap;
+      if (map == null) return null;
+      try {
+        return PrivateKeyInfo.fromJson(map as Map<String, dynamic>);
+      } catch (e) {
+        dprint('Parsing PrivateKeyInfo from JSON', e);
+      }
+    }
+    return null;
   }
 }

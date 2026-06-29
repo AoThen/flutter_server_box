@@ -9,16 +9,11 @@ final class SensorAdaptor {
   static const pciRaw = 'PCI adapter';
   static const virtualRaw = 'Virtual device';
   static const isaRaw = 'ISA adapter';
-  static const acpi = SensorAdaptor(acpiRaw);
-  static const pci = SensorAdaptor(pciRaw);
-  static const virtual = SensorAdaptor(virtualRaw);
-  static const isa = SensorAdaptor(isaRaw);
-
   static SensorAdaptor parse(String raw) => switch (raw) {
-    acpiRaw => acpi,
-    pciRaw => pci,
-    virtualRaw => virtual,
-    isaRaw => isa,
+    acpiRaw => const SensorAdaptor(acpiRaw),
+    pciRaw => const SensorAdaptor(pciRaw),
+    virtualRaw => const SensorAdaptor(virtualRaw),
+    isaRaw => const SensorAdaptor(isaRaw),
     _ => SensorAdaptor(raw),
   };
 }
@@ -28,7 +23,11 @@ final class SensorItem {
   final SensorAdaptor adapter;
   final Map<String, String> details;
 
-  const SensorItem({required this.device, required this.adapter, required this.details});
+  const SensorItem({
+    required this.device,
+    required this.adapter,
+    required this.details,
+  });
 
   String get toMarkdown {
     final sb = StringBuffer();
@@ -68,7 +67,9 @@ final class SensorItem {
       final len = sensorLines.length;
       if (len < 3) continue;
       final device = sensorLines.first;
-      final adapter = SensorAdaptor.parse(sensorLines[1].split(':').last.trim());
+      final adapter = SensorAdaptor.parse(
+        sensorLines[1].split(':').last.trim(),
+      );
 
       final details = <String, String>{};
       for (var idx = 2; idx < len; idx++) {
@@ -79,7 +80,9 @@ final class SensorItem {
         final value = detailParts[1].trim();
         details[key] = value;
       }
-      sensors.add(SensorItem(device: device, adapter: adapter, details: details));
+      sensors.add(
+        SensorItem(device: device, adapter: adapter, details: details),
+      );
     }
 
     return sensors;

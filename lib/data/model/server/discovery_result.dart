@@ -12,7 +12,8 @@ abstract class SshDiscoveryResult with _$SshDiscoveryResult {
     @Default(false) bool isSelected,
   }) = _SshDiscoveryResult;
 
-  factory SshDiscoveryResult.fromJson(Map<String, dynamic> json) => _$SshDiscoveryResultFromJson(json);
+  factory SshDiscoveryResult.fromJson(Map<String, dynamic> json) =>
+      _$SshDiscoveryResultFromJson(json);
 }
 
 @freezed
@@ -24,7 +25,8 @@ abstract class SshDiscoveryReport with _$SshDiscoveryReport {
     required List<SshDiscoveryResult> items,
   }) = _SshDiscoveryReport;
 
-  factory SshDiscoveryReport.fromJson(Map<String, dynamic> json) => _$SshDiscoveryReportFromJson(json);
+  factory SshDiscoveryReport.fromJson(Map<String, dynamic> json) =>
+      _$SshDiscoveryReportFromJson(json);
 }
 
 @freezed
@@ -35,15 +37,4 @@ abstract class SshDiscoveryConfig with _$SshDiscoveryConfig {
     @Default(false) bool enableMdns,
     @Default(4096) int hostEnumerationLimit,
   }) = _SshDiscoveryConfig;
-}
-
-extension SshDiscoveryConfigX on SshDiscoveryConfig {
-  List<String> toArgs() {
-    final args = <String>[];
-    args.add('--timeout-ms=$timeoutMs');
-    args.add('--max-concurrency=$maxConcurrency');
-    args.add('--host-enumeration-limit=$hostEnumerationLimit');
-    if (enableMdns) args.add('--enable-mdns');
-    return args;
-  }
 }

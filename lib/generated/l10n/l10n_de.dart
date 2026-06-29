@@ -32,6 +32,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get askAi => 'KI fragen';
 
   @override
+  String get ai => 'AI';
+
+  @override
   String get askAiApiKey => 'API-Schlüssel';
 
   @override
@@ -39,6 +42,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get askAiBaseUrl => 'Basis-URL';
+
+  @override
+  String get askAiEndpointTip =>
+      'Enter the full Chat Completions endpoint, or a service base URL. If the address ends with /v1, the app will append /chat/completions.';
 
   @override
   String get askAiCommandInserted => 'Befehl ins Terminal eingefügt';
@@ -130,6 +137,35 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Backup-Version stimmt nicht überein.';
 
   @override
+  String get icloudBackupStatusTitle => 'Backup status';
+
+  @override
+  String get icloudBackupStatusLoading => 'Loading iCloud backup status...';
+
+  @override
+  String get icloudBackupStatusError => 'Unable to read iCloud backup metadata';
+
+  @override
+  String get icloudBackupStatusEmpty => 'No iCloud backup file found yet';
+
+  @override
+  String get icloudBackupStateUploading => 'Uploading';
+
+  @override
+  String get icloudBackupStateConflict => 'Conflict detected';
+
+  @override
+  String get icloudBackupStateUploaded => 'Uploaded';
+
+  @override
+  String get icloudBackupStateWaiting => 'Waiting for iCloud';
+
+  @override
+  String icloudBackupStatusSummary(Object lastModified, Object remoteState) {
+    return 'Last backup: $lastModified\nStatus: $remoteState';
+  }
+
+  @override
   String get bgRun => 'Hintergrundaktualisierung';
 
   @override
@@ -205,6 +241,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get cursorType => 'Cursor-Typ';
+
+  @override
+  String get configured => 'Configured';
 
   @override
   String get customCmd => 'Benutzerdefinierte Befehle';
@@ -345,6 +384,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Soll der Vollbildmodus aktiviert werden, wenn das Gerät in den Quermodus gedreht wird? Diese Option gilt nur für die Server-Registerkarte.';
 
   @override
+  String get githubGist => 'GitHub Gist';
+
+  @override
+  String get githubGistIdOptional => 'Gist ID (optional)';
+
+  @override
+  String get githubGistToken => 'GitHub Gist token';
+
+  @override
+  String get githubGistTokenEmpty => 'Token is empty';
+
+  @override
   String get goBackQ => 'Zurückkommen?';
 
   @override
@@ -381,6 +432,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get imagesList => 'Images';
 
   @override
+  String get pull => 'Pull';
+
+  @override
   String get installDockerWithUrl =>
       'Bitte installiere docker zuerst. https://docs.docker.com/engine/install';
 
@@ -388,11 +442,26 @@ class AppLocalizationsDe extends AppLocalizations {
   String get invalid => 'Ungültig';
 
   @override
+  String get invalidUrl => 'Invalid URL';
+
+  @override
   String get invalidHostFormat =>
       'Invalid host format. Only IPv4, IPv6, and domain characters are allowed.';
 
   @override
   String get jumpServer => 'Server springen';
+
+  @override
+  String jumpServersNotFoundFmt(Object serverName, Object jumpIds) {
+    return 'Jump servers not found for $serverName: $jumpIds';
+  }
+
+  @override
+  String get noJumpServerAvailable => 'No jump server available.';
+
+  @override
+  String get jumpServerAndProxyCommandCannotBeUsedTogether =>
+      'Jump server and ProxyCommand cannot be used together.';
 
   @override
   String get keepForeground => 'Stelle sicher, dass die App geöffnet bleibt.';
@@ -414,11 +483,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get lastSuccess => 'Letzter Erfolg';
 
   @override
-  String get letterCache => 'Buchstaben-Caching';
+  String get letterCache => 'Normale Tastatureingabe';
 
   @override
   String get letterCacheTip =>
-      'Empfohlen, zu deaktivieren, aber nach dem Deaktivieren können keine CJK-Zeichen eingegeben werden.';
+      'Wenn aktiviert, läuft die Eingabe über die normale IME. Dadurch lassen sich auf manchen Systemen sichere Tastaturhinweise im Terminal vermeiden.';
 
   @override
   String madeWithLove(Object myGithub) {
@@ -440,6 +509,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get min => 'min';
+
+  @override
+  String mismatchSystem(Object system) {
+    return 'Nicht übereinstimmendes System: $system';
+  }
 
   @override
   String get more => 'Mehr';
@@ -531,6 +605,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pushToken => 'Push Token';
 
   @override
+  String get proxyCommandOnlySupportedOnDesktop =>
+      'ProxyCommand is only supported on desktop platforms.';
+
+  @override
   String get pveIgnoreCertTip =>
       'Nicht empfohlen, Achten Sie auf Sicherheitsrisiken! Wenn Sie das Standardzertifikat von PVE verwenden, müssen Sie diese Option aktivieren.';
 
@@ -539,14 +617,81 @@ class AppLocalizationsDe extends AppLocalizations {
       'Anmeldung fehlgeschlagen. Kann nicht mit Benutzername/Passwort aus der Serverkonfiguration angemeldet werden, um sich über Linux PAM anzumelden.';
 
   @override
+  String get pveServerClientMissing =>
+      'The SSH client for this server is not available.';
+
+  @override
+  String get pveAddressMissing =>
+      'The PVE address is missing. Please configure it in server settings.';
+
+  @override
+  String get pvePasswordRequired =>
+      'PVE password is required. Please set it in server settings.';
+
+  @override
+  String get pveOtpRequired =>
+      'Two-factor authentication is enabled on this PVE server. Please enter the OTP code.';
+
+  @override
+  String get pveOtpChallengeExpired =>
+      'The OTP challenge has expired. Please refresh and try again.';
+
+  @override
+  String get pveOtpCodeRequired => 'OTP code is required.';
+
+  @override
+  String get pveOtpVerificationFailed =>
+      'OTP verification failed. Please try again with a fresh code.';
+
+  @override
+  String get pveOtpTitle => 'OTP Verification';
+
+  @override
+  String get pveOtpLabel => 'OTP Code';
+
+  @override
+  String get pveInvalidResponseBody =>
+      'PVE login returned an invalid response body.';
+
+  @override
+  String get pveInvalidResponseData =>
+      'PVE login response did not contain a valid data payload.';
+
+  @override
+  String get pveMissingAuthTicket =>
+      'PVE login succeeded but no authentication ticket was returned.';
+
+  @override
   String get pveVersionLow =>
       'Diese Funktion befindet sich derzeit in der Testphase und wurde nur auf PVE 8+ getestet. Bitte verwenden Sie sie mit Vorsicht.';
+
+  @override
+  String get pveLoadingForwarding => 'Establishing SSH tunnel...';
+
+  @override
+  String get pveLoadingLogin => 'Authenticating with PVE...';
+
+  @override
+  String get pveLoadingData => 'Fetching cluster data...';
+
+  @override
+  String get pveLoadingConnect => 'Connecting...';
+
+  @override
+  String get pvePassword => 'PVE Password';
+
+  @override
+  String get pvePasswordHint =>
+      'Required when using key-based SSH authentication';
 
   @override
   String get read => 'Lesen';
 
   @override
   String get recentConnections => 'Kürzliche Verbindungen';
+
+  @override
+  String get reconnecting => 'Erneut verbinden...';
 
   @override
   String get rememberPwdInMem => 'Passwort im Speicher behalten';
@@ -603,6 +748,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sftpSSHConnected => 'SFTP Verbunden';
 
   @override
+  String get sftp => 'SFTP';
+
+  @override
   String get sftpShowFoldersFirst => 'Ordner zuerst anzeigen';
 
   @override
@@ -622,6 +770,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Zum Beispiel bezieht sich die Standard-Netzwerkverkehrsstatistik auf alle Geräte. Hier können Sie ein bestimmtes Gerät angeben.';
 
   @override
+  String get tempIsCelsiusTip =>
+      'When enabled, the temperature value will be treated as Celsius instead of millicelsius. Turn on only if the temperature displays incorrectly (e.g., showing 0.1°C instead of 58°C).';
+
+  @override
   String get speed => 'Tempo';
 
   @override
@@ -633,6 +785,28 @@ class AppLocalizationsDe extends AppLocalizations {
   String sshConfigAllExist(Object duplicateCount) {
     return 'Alle Server existieren bereits ($duplicateCount Duplikate gefunden)';
   }
+
+  @override
+  String get ssh => 'SSH';
+
+  @override
+  String get sshConnectionMode => 'SSH connection mode';
+
+  @override
+  String get sshConnectionModeBuiltin => 'Built-in';
+
+  @override
+  String get sshConnectionModeSystem => 'System SSH';
+
+  @override
+  String get sshConnectionModeTip =>
+      'Built-in: use the app\'s terminal. System SSH: launch the system ssh command in an external terminal.';
+
+  @override
+  String get sshConnectionModeUseBuiltin => 'Use built-in terminal';
+
+  @override
+  String get sshConnectionModeUseSystem => 'Use system SSH';
 
   @override
   String sshConfigDuplicatesSkipped(Object duplicateCount) {
@@ -743,6 +917,13 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get syncAppSettings => 'Sync app settings';
+
+  @override
+  String get syncAppSettingsTip =>
+      'Include theme, layout, editor, terminal and other device preferences in automatic sync.';
+
+  @override
   String get syncTip =>
       'Damit einige Änderungen wirksam werden, kann ein Neustart erforderlich sein.';
 
@@ -775,6 +956,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get trySudo => 'Versuche es mit sudo';
+
+  @override
+  String get sudoPromptNotFound =>
+      'Aktuell wird kein sudo-Passwort-Prompt angezeigt.';
 
   @override
   String get unknown => 'Unbekannt';
@@ -848,6 +1033,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get whenOpenApp => 'Beim Öffnen der App';
 
   @override
+  String get wiki => 'Wiki';
+
+  @override
   String get wolTip =>
       'Nach der Konfiguration von WOL (Wake-on-LAN) wird jedes Mal, wenn der Server verbunden wird, eine WOL-Anfrage gesendet.';
 
@@ -868,4 +1056,68 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get podmanDockerEmulationDetected =>
       'Podman Docker-Emulation erkannt. Bitte wechseln Sie in den Einstellungen zu Podman.';
+
+  @override
+  String get portForwardBeta =>
+      'This feature is still in beta testing. Functionality is not guaranteed.';
+
+  @override
+  String get portForward_startPrompt =>
+      'Add a port forward rule to get started';
+
+  @override
+  String get portForward_localHost => 'Local Host';
+
+  @override
+  String get portForward_localPort => 'Local Port';
+
+  @override
+  String get portForward_remoteHost => 'Remote Host';
+
+  @override
+  String get portForward_remotePort => 'Remote Port';
+
+  @override
+  String get portForward_type_local => 'Local';
+
+  @override
+  String get portForward_type_remote => 'Remote';
+
+  @override
+  String portForward_deleteConfirmFmt(Object name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get sponsor => 'Sponsor';
+
+  @override
+  String get sort => 'Sort';
+
+  @override
+  String get sortByName => 'By name';
+
+  @override
+  String get sortByJoinTime => 'By join time';
+
+  @override
+  String get ascending => 'Ascending';
+
+  @override
+  String get descending => 'Descending';
+
+  @override
+  String get searchServer => 'Search server';
+
+  @override
+  String get serverHistory => 'Server history';
+
+  @override
+  String get clearHistory => 'Clear history';
+
+  @override
+  String get portForwardBetaTitle => 'Port Forwarding (Beta)';
+
+  @override
+  String get systemd => 'Systemd';
 }

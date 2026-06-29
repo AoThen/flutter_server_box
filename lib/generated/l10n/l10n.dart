@@ -165,6 +165,12 @@ abstract class AppLocalizations {
   /// **'Ask AI'**
   String get askAi;
 
+  /// No description provided for @ai.
+  ///
+  /// In en, this message translates to:
+  /// **'AI'**
+  String get ai;
+
   /// No description provided for @askAiApiKey.
   ///
   /// In en, this message translates to:
@@ -180,8 +186,14 @@ abstract class AppLocalizations {
   /// No description provided for @askAiBaseUrl.
   ///
   /// In en, this message translates to:
-  /// **'Base URL'**
+  /// **'API Endpoint'**
   String get askAiBaseUrl;
+
+  /// No description provided for @askAiEndpointTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the full Chat Completions endpoint, or a service base URL. If the address ends with /v1, the app will append /chat/completions.'**
+  String get askAiEndpointTip;
 
   /// No description provided for @askAiCommandInserted.
   ///
@@ -345,6 +357,60 @@ abstract class AppLocalizations {
   /// **'Backup version is not match.'**
   String get backupVersionNotMatch;
 
+  /// No description provided for @icloudBackupStatusTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup status'**
+  String get icloudBackupStatusTitle;
+
+  /// No description provided for @icloudBackupStatusLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading iCloud backup status...'**
+  String get icloudBackupStatusLoading;
+
+  /// No description provided for @icloudBackupStatusError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to read iCloud backup metadata'**
+  String get icloudBackupStatusError;
+
+  /// No description provided for @icloudBackupStatusEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No iCloud backup file found yet'**
+  String get icloudBackupStatusEmpty;
+
+  /// No description provided for @icloudBackupStateUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading'**
+  String get icloudBackupStateUploading;
+
+  /// No description provided for @icloudBackupStateConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflict detected'**
+  String get icloudBackupStateConflict;
+
+  /// No description provided for @icloudBackupStateUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get icloudBackupStateUploaded;
+
+  /// No description provided for @icloudBackupStateWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for iCloud'**
+  String get icloudBackupStateWaiting;
+
+  /// No description provided for @icloudBackupStatusSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {lastModified}\nStatus: {remoteState}'**
+  String icloudBackupStatusSummary(Object lastModified, Object remoteState);
+
   /// No description provided for @bgRun.
   ///
   /// In en, this message translates to:
@@ -470,6 +536,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cursor type'**
   String get cursorType;
+
+  /// No description provided for @configured.
+  ///
+  /// In en, this message translates to:
+  /// **'Configured'**
+  String get configured;
 
   /// No description provided for @customCmd.
   ///
@@ -708,6 +780,30 @@ abstract class AppLocalizations {
   /// **'Should full-screen mode be enabled when the device is rotated to landscape mode? This option only applies to the server tab.'**
   String get fullScreenTip;
 
+  /// No description provided for @githubGist.
+  ///
+  /// In en, this message translates to:
+  /// **'GitHub Gist'**
+  String get githubGist;
+
+  /// No description provided for @githubGistIdOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Gist ID (optional)'**
+  String get githubGistIdOptional;
+
+  /// No description provided for @githubGistToken.
+  ///
+  /// In en, this message translates to:
+  /// **'GitHub Gist token'**
+  String get githubGistToken;
+
+  /// No description provided for @githubGistTokenEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Token is empty'**
+  String get githubGistTokenEmpty;
+
   /// No description provided for @goBackQ.
   ///
   /// In en, this message translates to:
@@ -774,6 +870,12 @@ abstract class AppLocalizations {
   /// **'Images list'**
   String get imagesList;
 
+  /// No description provided for @pull.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull'**
+  String get pull;
+
   /// No description provided for @installDockerWithUrl.
   ///
   /// In en, this message translates to:
@@ -786,6 +888,12 @@ abstract class AppLocalizations {
   /// **'Invalid'**
   String get invalid;
 
+  /// No description provided for @invalidUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid URL'**
+  String get invalidUrl;
+
   /// No description provided for @invalidHostFormat.
   ///
   /// In en, this message translates to:
@@ -797,6 +905,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Jump server'**
   String get jumpServer;
+
+  /// No description provided for @jumpServersNotFoundFmt.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump servers not found for {serverName}: {jumpIds}'**
+  String jumpServersNotFoundFmt(Object serverName, Object jumpIds);
+
+  /// No description provided for @noJumpServerAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No jump server available.'**
+  String get noJumpServerAvailable;
+
+  /// No description provided for @jumpServerAndProxyCommandCannotBeUsedTogether.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump server and ProxyCommand cannot be used together.'**
+  String get jumpServerAndProxyCommandCannotBeUsedTogether;
 
   /// No description provided for @keepForeground.
   ///
@@ -837,13 +963,13 @@ abstract class AppLocalizations {
   /// No description provided for @letterCache.
   ///
   /// In en, this message translates to:
-  /// **'Letter caching'**
+  /// **'Normal keyboard input'**
   String get letterCache;
 
   /// No description provided for @letterCacheTip.
   ///
   /// In en, this message translates to:
-  /// **'Recommended to disable, but after disabling, it will be impossible to input CJK characters.'**
+  /// **'When enabled, input goes through the regular IME, which can avoid secure keyboard prompts in the terminal on some systems.'**
   String get letterCacheTip;
 
   /// No description provided for @madeWithLove.
@@ -881,6 +1007,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'min'**
   String get min;
+
+  /// No description provided for @mismatchSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Mismatch system: {system}'**
+  String mismatchSystem(Object system);
 
   /// No description provided for @more.
   ///
@@ -1038,6 +1170,12 @@ abstract class AppLocalizations {
   /// **'Push token'**
   String get pushToken;
 
+  /// No description provided for @proxyCommandOnlySupportedOnDesktop.
+  ///
+  /// In en, this message translates to:
+  /// **'ProxyCommand is only supported on desktop platforms.'**
+  String get proxyCommandOnlySupportedOnDesktop;
+
   /// No description provided for @pveIgnoreCertTip.
   ///
   /// In en, this message translates to:
@@ -1050,11 +1188,119 @@ abstract class AppLocalizations {
   /// **'Login failed. Unable to authenticate with username/password from server configuration for Linux PAM login.'**
   String get pveLoginFailed;
 
+  /// No description provided for @pveServerClientMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The SSH client for this server is not available.'**
+  String get pveServerClientMissing;
+
+  /// No description provided for @pveAddressMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The PVE address is missing. Please configure it in server settings.'**
+  String get pveAddressMissing;
+
+  /// No description provided for @pvePasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'PVE password is required. Please set it in server settings.'**
+  String get pvePasswordRequired;
+
+  /// No description provided for @pveOtpRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-factor authentication is enabled on this PVE server. Please enter the OTP code.'**
+  String get pveOtpRequired;
+
+  /// No description provided for @pveOtpChallengeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'The OTP challenge has expired. Please refresh and try again.'**
+  String get pveOtpChallengeExpired;
+
+  /// No description provided for @pveOtpCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP code is required.'**
+  String get pveOtpCodeRequired;
+
+  /// No description provided for @pveOtpVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP verification failed. Please try again with a fresh code.'**
+  String get pveOtpVerificationFailed;
+
+  /// No description provided for @pveOtpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP Verification'**
+  String get pveOtpTitle;
+
+  /// No description provided for @pveOtpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'OTP Code'**
+  String get pveOtpLabel;
+
+  /// No description provided for @pveInvalidResponseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'PVE login returned an invalid response body.'**
+  String get pveInvalidResponseBody;
+
+  /// No description provided for @pveInvalidResponseData.
+  ///
+  /// In en, this message translates to:
+  /// **'PVE login response did not contain a valid data payload.'**
+  String get pveInvalidResponseData;
+
+  /// No description provided for @pveMissingAuthTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'PVE login succeeded but no authentication ticket was returned.'**
+  String get pveMissingAuthTicket;
+
   /// No description provided for @pveVersionLow.
   ///
   /// In en, this message translates to:
   /// **'This feature is currently in the testing phase and has only been tested on PVE 8+. Please use it with caution.'**
   String get pveVersionLow;
+
+  /// No description provided for @pveLoadingForwarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Establishing SSH tunnel...'**
+  String get pveLoadingForwarding;
+
+  /// No description provided for @pveLoadingLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticating with PVE...'**
+  String get pveLoadingLogin;
+
+  /// No description provided for @pveLoadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching cluster data...'**
+  String get pveLoadingData;
+
+  /// No description provided for @pveLoadingConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting...'**
+  String get pveLoadingConnect;
+
+  /// No description provided for @pvePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'PVE Password'**
+  String get pvePassword;
+
+  /// No description provided for @pvePasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Required when using key-based SSH authentication'**
+  String get pvePasswordHint;
 
   /// No description provided for @read.
   ///
@@ -1067,6 +1313,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recent Connections'**
   String get recentConnections;
+
+  /// No description provided for @reconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting...'**
+  String get reconnecting;
 
   /// No description provided for @rememberPwdInMem.
   ///
@@ -1170,6 +1422,12 @@ abstract class AppLocalizations {
   /// **'SFTP Connected'**
   String get sftpSSHConnected;
 
+  /// No description provided for @sftp.
+  ///
+  /// In en, this message translates to:
+  /// **'SFTP'**
+  String get sftp;
+
   /// No description provided for @sftpShowFoldersFirst.
   ///
   /// In en, this message translates to:
@@ -1206,6 +1464,12 @@ abstract class AppLocalizations {
   /// **'For example, network traffic statistics are by default for all devices. You can specify a particular device here.'**
   String get specifyDevTip;
 
+  /// No description provided for @tempIsCelsiusTip.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, the temperature value will be treated as Celsius instead of millicelsius. Turn on only if the temperature displays incorrectly (e.g., showing 0.1°C instead of 58°C).'**
+  String get tempIsCelsiusTip;
+
   /// No description provided for @speed.
   ///
   /// In en, this message translates to:
@@ -1223,6 +1487,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All servers already exist ({duplicateCount} duplicates found)'**
   String sshConfigAllExist(Object duplicateCount);
+
+  /// No description provided for @ssh.
+  ///
+  /// In en, this message translates to:
+  /// **'SSH'**
+  String get ssh;
+
+  /// No description provided for @sshConnectionMode.
+  ///
+  /// In en, this message translates to:
+  /// **'SSH connection mode'**
+  String get sshConnectionMode;
+
+  /// No description provided for @sshConnectionModeBuiltin.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in'**
+  String get sshConnectionModeBuiltin;
+
+  /// No description provided for @sshConnectionModeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System SSH'**
+  String get sshConnectionModeSystem;
+
+  /// No description provided for @sshConnectionModeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in: use the app\'s terminal. System SSH: launch the system ssh command in an external terminal.'**
+  String get sshConnectionModeTip;
+
+  /// No description provided for @sshConnectionModeUseBuiltin.
+  ///
+  /// In en, this message translates to:
+  /// **'Use built-in terminal'**
+  String get sshConnectionModeUseBuiltin;
+
+  /// No description provided for @sshConnectionModeUseSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Use system SSH'**
+  String get sshConnectionModeUseSystem;
 
   /// No description provided for @sshConfigDuplicatesSkipped.
   ///
@@ -1374,6 +1680,18 @@ abstract class AppLocalizations {
   /// **'Switch to {val}'**
   String switchTo(Object val);
 
+  /// No description provided for @syncAppSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync app settings'**
+  String get syncAppSettings;
+
+  /// No description provided for @syncAppSettingsTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Include theme, layout, editor, terminal and other device preferences in automatic sync.'**
+  String get syncAppSettingsTip;
+
   /// No description provided for @syncTip.
   ///
   /// In en, this message translates to:
@@ -1433,6 +1751,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try using sudo'**
   String get trySudo;
+
+  /// No description provided for @sudoPromptNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No sudo password prompt is active.'**
+  String get sudoPromptNotFound;
 
   /// No description provided for @unknown.
   ///
@@ -1566,6 +1890,12 @@ abstract class AppLocalizations {
   /// **'When opening the app'**
   String get whenOpenApp;
 
+  /// No description provided for @wiki.
+  ///
+  /// In en, this message translates to:
+  /// **'Wiki'**
+  String get wiki;
+
   /// No description provided for @wolTip.
   ///
   /// In en, this message translates to:
@@ -1601,6 +1931,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Podman Docker emulation detected. Please switch to Podman in settings.'**
   String get podmanDockerEmulationDetected;
+
+  /// No description provided for @portForwardBeta.
+  ///
+  /// In en, this message translates to:
+  /// **'This feature is still in beta testing. Functionality is not guaranteed.'**
+  String get portForwardBeta;
+
+  /// No description provided for @portForward_startPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a port forward rule to get started'**
+  String get portForward_startPrompt;
+
+  /// No description provided for @portForward_localHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Local Host'**
+  String get portForward_localHost;
+
+  /// No description provided for @portForward_localPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Local Port'**
+  String get portForward_localPort;
+
+  /// No description provided for @portForward_remoteHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote Host'**
+  String get portForward_remoteHost;
+
+  /// No description provided for @portForward_remotePort.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote Port'**
+  String get portForward_remotePort;
+
+  /// No description provided for @portForward_type_local.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get portForward_type_local;
+
+  /// No description provided for @portForward_type_remote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote'**
+  String get portForward_type_remote;
+
+  /// No description provided for @portForward_deleteConfirmFmt.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String portForward_deleteConfirmFmt(Object name);
+
+  /// No description provided for @sponsor.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsor'**
+  String get sponsor;
+
+  /// No description provided for @sort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get sort;
+
+  /// No description provided for @sortByName.
+  ///
+  /// In en, this message translates to:
+  /// **'By name'**
+  String get sortByName;
+
+  /// No description provided for @sortByJoinTime.
+  ///
+  /// In en, this message translates to:
+  /// **'By join time'**
+  String get sortByJoinTime;
+
+  /// No description provided for @ascending.
+  ///
+  /// In en, this message translates to:
+  /// **'Ascending'**
+  String get ascending;
+
+  /// No description provided for @descending.
+  ///
+  /// In en, this message translates to:
+  /// **'Descending'**
+  String get descending;
+
+  /// No description provided for @searchServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Search server'**
+  String get searchServer;
+
+  /// No description provided for @serverHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Server history'**
+  String get serverHistory;
+
+  /// No description provided for @clearHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear history'**
+  String get clearHistory;
+
+  /// No description provided for @portForwardBetaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Port Forward (Beta)'**
+  String get portForwardBetaTitle;
+
+  /// No description provided for @systemd.
+  ///
+  /// In en, this message translates to:
+  /// **'Systemd'**
+  String get systemd;
 }
 
 class _AppLocalizationsDelegate

@@ -6,10 +6,6 @@ import 'package:server_box/data/res/store.dart';
 abstract final class MethodChans {
   static const _channel = MethodChannel('${Miscs.pkgName}/main_chan');
 
-  static void moveToBg() {
-    _channel.invokeMethod('sendToBackground');
-  }
-
   /// Issue #662
   static void startService() {
     if (Stores.setting.fgService.fetch() != true) return;
@@ -47,22 +43,16 @@ abstract final class MethodChans {
       final res = await _channel.invokeMethod('isServiceRunning');
       return res == true;
     } catch (e, s) {
-      Loggers.app.warning('Failed to check if Android service is running', e, s);
+      Loggers.app.warning(
+        'Failed to check if Android service is running',
+        e,
+        s,
+      );
       return false;
     }
   }
 
   // iOS Live Activities controls
-  static Future<void> startLiveActivity(String payload) async {
-    if (!isIOS) return;
-    try {
-      Loggers.app.info('Starting iOS Live Activity: $payload');
-      await _channel.invokeMethod('startLiveActivity', payload);
-    } catch (e, s) {
-      Loggers.app.warning('Failed to start iOS Live Activity', e, s);
-    }
-  }
-
   static Future<void> updateLiveActivity(String payload) async {
     if (!isIOS) return;
     try {
@@ -84,10 +74,13 @@ abstract final class MethodChans {
   }
 
   /// Register a handler for native -> Flutter callbacks.
-  /// Currently handles: 
+  /// Currently handles:
   /// - `disconnectSession` with argument map {id: string}
   /// - `stopAllConnections` with no arguments
-  static void registerHandler(Future<void> Function(String id) onDisconnect, [VoidCallback? onStopAll]) {
+  static void registerHandler(
+    Future<void> Function(String id) onDisconnect, [
+    VoidCallback? onStopAll,
+  ]) {
     _channel.setMethodCallHandler((call) async {
       switch (call.method) {
         case 'disconnectSession':

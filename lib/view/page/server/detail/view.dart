@@ -4,6 +4,7 @@ import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/core/extension/server.dart';
@@ -36,10 +37,14 @@ class ServerDetailPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<ServerDetailPage> createState() => _ServerDetailPageState();
 
-  static const route = AppRouteArg(page: ServerDetailPage.new, path: '/servers/detail');
+  static const route = AppRouteArg(
+    page: ServerDetailPage.new,
+    path: '/servers/detail',
+  );
 }
 
-class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with SingleTickerProviderStateMixin {
+class _ServerDetailPageState extends ConsumerState<ServerDetailPage>
+    with SingleTickerProviderStateMixin {
   late final _cardBuildMap = Map.fromIterables(ServerDetailCards.names, [
     _buildAbout,
     _buildCPUView,
@@ -84,7 +89,9 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
     super.initState();
     final order = _settings.detailCardOrder.fetch();
     final disabled = _settings.detailCardDisabled.fetch();
-    order.removeWhere((e) => !ServerDetailCards.names.contains(e) || disabled.contains(e));
+    order.removeWhere(
+      (e) => !ServerDetailCards.names.contains(e) || disabled.contains(e),
+    );
     _cardsOrder.addAll(order);
   }
 
@@ -103,7 +110,10 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
   Widget _buildMainPage(ServerState si) {
     final buildFuncs = !_moveServerFuncs;
     final logo = _buildLogo(si);
-    final children = <Widget>[?logo, if (buildFuncs) ServerFuncBtns(spi: si.spi)];
+    final children = <Widget>[
+      ?logo,
+      if (buildFuncs) ServerFuncBtns(spi: si.spi),
+    ];
     for (final card in _cardsOrder) {
       final child = _cardBuildMap[card]?.call(si);
       if (child != null) {
@@ -121,14 +131,24 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
     return CustomAppBar(
       title: Text(
         si.spi.name,
-        style: TextStyle(fontSize: 20, color: context.isDark ? Colors.white : Colors.black),
+        style: TextStyle(
+          fontSize: 20,
+          color: context.isDark ? Colors.white : Colors.black,
+        ),
       ),
       actions: [
-        QrShareBtn(data: si.spi.toJsonString(), tip: si.spi.name, tip2: '${libL10n.server} ~ ServerBox'),
+        QrShareBtn(
+          data: si.spi.toJsonString(),
+          tip: si.spi.name,
+          tip2: '${libL10n.server} ~ ServerBox',
+        ),
         IconButton(
           icon: const Icon(Icons.edit),
           onPressed: () async {
-            final delete = await ServerEditPage.route.go(context, args: SpiRequiredArgs(si.spi));
+            final delete = await ServerEditPage.route.go(
+              context,
+              args: SpiRequiredArgs(si.spi),
+            );
             if (delete == true) {
               context.pop();
             }
@@ -148,10 +168,19 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
           if (logoUrl == null) {
             return UIs.placeholder;
           }
+          final height = cons.maxWidth * 0.3;
+          if (logoUrl.isSvgUrl) {
+            return SvgPicture.network(
+              logoUrl,
+              height: height,
+              width: cons.maxWidth,
+              fit: BoxFit.contain,
+            );
+          }
           return ExtendedImage.network(
             logoUrl,
             cache: true,
-            height: cons.maxWidth * 0.3,
+            height: height,
             width: cons.maxWidth,
           );
         },
@@ -174,8 +203,16 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(e.key.i18n, style: UIs.text13, overflow: TextOverflow.ellipsis),
-                  Text(e.value, style: UIs.text13Grey, overflow: TextOverflow.ellipsis),
+                  Text(
+                    e.key.i18n,
+                    style: UIs.text13,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    e.value,
+                    style: UIs.text13Grey,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
@@ -207,7 +244,9 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
 
     if (ss.cpu.brand.isNotEmpty) {
       children.add(
-        Column(children: ss.cpu.brand.entries.map(_buildCpuModelItem).toList()).paddingOnly(top: 13),
+        Column(
+          children: ss.cpu.brand.entries.map(_buildCpuModelItem).toList(),
+        ).paddingOnly(top: 13),
       );
     }
 
@@ -235,11 +274,20 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
           builder: (_, cons) {
             return ConstrainedBox(
               constraints: BoxConstraints(maxWidth: cons.maxWidth * .7),
-              child: Text(name, style: UIs.text13, overflow: TextOverflow.ellipsis, maxLines: 1),
+              child: Text(
+                name,
+                style: UIs.text13,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             );
           },
         ),
-        Text('x ${e.value}', style: UIs.text13Grey, overflow: TextOverflow.clip),
+        Text(
+          'x ${e.value}',
+          style: UIs.text13Grey,
+          overflow: TextOverflow.clip,
+        ),
       ],
     );
     return child.paddingSymmetric(horizontal: 17);
@@ -251,7 +299,11 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text('${percent.toStringAsFixed(1)}%', style: UIs.text12, textScaler: _textFactor),
+        Text(
+          '${percent.toStringAsFixed(1)}%',
+          style: UIs.text12,
+          textScaler: _textFactor,
+        ),
         Text(timeType, style: UIs.text12Grey, textScaler: _textFactor),
       ],
     );
@@ -283,7 +335,9 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 3),
-                child: _buildProgress(cs.usedPercent(coreIdx: coreNumberOneBased)),
+                child: _buildProgress(
+                  cs.usedPercent(coreIdx: coreNumberOneBased),
+                ),
               ),
             ),
           );
@@ -331,8 +385,8 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
   }
 
   Widget _buildProgress(double percent) {
-    if (percent > 100) percent = 100;
-    final percentWithinOne = percent / 100;
+    final clamped = percent.clamp(0, 100);
+    final percentWithinOne = clamped / 100;
     return LinearProgressIndicator(
       value: percentWithinOne,
       minHeight: 7,
@@ -343,6 +397,7 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
 
   Widget? _buildMemView(ServerState si) {
     final ss = si.status;
+    if (ss.mem.total == 0) return null;
     final free = ss.mem.free / ss.mem.total * 100;
     final avail = ss.mem.availPercent * 100;
     final used = ss.mem.usedPercent * 100;
@@ -457,16 +512,7 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
         textScaler: _textFactor,
       ),
       contentPadding: const EdgeInsets.only(left: 17, right: 17),
-      trailing: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            onPressed: () => _onTapNvidiaGpuItem(item),
-            icon: const Icon(Icons.info_outline, size: 17),
-          ),
-        ],
-      ),
+      trailing: _buildGpuInfoButton(() => _onTapNvidiaGpuItem(item)),
     );
   }
 
@@ -486,53 +532,56 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
         textScaler: _textFactor,
       ),
       contentPadding: const EdgeInsets.only(left: 17, right: 17),
-      trailing: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(onPressed: () => _onTapAmdGpuItem(item), icon: const Icon(Icons.info_outline, size: 17)),
-        ],
-      ),
+      trailing: _buildGpuInfoButton(() => _onTapAmdGpuItem(item)),
     );
   }
 
   Widget _buildGpuProcessItem(NvidiaSmiMemProcess process) {
-    return ListTile(
-      title: Text(
-        process.name,
-        style: UIs.text12,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        textScaler: _textFactor,
-      ),
-      subtitle: Text(
-        'PID: ${process.pid} - ${process.memory} MiB',
-        style: UIs.text12Grey,
-        textScaler: _textFactor,
-      ),
-      trailing: InkWell(
-        onTap: () => _onTapGpuProcessItem(process),
-        child: const Icon(Icons.info_outline, size: 17),
-      ),
+    return _buildGpuProcessTile(
+      name: process.name,
+      subtitle: 'PID: ${process.pid} - ${process.memory} MiB',
+      onTap: () => _onTapGpuProcessItem(process),
     );
   }
 
   Widget _buildAmdGpuProcessItem(AmdSmiMemProcess process) {
+    return _buildGpuProcessTile(
+      name: process.name,
+      subtitle:
+          'PID: ${process.pid} - ${_formatAmdGpuProcessMemory(process.memory)}',
+      onTap: () => _onTapAmdGpuProcessItem(process),
+    );
+  }
+
+  Widget _buildGpuInfoButton(VoidCallback onPressed) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          onPressed: onPressed,
+          icon: const Icon(Icons.info_outline, size: 17),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGpuProcessTile({
+    required String name,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       title: Text(
-        process.name,
+        name,
         style: UIs.text12,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         textScaler: _textFactor,
       ),
-      subtitle: Text(
-        'PID: ${process.pid} - ${process.memory} MiB',
-        style: UIs.text12Grey,
-        textScaler: _textFactor,
-      ),
+      subtitle: Text(subtitle, style: UIs.text12Grey, textScaler: _textFactor),
       trailing: InkWell(
-        onTap: () => _onTapAmdGpuProcessItem(process),
+        onTap: onTap,
         child: const Icon(Icons.info_outline, size: 17),
       ),
     );
@@ -559,7 +608,11 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
     ).cardx;
   }
 
-  Widget _buildDiskItemWithHierarchy(Disk disk, server_model.ServerStatus ss, int depth) {
+  Widget _buildDiskItemWithHierarchy(
+    Disk disk,
+    server_model.ServerStatus ss,
+    int depth,
+  ) {
     // Create a list to hold this disk and its children
     final items = <Widget>[];
 
@@ -601,7 +654,9 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  disk.mount.isEmpty ? disk.path : '${disk.path} (${disk.mount})',
+                  disk.mount.isEmpty
+                      ? disk.path
+                      : '${disk.path} (${disk.mount})',
                   style: UIs.text12,
                   textScaler: _textFactor,
                 ),
@@ -662,7 +717,9 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
     );
   }
 
-  ({String text, Color color, Widget icon}) _getDiskHealthStatus(DiskSmart smart) {
+  ({String text, Color color, Widget icon}) _getDiskHealthStatus(
+    DiskSmart smart,
+  ) {
     if (smart.healthy == null) {
       return (
         text: libL10n.unknown,
@@ -676,7 +733,11 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
         icon: const Icon(Icons.check_circle, color: Colors.green, size: 18),
       );
     } else {
-      return (text: 'FAIL', color: Colors.red, icon: const Icon(Icons.error, color: Colors.red, size: 18));
+      return (
+        text: 'FAIL',
+        color: Colors.red,
+        icon: const Icon(Icons.error, color: Colors.red, size: 18),
+      );
     }
   }
 
@@ -797,7 +858,8 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
               onTap: () => _netSortType.value = val.next,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 377),
-                transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                transitionBuilder: (child, animation) =>
+                    FadeTransition(opacity: animation, child: child),
                 child: Row(
                   children: [
                     const Icon(Icons.sort, size: 17),
@@ -863,7 +925,9 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
         leading: const Icon(Icons.ac_unit, size: 20),
         initiallyExpanded: _getInitExpand(ss.temps.devices.length),
         childrenPadding: const EdgeInsets.only(bottom: 7),
-        children: ss.temps.devices.map((key) => _buildTemperatureItem(key, ss.temps.get(key))).toList(),
+        children: ss.temps.devices
+            .map((key) => _buildTemperatureItem(key, ss.temps.get(key)))
+            .toList(),
       ),
     );
   }
@@ -911,10 +975,16 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('${battery.name}', style: UIs.text15),
-              Text('${battery.status.name} - ${battery.cycle}', style: UIs.text13Grey),
+              Text(
+                '${battery.status.name} - ${battery.cycle}',
+                style: UIs.text13Grey,
+              ),
             ],
           ),
-          Text('${battery.percent?.toStringAsFixed(0)}%', style: UIs.text13Grey),
+          Text(
+            '${battery.percent?.toStringAsFixed(0)}%',
+            style: UIs.text13Grey,
+          ),
         ],
       ),
     );
@@ -953,7 +1023,7 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
             Text('(${si.adapter.raw})', style: UIs.text13Grey),
           ],
         ),
-        Text(si.summary ?? '', style: UIs.text13Grey),
+        Text(si.summary!, style: UIs.text13Grey),
       ],
     ).expanded();
 
@@ -1020,7 +1090,8 @@ class _ServerDetailPageState extends ConsumerState<ServerDetailPage> with Single
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 277),
       child: Text(key: key, text, style: style, textScaler: _textFactor),
-      transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+      transitionBuilder: (child, animation) =>
+          FadeTransition(opacity: animation, child: child),
     );
   }
 }

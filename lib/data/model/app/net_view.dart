@@ -1,5 +1,4 @@
 import 'package:fl_lib/fl_lib.dart';
-import 'package:server_box/core/extension/context/locale.dart';
 import 'package:server_box/data/model/server/server.dart';
 
 enum NetViewType {
@@ -16,27 +15,42 @@ enum NetViewType {
   String get toStr => switch (this) {
     NetViewType.conn => libL10n.conn,
     NetViewType.traffic => libL10n.traffic,
-    NetViewType.speed => l10n.speed,
+    NetViewType.speed => libL10n.speed,
   };
 
   /// If no device is specified, return the cached value (only real devices,
   /// such as ethX, wlanX...).
   (String, String) build(ServerStatus ss, {String? dev}) {
-    final notSepcifyDev = dev == null || dev.isEmpty;
+    final notSpecifyDev = dev == null || dev.isEmpty;
     try {
       switch (this) {
         case NetViewType.conn:
-          return ('${libL10n.conn}:\n${ss.tcp.maxConn}', '${libL10n.fail}:\n${ss.tcp.fail}');
+          return (
+            '${libL10n.conn}:\n${ss.tcp.maxConn}',
+            '${libL10n.fail}:\n${ss.tcp.fail}',
+          );
         case NetViewType.speed:
-          if (notSepcifyDev) {
-            return ('↓:\n${ss.netSpeed.cachedVals.speedIn}', '↑:\n${ss.netSpeed.cachedVals.speedOut}');
+          if (notSpecifyDev) {
+            return (
+              '↓:\n${ss.netSpeed.cachedVals.speedIn}',
+              '↑:\n${ss.netSpeed.cachedVals.speedOut}',
+            );
           }
-          return ('↓:\n${ss.netSpeed.speedIn(device: dev)}', '↑:\n${ss.netSpeed.speedOut(device: dev)}');
+          return (
+            '↓:\n${ss.netSpeed.speedIn(device: dev)}',
+            '↑:\n${ss.netSpeed.speedOut(device: dev)}',
+          );
         case NetViewType.traffic:
-          if (notSepcifyDev) {
-            return ('↓:\n${ss.netSpeed.cachedVals.sizeIn}', '↑:\n${ss.netSpeed.cachedVals.sizeOut}');
+          if (notSpecifyDev) {
+            return (
+              '↓:\n${ss.netSpeed.cachedVals.sizeIn}',
+              '↑:\n${ss.netSpeed.cachedVals.sizeOut}',
+            );
           }
-          return ('↓:\n${ss.netSpeed.sizeIn(device: dev)}', '↑:\n${ss.netSpeed.sizeOut(device: dev)}');
+          return (
+            '↓:\n${ss.netSpeed.sizeIn(device: dev)}',
+            '↑:\n${ss.netSpeed.sizeOut(device: dev)}',
+          );
       }
     } catch (e, s) {
       Loggers.app.warning('NetViewType.build', e, s);

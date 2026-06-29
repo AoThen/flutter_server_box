@@ -108,6 +108,7 @@
   "ignoreCert": "証明書を無視する",
   "image": "イメージ",
   "imagesList": "イメージリスト",
+  "pull": "プル",
   "installDockerWithUrl": "最初に https://docs.docker.com/engine/install dockerをインストールしてください",
   "invalid": "無効",
   "jumpServer": "ジャンプサーバー",
@@ -117,14 +118,20 @@
   "keyAuth": "キー認証",
   "lastFailure": "最後の失敗",
   "lastSuccess": "最後の成功",
-  "letterCache": "文字キャッシング",
-  "letterCacheTip": "無効にすることを推奨しますが、無効にした後はCJK文字を入力することができなくなります。",
+  "letterCache": "通常キーボード入力",
+  "letterCacheTip": "有効にすると入力内容は通常のIMEを経由し、一部のシステムでターミナルにセキュアキーボードの案内が表示されるのを避けられます。",
   "madeWithLove": "{myGithub}によって❤️で作成済み",
   "max": "最大",
   "maxConcurrency": "最大同時実行数",
   "maxRetryCount": "サーバーの再接続試行回数",
   "maxRetryCountEqual0": "無限に再試行します",
   "min": "最小",
+  "mismatchSystem": "システムが一致しません: {system}",
+  "@mismatchSystem": {
+    "placeholders": {
+      "system": {}
+    }
+  },
   "more": "もっと",
   "moveOutServerFuncBtnsHelp": "有効にする：サーバータブの各カードの下に表示されます。無効にする：サーバーの詳細ページの上部に表示されます。",
   "needHomeDir": "Synologyユーザーの場合は、[こちらをご覧ください](https://kb.synology.com/DSM/tutorial/user_enable_home_service)。他のシステムのユーザーは、ホームディレクトリの作成方法を検索する必要があります。",
@@ -156,6 +163,7 @@
   "pveVersionLow": "この機能は現在テスト段階にあり、PVE 8+でのみテストされています。ご利用の際は慎重に。",
   "read": "読み取り",
   "recentConnections": "最近の接続",
+  "reconnecting": "再接続中...",
   "rememberPwdInMem": "メモリにパスワードを記憶する",
   "rememberPwdInMemTip": "コンテナ、一時停止などに使用されます。",
   "rememberWindowSize": "ウィンドウサイズを記憶する",
@@ -217,6 +225,7 @@
   "time": "時間",
   "times": "回",
   "trySudo": "sudoを試みる",
+  "sudoPromptNotFound": "sudo のパスワード入力プロンプトがありません。",
   "unknown": "不明",
   "unkownConvertMode": "未知の変換モード",
   "update": "更新",
@@ -243,5 +252,8 @@
   "write": "書き込み",
   "writeScriptFailTip": "スクリプトの書き込みに失敗しました。権限がないかディレクトリが存在しない可能性があります。",
   "writeScriptTip": "サーバーへの接続後、システムステータスを監視するスクリプトが `~/.config/server_box` \n | `/tmp/server_box` に書き込まれます。スクリプトの内容を確認できます。",
-  "podmanDockerEmulationDetected": "Podman Docker エミュレーションが検出されました。設定で Podman に切り替えてください。"
+  "podmanDockerEmulationDetected": "Podman Docker エミュレーションが検出されました。設定で Podman に切り替えてください。",
+  "sponsor": "赞助",
+  "portForwardBetaTitle": "Port Forward (Beta)",
+  "systemd": "Systemd"
 }

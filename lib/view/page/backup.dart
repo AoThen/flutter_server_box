@@ -27,9 +27,20 @@ class BackupPage extends ConsumerStatefulWidget {
   static const route = AppRouteNoArg(page: BackupPage.new, path: '/backup');
 }
 
-final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKeepAliveClientMixin {
+final class _BackupPageState extends ConsumerState<BackupPage>
+    with AutomaticKeepAliveClientMixin {
   final webdavLoading = false.vn;
   final gistLoading = false.vn;
+  late Future<_ICloudBackupStatus?> _icloudStatusFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _icloudStatusFuture = Future.value(null);
+    if (isICloudSupported) {
+      _refreshIcloudStatus(notify: false);
+    }
+  }
 
   @override
   void dispose() {
@@ -52,15 +63,19 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
           CenterGreyTitle(libL10n.sync),
           _buildTip,
           _buildBakPwd,
-          if (isMacOS || isIOS) _buildIcloud,
+          if (isICloudSupported) _buildIcloud,
           _buildWebdav,
           _buildGist,
           _buildFile,
           _buildClipboard,
         ],
-        [CenterGreyTitle(libL10n.import), _buildBulkImportServers, _buildImportSnippet],
+        [
+          CenterGreyTitle(libL10n.import),
+          _buildBulkImportServers,
+          _buildImportSnippet,
+        ],
       ],
-      );
+    );
   }
 
   Widget get _buildBakPwd {
@@ -72,11 +87,17 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
           child: ListTile(
             leading: const Icon(Icons.lock),
             title: Text(l10n.backupPassword),
-            subtitle: Text(hasPwd ? l10n.backupEncrypted : l10n.backupNotEncrypted, style: UIs.textGrey),
+            subtitle: Text(
+              hasPwd ? l10n.backupEncrypted : l10n.backupNotEncrypted,
+              style: UIs.textGrey,
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextButton(onPressed: () async => _onTapSetBakPwd(context), child: Text(libL10n.setting)),
+                TextButton(
+                  onPressed: () async => _onTapSetBakPwd(context),
+                  child: Text(libL10n.setting),
+                ),
                 if (hasPwd) ...[
                   UIs.width7,
                   TextButton(
@@ -123,12 +144,16 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
       final pwd = controller.text.trim();
       if (pwd.isEmpty) {
         context.showSnackBar(libL10n.empty);
+        controller.dispose();
+        node.dispose();
         return;
       }
       await SecureStoreProps.bakPwd.write(pwd);
       context.showSnackBar(l10n.backupPasswordSet);
       setState(() {});
     }
+    controller.dispose();
+    node.dispose();
   }
 
   Widget get _buildTip {
@@ -165,26 +190,36 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
 
   Widget get _buildIcloud {
     return CardX(
-      child: ListTile(
+      child: ExpandTile(
         leading: const Icon(Icons.cloud),
         title: const Text('iCloud'),
-        trailing: StoreSwitch(
-          prop: PrefProps.icloudSync,
-          validator: (p0) async {
-            if (p0 && PrefProps.webdavSync.get()) {
-              context.showSnackBar(l10n.autoBackupConflict);
-              return false;
-            }
-            if (p0) {
-              final ok = await _ensureBakPwd(context);
-              if (!ok) return false;
-            }
-            if (p0) {
-              await bakSync.sync(rs: icloud);
-            }
-            return true;
-          },
-        ),
+        initiallyExpanded: false,
+        children: [
+          _buildSyncSettingsTile(),
+          _buildIcloudStatus,
+          ListTile(
+            title: Text(libL10n.auto),
+            trailing: StoreSwitch(
+              prop: PrefProps.icloudSync,
+              validator: (p0) async {
+                if (p0 &&
+                    (PrefProps.webdavSync.get() || PrefProps.gistSync.get())) {
+                  context.showSnackBar(l10n.autoBackupConflict);
+                  return false;
+                }
+                if (p0) {
+                  final ok = await _ensureBakPwd(context);
+                  if (!ok) return false;
+                }
+                if (p0) {
+                  await bakSync.sync(rs: icloud);
+                  if (mounted) _refreshIcloudStatus();
+                }
+                return true;
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -196,6 +231,7 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
         title: const Text('WebDAV'),
         initiallyExpanded: false,
         children: [
+          _buildSyncSettingsTile(),
           ListTile(
             title: Text(libL10n.setting),
             trailing: const Icon(Icons.settings),
@@ -206,7 +242,7 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
             trailing: StoreSwitch(
               prop: PrefProps.webdavSync,
               validator: (p0) async {
-                if (p0 && PrefProps.icloudSync.get()) {
+                if (p0 && isICloudSupported && PrefProps.icloudSync.get()) {
                   context.showSnackBar(l10n.autoBackupConflict);
                   return false;
                 }
@@ -247,9 +283,15 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextButton(onPressed: () async => _onTapWebdavDl(context), child: Text(libL10n.restore)),
+                  TextButton(
+                    onPressed: () async => _onTapWebdavDl(context),
+                    child: Text(libL10n.restore),
+                  ),
                   UIs.width7,
-                  TextButton(onPressed: () async => _onTapWebdavUp(context), child: Text(libL10n.backup)),
+                  TextButton(
+                    onPressed: () async => _onTapWebdavUp(context),
+                    child: Text(libL10n.backup),
+                  ),
                 ],
               );
             }),
@@ -266,6 +308,7 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
         title: const Text('GitHub Gist'),
         initiallyExpanded: false,
         children: [
+          _buildSyncSettingsTile(),
           ListTile(
             title: Text(libL10n.setting),
             trailing: const Icon(Icons.settings),
@@ -276,7 +319,9 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
             trailing: StoreSwitch(
               prop: PrefProps.gistSync,
               validator: (p0) async {
-                if (p0 && (PrefProps.icloudSync.get() || PrefProps.webdavSync.get())) {
+                if (p0 &&
+                    ((isICloudSupported && PrefProps.icloudSync.get()) ||
+                        PrefProps.webdavSync.get())) {
                   context.showSnackBar(l10n.autoBackupConflict);
                   return false;
                 }
@@ -289,7 +334,7 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
                   // Allow empty gistId (will create one on first upload)
                   final hasToken = token != null && token.isNotEmpty;
                   if (!hasToken) {
-                    context.showSnackBar('Token or Gist ID is empty');
+                    context.showSnackBar(context.l10n.githubGistTokenEmpty);
                     return false;
                   }
                   gistLoading.value = true;
@@ -308,9 +353,15 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
               return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextButton(onPressed: () async => _onTapGistDl(context), child: Text(libL10n.restore)),
+                  TextButton(
+                    onPressed: () async => _onTapGistDl(context),
+                    child: Text(libL10n.restore),
+                  ),
                   UIs.width7,
-                  TextButton(onPressed: () async => _onTapGistUp(context), child: Text(libL10n.backup)),
+                  TextButton(
+                    onPressed: () async => _onTapGistUp(context),
+                    child: Text(libL10n.backup),
+                  ),
                 ],
               );
             }),
@@ -334,10 +385,96 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
           ListTile(
             trailing: const Icon(Icons.restore),
             title: Text(libL10n.restore),
-            onTap: () => BackupService.restore(context, ClipboardBackupSource()),
+            onTap: () =>
+                BackupService.restore(context, ClipboardBackupSource()),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSyncSettingsTile() {
+    return ListTile(
+      title: Text(l10n.syncAppSettings),
+      subtitle: Text(l10n.syncAppSettingsTip, style: UIs.textGrey),
+      trailing: StoreSwitch(prop: PrefProps.syncAppSettings),
+    );
+  }
+
+  void _refreshIcloudStatus({bool notify = true}) {
+    if (!isICloudSupported) return;
+
+    final future = _loadIcloudStatus();
+    if (!notify) {
+      _icloudStatusFuture = future;
+      return;
+    }
+
+    setState(() {
+      _icloudStatusFuture = future;
+    });
+  }
+
+  Widget get _buildIcloudStatus {
+    return FutureBuilder<_ICloudBackupStatus?>(
+      future: _icloudStatusFuture,
+      builder: (context, snapshot) {
+        String subtitle;
+        IconData icon;
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          subtitle = l10n.icloudBackupStatusLoading;
+          icon = Icons.sync;
+        } else if (snapshot.hasError) {
+          subtitle = l10n.icloudBackupStatusError;
+          icon = Icons.error_outline;
+        } else {
+          final status = snapshot.data;
+          if (status == null) {
+            subtitle = l10n.icloudBackupStatusEmpty;
+            icon = Icons.cloud_off;
+          } else {
+            final lastModified = status.lastModified.toLocal().ymdhms();
+            final remoteState = switch ((
+              status.isUploading,
+              status.isUploaded,
+              status.hasConflict,
+            )) {
+              (_, _, true) => l10n.icloudBackupStateConflict,
+              (true, _, _) => l10n.icloudBackupStateUploading,
+              (_, true, _) => l10n.icloudBackupStateUploaded,
+              _ => l10n.icloudBackupStateWaiting,
+            };
+            subtitle = l10n.icloudBackupStatusSummary(
+              lastModified,
+              remoteState,
+            );
+            icon = switch ((
+              status.hasConflict,
+              status.isUploading,
+              status.isUploaded,
+            )) {
+              (true, _, _) => Icons.warning,
+              (_, true, _) => Icons.cloud_upload,
+              (_, _, true) => Icons.cloud_done,
+              _ => Icons.cloud_queue,
+            };
+          }
+        }
+
+        return ListTile(
+          leading: Icon(icon),
+          title: Text(l10n.icloudBackupStatusTitle),
+          subtitle: Text(subtitle, style: UIs.textGrey),
+          trailing: IconButton(
+            onPressed: () {
+              _refreshIcloudStatus();
+            },
+            icon: const Icon(Icons.refresh),
+            tooltip: libL10n.refresh,
+          ),
+        );
+      },
     );
   }
 
@@ -358,7 +495,10 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
       leading: const Icon(MingCute.code_line),
       trailing: const Icon(Icons.keyboard_arrow_right),
       onTap: () async {
-        final data = await context.showImportDialog(title: libL10n.snippet, modelDef: Snippet.example.toJson());
+        final data = await context.showImportDialog(
+          title: libL10n.snippet,
+          modelDef: Snippet.example.toJson(),
+        );
         if (data == null) return;
         String str;
         try {
@@ -397,7 +537,11 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
         final snippetNames = snippets.map((e) => e.name).join(', ');
         context.showRoundDialog(
           title: libL10n.attention,
-          child: SingleChildScrollView(child: Text(libL10n.askContinue('${libL10n.import} [$snippetNames]'))),
+          child: SingleChildScrollView(
+            child: Text(
+              libL10n.askContinue('${libL10n.import} [$snippetNames]'),
+            ),
+          ),
           actions: Btn.ok(
             onTap: () {
               final notifier = ref.read(snippetProvider.notifier);
@@ -418,13 +562,39 @@ final class _BackupPageState extends ConsumerState<BackupPage> with AutomaticKee
 }
 
 extension on _BackupPageState {
+  Future<_ICloudBackupStatus?> _loadIcloudStatus() async {
+    if (!isICloudSupported) return null;
+
+    final files = await icloud.list();
+    final matches = files.where(
+      (file) => file.relativePath == Paths.bakName && file.contentChangeDate != null,
+    );
+    if (matches.isEmpty) return null;
+
+    final file = matches.reduce(
+      (latest, current) =>
+          current.contentChangeDate!.isAfter(latest.contentChangeDate!)
+          ? current
+          : latest,
+    );
+    return _ICloudBackupStatus(
+      lastModified: file.contentChangeDate!,
+      isUploading: file.isUploading,
+      isUploaded: file.isUploaded,
+      hasConflict: file.hasUnresolvedConflicts,
+    );
+  }
+
   Future<void> _onTapWebdavDl(BuildContext context) async {
     webdavLoading.value = true;
     try {
       final files = await Webdav.shared.list();
       if (files.isEmpty) return context.showSnackBar(l10n.dirEmpty);
 
-      final fileName = await context.showPickSingleDialog(title: libL10n.restore, items: files);
+      final fileName = await context.showPickSingleDialog(
+        title: libL10n.restore,
+        items: files,
+      );
       if (fileName == null) return;
 
       await Webdav.shared.download(relativePath: fileName);
@@ -446,7 +616,10 @@ extension on _BackupPageState {
       final ok = await _ensureBakPwd(context);
       if (!ok) return;
       final savedPassword = await SecureStoreProps.bakPwd.read();
-      await BackupV2.backup(bakName, savedPassword?.isEmpty == true ? null : savedPassword);
+      await BackupV2.backup(
+        bakName,
+        savedPassword?.isEmpty == true ? null : savedPassword,
+      );
       await Webdav.shared.upload(relativePath: bakName);
       Loggers.app.info('Upload webdav backup success');
     } catch (e, s) {
@@ -463,7 +636,10 @@ extension on _BackupPageState {
       final files = await GistRs.shared.list();
       if (files.isEmpty) return context.showSnackBar(l10n.dirEmpty);
 
-      final fileName = await context.showPickSingleDialog(title: libL10n.restore, items: files);
+      final fileName = await context.showPickSingleDialog(
+        title: libL10n.restore,
+        items: files,
+      );
       if (fileName == null) return;
 
       await GistRs.shared.download(relativePath: fileName);
@@ -485,7 +661,10 @@ extension on _BackupPageState {
       final ok = await _ensureBakPwd(context);
       if (!ok) return;
       final savedPassword = await SecureStoreProps.bakPwd.read();
-      await BackupV2.backup(bakName, savedPassword?.isEmpty == true ? null : savedPassword);
+      await BackupV2.backup(
+        bakName,
+        savedPassword?.isEmpty == true ? null : savedPassword,
+      );
       await GistRs.shared.upload(relativePath: bakName);
       Loggers.app.info('Upload gist backup success');
     } catch (e, s) {
@@ -500,14 +679,20 @@ extension on _BackupPageState {
     final tokenCtrl = TextEditingController(text: PrefProps.githubToken.get());
     final gistIdCtrl = TextEditingController(text: PrefProps.gistId.get());
     final nodeToken = FocusNode();
+    final appL10n = context.l10n;
     final result = await context.showRoundDialog<bool>(
-      title: 'GitHub Gist',
+      title: appL10n.githubGist,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Input(label: 'Token', controller: tokenCtrl, suggestion: false, node: nodeToken),
           Input(
-            label: 'Gist ID (optional)',
+            label: appL10n.githubGistToken,
+            controller: tokenCtrl,
+            suggestion: false,
+            node: nodeToken,
+          ),
+          Input(
+            label: appL10n.githubGistIdOptional,
             controller: gistIdCtrl,
             suggestion: false,
             onSubmitted: (_) => context.pop(true),
@@ -521,7 +706,10 @@ extension on _BackupPageState {
         final token_ = tokenCtrl.text.trim();
         final gistId_ = gistIdCtrl.text.trim();
 
-        await GistRs.test(token: token_, gistId: gistId_.isEmpty ? null : gistId_);
+        await GistRs.test(
+          token: token_,
+          gistId: gistId_.isEmpty ? null : gistId_,
+        );
         context.showSnackBar(libL10n.success);
 
         await PrefProps.githubToken.set(token_);
@@ -534,6 +722,9 @@ extension on _BackupPageState {
         context.showErrDialog(e, s, 'Gist');
       }
     }
+    tokenCtrl.dispose();
+    gistIdCtrl.dispose();
+    nodeToken.dispose();
   }
 
   Future<void> _onTapWebdavSetting(BuildContext context) async {
@@ -581,7 +772,11 @@ extension on _BackupPageState {
         await Webdav.test(url_, user_, pwd_);
         context.showSnackBar(libL10n.success);
 
-        Webdav.shared.client = WebdavClient.basicAuth(url: url_, user: user_, pwd: pwd_);
+        Webdav.shared.client = WebdavClient.basicAuth(
+          url: url_,
+          user: user_,
+          pwd: pwd_,
+        );
         PrefProps.webdavUrl.set(url_);
         PrefProps.webdavUser.set(user_);
         PrefProps.webdavPwd.set(pwd_);
@@ -589,10 +784,18 @@ extension on _BackupPageState {
         context.showErrDialog(e, s, 'Webdav');
       }
     }
+    url.dispose();
+    user.dispose();
+    pwd.dispose();
+    nodeUser.dispose();
+    nodePwd.dispose();
   }
 
   void _onBulkImportServers(BuildContext context) async {
-    final data = await context.showImportDialog(title: libL10n.server, modelDef: Spix.example.toJson());
+    final data = await context.showImportDialog(
+      title: libL10n.server,
+      modelDef: Spix.example.toJson(),
+    );
     if (data == null) return;
     String text;
     try {
@@ -623,8 +826,10 @@ extension on _BackupPageState {
               // Ensure each server has a unique ID
 
               // Only generate a new ID if the imported one is empty or already used in importing stage
-              final isIdUsed = spi.id.isNotEmpty || usedIds.contains(spi.id);
-              final spiWithId = isIdUsed ? spi.copyWith(id: ShortId.generate()) : spi;
+              final isIdUsed = spi.id.isEmpty || usedIds.contains(spi.id);
+              final spiWithId = isIdUsed
+                  ? spi.copyWith(id: ShortId.generate())
+                  : spi;
               Stores.server.put(spiWithId);
               usedIds.add(spiWithId.id);
             }
@@ -649,8 +854,14 @@ extension on _BackupPageState {
       title: l10n.backupPassword,
       child: Text(l10n.backupPasswordTip, style: UIs.textGrey),
       actions: [
-        TextButton(onPressed: () => context.pop(true), child: Text(libL10n.cancel)),
-        TextButton(onPressed: () => context.pop(false), child: Text(libL10n.setting)),
+        TextButton(
+          onPressed: () => context.pop(true),
+          child: Text(libL10n.cancel),
+        ),
+        TextButton(
+          onPressed: () => context.pop(false),
+          child: Text(libL10n.setting),
+        ),
       ],
     );
 
@@ -660,9 +871,24 @@ extension on _BackupPageState {
     } else if (result == false) {
       // User wants to set password
       await _onTapSetBakPwd(context);
-      return true; // Allow continuing even if password setting was cancelled
+      final savedAfterSetting = await SecureStoreProps.bakPwd.read();
+      return savedAfterSetting != null && savedAfterSetting.isNotEmpty;
     }
 
     return false; // User cancelled the dialog
   }
+}
+
+final class _ICloudBackupStatus {
+  const _ICloudBackupStatus({
+    required this.lastModified,
+    required this.isUploading,
+    required this.isUploaded,
+    required this.hasConflict,
+  });
+
+  final DateTime lastModified;
+  final bool isUploading;
+  final bool isUploaded;
+  final bool hasConflict;
 }

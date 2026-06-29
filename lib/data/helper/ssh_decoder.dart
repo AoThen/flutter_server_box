@@ -31,7 +31,9 @@ class SSHDecoder {
       // For Windows with replacement chars, log and try GBK fallback
       if (isWindows && result.contains('�')) {
         final contextInfo = context != null ? ' [$context]' : '';
-        Loggers.app.info('UTF-8 decode has replacement chars$contextInfo, trying GBK fallback');
+        Loggers.app.info(
+          'UTF-8 decode has replacement chars$contextInfo, trying GBK fallback',
+        );
       }
     } catch (e) {
       final contextInfo = context != null ? ' [$context]' : '';
@@ -49,18 +51,4 @@ class SSHDecoder {
     }
   }
 
-  /// Encodes string to bytes for SSH command input
-  ///
-  /// Uses GBK for Windows, UTF-8 for others
-  static List<int> encode(String text, {bool isWindows = false}) {
-    if (isWindows) {
-      try {
-        return gbk.encode(text);
-      } catch (e) {
-        Loggers.app.warning('GBK encode failed: $e, falling back to UTF-8');
-        return utf8.encode(text);
-      }
-    }
-    return utf8.encode(text);
-  }
 }

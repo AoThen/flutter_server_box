@@ -5,10 +5,10 @@ import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:server_box/core/route.dart';
+import 'package:server_box/core/utils/refresh_interval.dart';
 import 'package:server_box/data/model/app/scripts/shell_func.dart';
 import 'package:server_box/data/model/server/proc.dart';
 import 'package:server_box/data/provider/server/single.dart';
-import 'package:server_box/data/res/store.dart';
 
 class ProcessPage extends ConsumerStatefulWidget {
   final SpiRequiredArgs args;
@@ -22,7 +22,7 @@ class ProcessPage extends ConsumerStatefulWidget {
 }
 
 class _ProcessPageState extends ConsumerState<ProcessPage> {
-  late Timer _timer;
+  Timer? _timer;
   late MediaQueryData _media;
 
   SSHClient? _client;
@@ -40,8 +40,8 @@ class _ProcessPageState extends ConsumerState<ProcessPage> {
 
   @override
   void dispose() {
+    _timer?.cancel();
     super.dispose();
-    _timer.cancel();
   }
 
   @override
@@ -49,8 +49,11 @@ class _ProcessPageState extends ConsumerState<ProcessPage> {
     super.initState();
     final serverState = ref.read(_provider);
     _client = serverState.client;
-    final duration = Duration(seconds: Stores.setting.serverStatusUpdateInterval.fetch());
-    _timer = Timer.periodic(duration, (_) => _refresh());
+    _refresh();
+    final duration = serverStatusRefreshInterval();
+    if (duration != null) {
+      _timer = Timer.periodic(duration, (_) => _refresh());
+    }
   }
 
   @override
@@ -60,26 +63,54 @@ class _ProcessPageState extends ConsumerState<ProcessPage> {
   }
 
   Future<void> _refresh() async {
-    if (mounted) {
+    if (!mounted) return;
+    try {
       final serverState = ref.read(_provider);
       final systemType = serverState.status.system;
       final result = await _client
-          ?.run(ShellFunc.process.exec(widget.args.spi.id, systemType: systemType, customDir: null))
+          ?.run(
+            ShellFunc.process.exec(
+              widget.args.spi.id,
+              systemType: systemType,
+              customDir: null,
+            ),
+          )
           .string;
+      if (!mounted) return;
       if (result == null || result.isEmpty) {
         context.showSnackBar(libL10n.empty);
         return;
       }
-      _result = PsResult.parse(result, sort: _procSortMode);
+      final parsed = PsResult.parse(result, sort: _procSortMode, previous: _result);
 
       if (!_checkedIncompleteData) {
-        final isAnyProcDataNotComplete = _result.procs.any((e) => e.cpu == null || e.mem == null);
+        final isAnyProcDataNotComplete = parsed.procs.any(
+          (e) => e.cpu == null || e.mem == null,
+        );
         if (isAnyProcDataNotComplete) {
-          _sortModes.removeWhere((e) => e == ProcSortMode.cpu || e == ProcSortMode.mem);
+          _sortModes.removeWhere(
+            (e) => e == ProcSortMode.cpu || e == ProcSortMode.mem,
+          );
+        }
+        final hasAnyProcIoData = parsed.procs.any(
+          (e) => e.readBytes != null || e.writeBytes != null,
+        );
+        if (!hasAnyProcIoData) {
+          _sortModes.removeWhere(
+            (e) => e == ProcSortMode.read || e == ProcSortMode.write,
+          );
+        }
+        if (!_sortModes.contains(_procSortMode)) {
+          _procSortMode = _sortModes.first;
         }
         _checkedIncompleteData = true;
       }
-      setState(() {});
+      _result = parsed;
+      if (mounted) setState(() {});
+    } catch (e) {
+      if (mounted) {
+        context.showSnackBar(libL10n.error);
+      }
     }
   }
 
@@ -94,7 +125,9 @@ class _ProcessPageState extends ConsumerState<ProcessPage> {
         },
         icon: const Icon(Icons.sort),
         initialValue: _procSortMode,
-        itemBuilder: (_) => _sortModes.map((e) => PopupMenuItem(value: e, child: Text(e.name))).toList(),
+        itemBuilder: (_) => _sortModes
+            .map((e) => PopupMenuItem(value: e, child: Text(e.name)))
+            .toList(),
       ),
     ];
     if (_result.error != null) {
@@ -104,7 +137,12 @@ class _ProcessPageState extends ConsumerState<ProcessPage> {
           onPressed: () => context.showRoundDialog(
             title: libL10n.error,
             child: SingleChildScrollView(child: Text(_result.error!)),
-            actions: [TextButton(onPressed: () => Pfs.copy(_result.error!), child: Text(libL10n.copy))],
+            actions: [
+              TextButton(
+                onPressed: () => Pfs.copy(_result.error!),
+                child: Text(libL10n.copy),
+              ),
+            ],
           ),
         ),
       );
@@ -122,7 +160,7 @@ class _ProcessPageState extends ConsumerState<ProcessPage> {
     return Scaffold(
       appBar: CustomAppBar(
         centerTitle: true,
-        title: TwoLineText(up: widget.args.spi.name, down: libL10n.process),
+        title: TwoLineText(up: libL10n.process, down: widget.args.spi.name),
         actions: actions,
       ),
       body: child,
@@ -138,26 +176,48 @@ class _ProcessPageState extends ConsumerState<ProcessPage> {
       child: ListTile(
         leading: SizedBox(width: _media.size.width / 6, child: leading),
         title: Text(proc.binary),
-        subtitle: Text(proc.command, style: UIs.textGrey, maxLines: 3, overflow: TextOverflow.fade),
+        subtitle: Text(
+          proc.command,
+          style: UIs.textGrey,
+          maxLines: 3,
+          overflow: TextOverflow.fade,
+        ),
         trailing: _buildItemTrail(proc),
       ),
     );
   }
+}
 
+extension _ProcessPageStateWidgets on _ProcessPageState {
   Widget _buildItemTrail(Proc proc) {
+    final items = <Widget>[
+      if (proc.cpu != null)
+        TwoLineText(up: proc.cpu!.toStringAsFixed(1), down: 'cpu'),
+      if (proc.mem != null)
+        TwoLineText(up: proc.mem!.toStringAsFixed(1), down: 'mem'),
+      if (proc.readSpeed != null)
+        TwoLineText(up: _formatSpeed(proc.readSpeed!), down: 'R'),
+      if (proc.writeSpeed != null)
+        TwoLineText(up: _formatSpeed(proc.writeSpeed!), down: 'W'),
+    ];
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (proc.cpu != null) TwoLineText(up: proc.cpu!.toStringAsFixed(1), down: 'cpu'),
-        if (proc.cpu != null && proc.mem != null) UIs.width13,
-        if (proc.mem != null) TwoLineText(up: proc.mem!.toStringAsFixed(1), down: 'mem'),
-        if (proc.cpu != null || proc.mem != null) UIs.width13,
+        for (final (idx, item) in items.indexed) ...[
+          if (idx > 0) UIs.width13,
+          item,
+        ],
+        if (items.isNotEmpty) UIs.width13,
         IconButton(
           icon: const Icon(Icons.stop),
           onPressed: () {
             context.showRoundDialog(
               title: libL10n.attention,
-              child: Text(libL10n.askContinue('${libL10n.stop} ${libL10n.process}(${proc.pid})')),
+              child: Text(
+                libL10n.askContinue(
+                  '${libL10n.stop} ${libL10n.process}(${proc.pid})',
+                ),
+              ),
               actions: [
                 Btn.cancel(),
                 Btn.ok(
@@ -178,4 +238,8 @@ class _ProcessPageState extends ConsumerState<ProcessPage> {
       ],
     );
   }
+}
+
+extension _ProcessPageStateUtils on _ProcessPageState {
+  String _formatSpeed(double bytes) => '${bytes.bytes2Str}/s';
 }

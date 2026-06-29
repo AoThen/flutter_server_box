@@ -108,6 +108,7 @@
   "ignoreCert": "Certificaat negeren",
   "image": "Afbeelding",
   "imagesList": "Lijst met afbeeldingen",
+  "pull": "Pull",
   "installDockerWithUrl": "Installeer eerst docker via https://docs.docker.com/engine/install.",
   "invalid": "Ongeldig",
   "jumpServer": "Spring naar server",
@@ -117,14 +118,20 @@
   "keyAuth": "Sleutelauthenticatie",
   "lastFailure": "Laatst gefaald",
   "lastSuccess": "Laatst succesvol",
-  "letterCache": "Lettercaching",
-  "letterCacheTip": "Aanbevolen om uit te schakelen, maar na het uitschakelen is het niet mogelijk om CJK-tekens in te voeren.",
+  "letterCache": "Normale toetsenbordinvoer",
+  "letterCacheTip": "Wanneer dit is ingeschakeld, gaat invoer via de normale IME, wat op sommige systemen beveiligde toetsenbordmeldingen in de terminal kan vermijden.",
   "madeWithLove": "Gemaakt met ❤️ door {myGithub}",
   "max": "max",
   "maxConcurrency": "Maximale gelijktijdigheid",
   "maxRetryCount": "Aantal serverherverbindingen",
   "maxRetryCountEqual0": "Zal opnieuw blijven proberen.",
   "min": "min",
+  "mismatchSystem": "Niet-overeenkomend systeem: {system}",
+  "@mismatchSystem": {
+    "placeholders": {
+      "system": {}
+    }
+  },
   "more": "Meer",
   "moveOutServerFuncBtnsHelp": "Aan: kan worden weergegeven onder elke kaart op de Server-tabbladpagina. Uit: kan worden weergegeven bovenaan de Serverdetails-pagina.",
   "needHomeDir": "Als u een Synology-gebruiker bent, [zie hier](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Gebruikers van andere systemen moeten zoeken hoe ze een home directory kunnen creëren.",
@@ -156,6 +163,7 @@
   "pveVersionLow": "Deze functie bevindt zich momenteel in de testfase en is alleen getest op PVE 8+. Gebruik het met voorzichtigheid.",
   "read": "Lezen",
   "recentConnections": "Recente verbindingen",
+  "reconnecting": "Opnieuw verbinden...",
   "rememberPwdInMem": "Wachtwoord onthouden in geheugen",
   "rememberPwdInMemTip": "Gebruikt voor containers, opschorting, enz.",
   "rememberWindowSize": "Venstergrootte onthouden",
@@ -217,6 +225,7 @@
   "time": "Tijd",
   "times": "Keer",
   "trySudo": "Probeer sudo te gebruiken",
+  "sudoPromptNotFound": "Er is geen sudo-wachtwoordprompt actief.",
   "unknown": "Onbekend",
   "unkownConvertMode": "Onbekende conversiemodus",
   "update": "Bijwerken",
@@ -243,5 +252,8 @@
   "write": "Schrijven",
   "writeScriptFailTip": "Het schrijven naar het script is mislukt, mogelijk door gebrek aan rechten of omdat de map niet bestaat.",
   "writeScriptTip": "Na het verbinden met de server wordt een script geschreven naar `~/.config/server_box` \n | `/tmp/server_box` om de systeemstatus te monitoren. U kunt de inhoud van het script controleren.",
-  "podmanDockerEmulationDetected": "Podman Docker-emulatie gedetecteerd. Schakel over naar Podman in de instellingen."
+  "podmanDockerEmulationDetected": "Podman Docker-emulatie gedetecteerd. Schakel over naar Podman in de instellingen.",
+  "sponsor": "Sponsor",
+  "portForwardBetaTitle": "Port Forward (Beta)",
+  "systemd": "Systemd"
 }

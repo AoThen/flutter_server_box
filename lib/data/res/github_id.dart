@@ -3,6 +3,7 @@ abstract final class GithubIds {
   // If you want to change your Github ID, please open an issue.
   static const contributors = <GhId>{
     'PaperCube',
+    'GT-610',
     'Integral-Tech',
     'its-tom',
     'leganck',
@@ -22,8 +23,9 @@ abstract final class GithubIds {
     'MasedMSD',
     'GitGitro',
     'Shin-suechtig',
-    'GT-610',
-    'hypn4'
+    'hypn4',
+    'barkure',
+    'yuguorui'
   };
 
   static const participants = <GhId>{
@@ -144,7 +146,43 @@ abstract final class GithubIds {
     'toarujs',
     'n4vi98',
     'Android0termux',
-    'idunwannagotoschool'
+    'idunwannagotoschool',
+    'jiao114514jiao',
+    'jjyou-github',
+    'yeluonight',
+    'Yinhono',
+    'kuvaldini',
+    'aliferne',
+    'canronglan',
+    'nickgirga',
+    'xxnuo',
+    'sunnysu0608',
+    'Staten-Wang',
+    'alterkeyy',
+    'zhbyu',
+    'CMJNB',
+    'wcwq98',
+    'Maplemister',
+    'TheTearMiser',
+    'Taocrypt',
+    'Fabick75',
+    'uniquePWD',
+    'ChirmyRam',
+    'Utaoki-henji',
+    'smtdev',
+    'tetsuya-ops',
+    'maxpeyn10',
+    'agczsz',
+    'kuilei0926',
+    'ci-sourcerer',
+    'misaki258',
+    'Muska-Ami',
+    'wu4339',
+    'shengroubao',
+    'nuclear06',
+    'shen-lan',
+    'Sahib911',
+    'SiLong96',
   };
 }
 
@@ -152,4 +190,6 @@ typedef GhId = String;
 
 extension GhIdX on GhId {
   String get url => 'https://github.com/$this';
+
+  String get markdownLink => '[$this]($url)';
 }

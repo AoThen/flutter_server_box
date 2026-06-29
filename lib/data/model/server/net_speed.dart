@@ -4,6 +4,8 @@ import 'package:fl_lib/fl_lib.dart';
 
 import 'package:server_box/data/model/server/time_seq.dart';
 
+final _whitespaceRegExp = RegExp(r'\s+');
+
 class NetSpeedPart extends TimeSeqIface<NetSpeedPart> {
   final String device;
   final BigInt bytesIn;
@@ -16,7 +18,12 @@ class NetSpeedPart extends TimeSeqIface<NetSpeedPart> {
   bool same(NetSpeedPart other) => device == other.device;
 }
 
-typedef CachedNetVals = ({String sizeIn, String sizeOut, String speedIn, String speedOut});
+typedef CachedNetVals = ({
+  String sizeIn,
+  String sizeOut,
+  String speedIn,
+  String speedOut,
+});
 
 class NetSpeed extends TimeSeq<NetSpeedPart> {
   NetSpeed(super.init1, super.init2);
@@ -27,14 +34,26 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
     devices.addAll(now.map((e) => e.device).toList());
 
     realIfaces.clear();
-    realIfaces.addAll(devices.where((e) => realIfacePrefixs.any((prefix) => e.startsWith(prefix))));
+    _realIfaceIndices.clear();
+    for (var i = 0; i < devices.length; i++) {
+      final dev = devices[i];
+      if (realIfacePrefixs.any((prefix) => dev.startsWith(prefix))) {
+        realIfaces.add(dev);
+        _realIfaceIndices.add(i);
+      }
+    }
 
     final sizeIn = this.sizeIn();
     final sizeOut = this.sizeOut();
     final speedIn = this.speedIn();
     final speedOut = this.speedOut();
 
-    cachedVals = (sizeIn: sizeIn, sizeOut: sizeOut, speedIn: speedIn, speedOut: speedOut);
+    cachedVals = (
+      sizeIn: sizeIn,
+      sizeOut: sizeOut,
+      speedIn: speedIn,
+      speedOut: speedOut,
+    );
   }
 
   /// Cached network device list
@@ -47,13 +66,22 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
   /// Cached non-virtual network device prefix
   final realIfaces = <String>[];
 
-  CachedNetVals cachedVals = (sizeIn: '0kb', sizeOut: '0kb', speedIn: '0kb/s', speedOut: '0kb/s');
+  /// Cached indices of real (non-virtual) interfaces in [devices]
+  final _realIfaceIndices = <int>[];
+
+  CachedNetVals cachedVals = (
+    sizeIn: '0kb',
+    sizeOut: '0kb',
+    speedIn: '0kb/s',
+    speedOut: '0kb/s',
+  );
 
   /// Time diff between [pre] and [now]
   BigInt get _timeDiff => BigInt.from(now[0].time - pre[0].time);
 
   double speedInBytes(int i) => (now[i].bytesIn - pre[i].bytesIn) / _timeDiff;
-  double speedOutBytes(int i) => (now[i].bytesOut - pre[i].bytesOut) / _timeDiff;
+  double speedOutBytes(int i) =>
+      (now[i].bytesOut - pre[i].bytesOut) / _timeDiff;
   BigInt sizeInBytes(int i) => now[i].bytesIn;
   BigInt sizeOutBytes(int i) => now[i].bytesOut;
 
@@ -62,12 +90,8 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
     if (pre.length != now.length) return 'N/A';
     if (device == null) {
       var speed = 0.0;
-      for (final device in devices) {
-        for (final prefix in realIfacePrefixs) {
-          if (device.startsWith(prefix)) {
-            speed += speedInBytes(devices.indexOf(device));
-          }
-        }
+      for (final i in _realIfaceIndices) {
+        speed += speedInBytes(i);
       }
       return buildStandardOutput(speed);
     }
@@ -80,12 +104,8 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
     if (pre.length != now.length) return 'N/A';
     if (device == null) {
       var size = BigInt.from(0);
-      for (final device in devices) {
-        for (final prefix in realIfacePrefixs) {
-          if (device.startsWith(prefix)) {
-            size += sizeInBytes(devices.indexOf(device));
-          }
-        }
+      for (final i in _realIfaceIndices) {
+        size += sizeInBytes(i);
       }
       return size.bytes2Str;
     }
@@ -98,12 +118,8 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
     if (pre.length != now.length) return 'N/A';
     if (device == null) {
       var speed = 0.0;
-      for (final device in devices) {
-        for (final prefix in realIfacePrefixs) {
-          if (device.startsWith(prefix)) {
-            speed += speedOutBytes(devices.indexOf(device));
-          }
-        }
+      for (final i in _realIfaceIndices) {
+        speed += speedOutBytes(i);
       }
       return buildStandardOutput(speed);
     }
@@ -116,12 +132,8 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
     if (pre.length != now.length) return 'N/A';
     if (device == null) {
       var size = BigInt.from(0);
-      for (final device in devices) {
-        for (final prefix in realIfacePrefixs) {
-          if (device.startsWith(prefix)) {
-            size += sizeOutBytes(devices.indexOf(device));
-          }
-        }
+      for (final i in _realIfaceIndices) {
+        size += sizeOutBytes(i);
       }
       return size.bytes2Str;
     }
@@ -131,10 +143,8 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
 
   int deviceIdx(String? device) {
     if (device != null) {
-      for (var item in now) {
-        if (item.device == device) {
-          return now.indexOf(item);
-        }
+      for (var i = 0; i < now.length; i++) {
+        if (now[i].device == device) return i;
       }
     }
     return 0;
@@ -202,7 +212,7 @@ class NetSpeed extends TimeSeq<NetSpeedPart> {
 
     final results = <NetSpeedPart>[];
     for (final item in split.sublist(1)) {
-      final data = item.trim().split(RegExp(r'\s+'));
+      final data = item.trim().split(_whitespaceRegExp);
       final device = data[0];
       if (device.endsWith('*')) {
         continue;

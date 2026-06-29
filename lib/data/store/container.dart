@@ -20,7 +20,9 @@ class ContainerStore extends HiveStore {
   ContainerType getType([String id = '']) {
     final cfg = box.get(_keyConfig + id);
     if (cfg != null) {
-      final type = ContainerType.values.firstWhereOrNull((e) => e.toString() == cfg);
+      final type = ContainerType.values.firstWhereOrNull(
+        (e) => e.toString() == cfg,
+      );
       if (type != null) return type;
     }
 
@@ -34,10 +36,8 @@ class ContainerStore extends HiveStore {
 
   void setType(ContainerType type, [String id = '']) {
     if (type == defaultType) {
-      // box.delete(_keyConfig + id);
       remove(_keyConfig + id);
     } else {
-      // box.put(_keyConfig + id, type.toString());
       set(_keyConfig + id, type.toString());
     }
   }

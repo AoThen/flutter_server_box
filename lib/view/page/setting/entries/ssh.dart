@@ -1,20 +1,274 @@
 part of '../entry.dart';
 
 extension _SSH on _AppSettingsPageState {
+  void _refreshApp({bool closeDialog = false}) {
+    if (closeDialog && mounted) {
+      context.pop();
+    }
+    RNodes.app.notify();
+  }
+
   Widget _buildSSH() {
     return Column(
       children: [
+        if (isDesktop) _buildSSHConfigImport(),
+        if (isDesktop) _buildSshConnectionMode(),
+        if (isMobile) _buildQrScan(),
+        _buildSSHDiscovery(),
         _buildLetterCache(),
         _buildSSHWakeLock(),
         _buildTermTheme(),
         _buildFont(),
         _buildTermFontSize(),
         _buildSshBg(),
-        if (isDesktop) _buildDesktopTerminal(),
+        if (isLinux) _buildDesktopTerminal(),
+        if (isDesktop) _buildDesktopSshAutoCopyPassword(),
         _buildSSHVirtualKeyAutoOff(),
         if (isMobile) _buildSSHVirtKeys(),
+        _buildTmuxAuto(),
       ].map((e) => CardX(child: e)).toList(),
     );
+  }
+
+  Widget _buildSSHConfigImport() {
+    return ListTile(
+      leading: const Icon(MingCute.file_import_line),
+      title: Text(l10n.sshConfigImport),
+      trailing: const Icon(Icons.keyboard_arrow_right),
+      onTap: _onTapSSHConfigImport,
+    );
+  }
+
+  Widget _buildQrScan() {
+    return ListTile(
+      leading: const Icon(Icons.qr_code),
+      title: Text(libL10n.import),
+      trailing: const Icon(Icons.keyboard_arrow_right),
+      onTap: _onTapQrScan,
+    );
+  }
+
+  Future<void> _onTapQrScan() async {
+    final ret = await BarcodeScannerPage.route.go(
+      context,
+      args: const BarcodeScannerPageArgs(),
+    );
+    final code = ret?.text;
+    if (code == null) return;
+    if (!mounted) return;
+
+    try {
+      final spi = Spi.fromJson(json.decode(code));
+      final existingIds = ref.read(serversProvider).servers.keys;
+      if (existingIds.contains(spi.id)) {
+        context.showSnackBar('${l10n.sameIdServerExist}: ${spi.id}');
+        return;
+      }
+      final resolvedList = ServerDeduplication.resolveNameConflicts([spi]);
+      final resolvedSpi = resolvedList.first;
+      ref.read(serversProvider.notifier).addServer(resolvedSpi);
+      context.showSnackBar(libL10n.success);
+    } catch (e, s) {
+      context.showErrDialog(e, s);
+    }
+  }
+
+  Widget _buildSSHDiscovery() {
+    return ListTile(
+      leading: const Icon(BoxIcons.bx_search),
+      title: Text(l10n.discoverSshServers),
+      trailing: const Icon(Icons.keyboard_arrow_right),
+      onTap: _onTapSSHDiscovery,
+    );
+  }
+
+  Future<void> _onTapSSHDiscovery() async {
+    try {
+      final result = await SshDiscoveryPage.route.go(context);
+      if (!mounted) return;
+
+      if (result != null && result.isNotEmpty) {
+        await _processDiscoveredServers(result);
+      }
+    } catch (e, s) {
+      if (!mounted) return;
+      context.showErrDialog(e, s);
+    }
+  }
+
+  Future<void> _processDiscoveredServers(
+    List<SshDiscoveryResult> discoveredServers,
+  ) async {
+    final defaultUsername = 'root';
+    final usernameController = TextEditingController(text: defaultUsername);
+
+    try {
+      final shouldImport = await context.showRoundDialog<bool>(
+        title: libL10n.import,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.sshConfigFoundServers('${discoveredServers.length}')),
+            const SizedBox(height: 8),
+            Input(controller: usernameController, label: libL10n.user),
+          ],
+        ),
+        actions: Btnx.cancelOk,
+      );
+
+      if (!mounted) return;
+
+      if (shouldImport == true) {
+        final username = usernameController.text.isNotEmpty
+            ? usernameController.text
+            : defaultUsername;
+        final servers = discoveredServers
+            .map(
+              (result) => Spi(
+                id: ShortId.generate(),
+                name: result.ip,
+                ip: result.ip,
+                port: result.port,
+                user: username,
+              ),
+            )
+            .toList();
+
+        await ServerDeduplication.importServersWithNotification(
+          servers: servers,
+          ref: ref,
+          context: context,
+          allExistMessage: l10n.sshConfigAllExist,
+          importedMessage: (count) =>
+              '${libL10n.success}: $count ${libL10n.servers}',
+        );
+      }
+    } finally {
+      usernameController.dispose();
+    }
+  }
+
+  Future<void> _onTapSSHConfigImport() async {
+    try {
+      final servers = await SSHConfig.parseConfig();
+      if (!mounted) return;
+      if (servers.isEmpty) {
+        context.showSnackBar(l10n.sshConfigNoServers);
+        return;
+      }
+
+      await _processSSHServers(servers);
+    } catch (e, s) {
+      if (!mounted) return;
+      await _handleImportSSHCfgPermissionIssue(e, s);
+    }
+  }
+
+  Future<void> _processSSHServers(List<Spi> servers) async {
+    final deduplicated = ServerDeduplication.deduplicateServers(servers);
+    final resolved = ServerDeduplication.resolveNameConflicts(deduplicated);
+    final summary = ServerDeduplication.getImportSummary(servers, resolved);
+
+    if (!summary.hasItemsToImport) {
+      if (!mounted) return;
+      context.showSnackBar(l10n.sshConfigAllExist('${summary.duplicates}'));
+      return;
+    }
+
+    final shouldImport = await context.showRoundDialog<bool>(
+      title: l10n.sshConfigImport,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.sshConfigFoundServers('${summary.total}')),
+            if (summary.hasDuplicates)
+              Text(
+                l10n.sshConfigDuplicatesSkipped('${summary.duplicates}'),
+                style: UIs.textGrey,
+              ),
+            Text(l10n.sshConfigServersToImport('${summary.toImport}')),
+            const SizedBox(height: 16),
+            ...resolved.map(
+              (s) => Text('• ${s.name} (${s.user}@${s.ip}:${s.port})'),
+            ),
+          ],
+        ),
+      ),
+      actions: Btnx.cancelOk,
+    );
+
+    if (!mounted) return;
+
+    if (shouldImport == true) {
+      await ServerDeduplication.importServersWithNotification(
+        ref: ref,
+        context: context,
+        resolvedServers: resolved,
+        originalCount: summary.total,
+        allExistMessage: l10n.sshConfigAllExist,
+        importedMessage: l10n.sshConfigImported,
+      );
+    }
+  }
+
+  Future<void> _handleImportSSHCfgPermissionIssue(
+    Object e,
+    StackTrace s,
+  ) async {
+    dprint('Error importing SSH config: $e');
+    if (e is PathAccessException ||
+        e.toString().contains('Operation not permitted')) {
+      final useFilePicker = await context.showRoundDialog<bool>(
+        title: l10n.sshConfigImport,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.sshConfigPermissionDenied),
+            const SizedBox(height: 8),
+            Text(l10n.sshConfigManualSelect),
+          ],
+        ),
+        actions: Btnx.cancelOk,
+      );
+
+      if (!mounted) return;
+
+      if (useFilePicker == true) {
+        await _onTapSSHImportWithFilePicker();
+      }
+    } else {
+      if (!mounted) return;
+      context.showErrDialog(e, s);
+    }
+  }
+
+  Future<void> _onTapSSHImportWithFilePicker() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
+        dialogTitle: l10n.sshConfigImport,
+      );
+
+      if (!mounted) return;
+
+      if (result?.files.single.path case final path?) {
+        final servers = await SSHConfig.parseConfig(path);
+        if (!mounted) return;
+        if (servers.isEmpty) {
+          context.showSnackBar(l10n.sshConfigNoServers);
+          return;
+        }
+
+        await _processSSHServers(servers);
+      }
+    } catch (e, s) {
+      if (!mounted) return;
+      context.showErrDialog(e, s);
+    }
   }
 
   Widget _buildSSHVirtKeys() {
@@ -40,19 +294,22 @@ extension _SSH on _AppSettingsPageState {
       leading: const Icon(MingCute.font_fill),
       title: Text(libL10n.font),
       trailing: _setting.fontPath.listenable().listenVal((val) {
-        final fontName = val.getFileName();
+        final fontName = val.getFileName(withoutExtension: true);
         return Text(fontName ?? libL10n.empty, style: UIs.text15);
       }),
       onTap: () {
         context.showRoundDialog(
           title: libL10n.font,
           actions: [
-            TextButton(onPressed: () async => await _pickFontFile(), child: Text(libL10n.file)),
             TextButton(
-              onPressed: () {
+              onPressed: () async => await _pickFontFile(),
+              child: Text(libL10n.file),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _clearCachedFont();
                 _setting.fontPath.delete();
-                context.pop();
-                RNodes.app.notify();
+                _refreshApp(closeDialog: true);
               },
               child: Text(libL10n.clear),
             ),
@@ -62,6 +319,15 @@ extension _SSH on _AppSettingsPageState {
     );
   }
 
+  Future<void> _clearCachedFont() async {
+    final oldFontPath = _setting.fontPath.fetch();
+    if (oldFontPath.isEmpty || !oldFontPath.startsWith(Paths.font)) return;
+    final oldFile = File(oldFontPath);
+    if (await oldFile.exists()) {
+      await oldFile.delete();
+    }
+  }
+
   Future<void> _pickFontFile() async {
     final path = await Pfs.pickFilePath();
     if (path == null) return;
@@ -69,14 +335,19 @@ extension _SSH on _AppSettingsPageState {
     // iOS can't copy file to app dir, so we need to use the original path
     if (isIOS) {
       _setting.fontPath.put(path);
+      await FontUtils.loadFrom(path);
     } else {
+      await _clearCachedFont();
+
       final fontFile = File(path);
-      await fontFile.copy(Paths.font);
-      _setting.fontPath.put(Paths.font);
+      final fontName = path.getFileName();
+      final fontPath = Paths.font.joinPath(fontName ?? 'font.ttf');
+      await fontFile.copy(fontPath);
+      _setting.fontPath.put(fontPath);
+      await FontUtils.loadFrom(fontPath);
     }
 
-    context.pop();
-    RNodes.app.notify();
+    _refreshApp(closeDialog: true);
   }
 
   Widget _buildTermFontSize() {
@@ -106,8 +377,7 @@ extension _SSH on _AppSettingsPageState {
     await file.copy(newPath);
     _setting.sshBgImage.put(newPath);
 
-    context.pop();
-    RNodes.app.notify();
+    _refreshApp(closeDialog: true);
   }
 
   Widget _buildDesktopTerminal() {
@@ -115,7 +385,12 @@ extension _SSH on _AppSettingsPageState {
       return ListTile(
         leading: const Icon(Icons.terminal),
         title: TipText(libL10n.terminal, l10n.desktopTerminalTip),
-        trailing: Text(val, style: UIs.text15, maxLines: 1, overflow: TextOverflow.ellipsis),
+        trailing: Text(
+          val,
+          style: UIs.text15,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
         onTap: () {
           withTextFieldController((ctrl) async {
             ctrl.text = val;
@@ -143,11 +418,34 @@ extension _SSH on _AppSettingsPageState {
     });
   }
 
+  Widget _buildDesktopSshAutoCopyPassword() {
+    return ListTile(
+      leading: const Icon(Icons.password),
+      title: Text('${libL10n.copy} ${libL10n.pwd}'),
+      subtitle: Text('SSH', style: UIs.textGrey),
+      trailing: StoreSwitch(prop: _setting.desktopSshAutoCopyPassword),
+    );
+  }
+
+  Widget _buildSshConnectionMode() {
+    return _setting.sshConnectionMode.listenable().listenVal((useSystemSsh) {
+      final title = useSystemSsh
+          ? l10n.sshConnectionModeUseSystem
+          : l10n.sshConnectionModeUseBuiltin;
+      return ListTile(
+        leading: const Icon(Icons.swap_horiz),
+        title: Text(title),
+        subtitle: Text(l10n.sshConnectionModeTip, style: UIs.textGrey),
+        trailing: StoreSwitch(prop: _setting.sshConnectionMode),
+      );
+    });
+  }
+
   Widget _buildTermTheme() {
     String index2Str(int index) {
       switch (index) {
         case 0:
-          return l10n.system;
+          return libL10n.auto;
         case 1:
           return libL10n.bright;
         case 2:
@@ -189,12 +487,10 @@ extension _SSH on _AppSettingsPageState {
   Widget _buildLetterCache() {
     return ListTile(
       leading: const Icon(Bootstrap.alphabet),
-      // title: Text(l10n.letterCache),
-      // subtitle: Text(
-      //   '${l10n.letterCacheTip}\n${l10n.needRestart}',
-      //   style: UIs.textGrey,
-      // ),
-      title: TipText(l10n.letterCache, '${l10n.letterCacheTip}\n${l10n.needRestart}'),
+      title: TipText(
+        l10n.letterCache,
+        '${l10n.letterCacheTip}\n${l10n.needRestart}',
+      ),
       trailing: StoreSwitch(prop: _setting.letterCache),
     );
   }
@@ -203,7 +499,11 @@ extension _SSH on _AppSettingsPageState {
     return ExpandTile(
       leading: const Icon(MingCute.background_fill),
       title: Text(libL10n.background),
-      children: [_buildSshBgImage(), _buildSshBgOpacity(), _buildSshBlurRadius()],
+      children: [
+        _buildSshBgImage(),
+        _buildSshBgOpacity(),
+        _buildSshBlurRadius(),
+      ],
     );
   }
 
@@ -219,12 +519,14 @@ extension _SSH on _AppSettingsPageState {
         context.showRoundDialog(
           title: libL10n.image,
           actions: [
-            TextButton(onPressed: () async => await _pickBgImage(), child: Text(libL10n.file)),
+            TextButton(
+              onPressed: () async => await _pickBgImage(),
+              child: Text(libL10n.file),
+            ),
             TextButton(
               onPressed: () {
                 _setting.sshBgImage.delete();
-                context.pop();
-                RNodes.app.notify();
+                _refreshApp(closeDialog: true);
               },
               child: Text(libL10n.clear),
             ),
@@ -303,5 +605,88 @@ extension _SSH on _AppSettingsPageState {
         actions: Btn.ok(onTap: () => onSave(_sshBlurCtrl.text)).toList,
       ),
     );
+  }
+
+  Widget _buildTmuxAuto() {
+    return ExpandTile(
+      leading: const Icon(Icons.terminal),
+      title: const Text('tmux auto-attach'),
+      children: [
+        _buildTmuxAutoToggle(),
+        _buildTmuxShowSelector(),
+        _buildTmuxSessionName(),
+      ],
+    );
+  }
+
+  Widget _buildTmuxAutoToggle() {
+    return ListTile(
+      title: const Text('Auto tmux'),
+      subtitle: Text(
+        'Automatically start/attach tmux on SSH connect',
+        style: UIs.textGrey,
+      ),
+      trailing: StoreSwitch(prop: _setting.tmuxAuto),
+    );
+  }
+
+  Widget _buildTmuxShowSelector() {
+    return _setting.tmuxAuto.listenable().listenVal((autoEnabled) {
+      return IgnorePointer(
+        ignoring: !autoEnabled,
+        child: Opacity(
+          opacity: autoEnabled ? 1.0 : 0.5,
+          child: ListTile(
+            title: const Text('Session selector'),
+            subtitle: Text(
+              'Show session picker dialog on connect',
+              style: UIs.textGrey,
+            ),
+            trailing: StoreSwitch(prop: _setting.tmuxShowSelector),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _buildTmuxSessionName() {
+    return _setting.tmuxAuto.listenable().listenVal((autoEnabled) {
+      return _setting.tmuxSessionName.listenable().listenVal((name) {
+        final displayName = name.isEmpty ? 'server_box' : name;
+        return IgnorePointer(
+          ignoring: !autoEnabled,
+          child: Opacity(
+            opacity: autoEnabled ? 1.0 : 0.5,
+            child: ListTile(
+              title: const Text('Default session name'),
+              trailing: Text(displayName, style: UIs.text15),
+              onTap: () => _showTmuxSessionNameDialog(name),
+            ),
+          ),
+        );
+      });
+    });
+  }
+
+  Future<void> _showTmuxSessionNameDialog(String current) async {
+    withTextFieldController((ctrl) async {
+      ctrl.text = current;
+      void onSave() {
+        _setting.tmuxSessionName.put(ctrl.text.trim());
+        context.pop();
+      }
+
+      await context.showRoundDialog<bool>(
+        title: 'Session name',
+        child: Input(
+          controller: ctrl,
+          autoFocus: true,
+          hint: 'server_box',
+          suggestion: false,
+          onSubmitted: (_) => onSave(),
+        ),
+        actions: Btn.ok(onTap: onSave).toList,
+      );
+    });
   }
 }

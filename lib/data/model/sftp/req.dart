@@ -1,4 +1,10 @@
-part of 'worker.dart';
+import 'package:fl_lib/fl_lib.dart';
+import 'package:server_box/core/utils/jump_chain.dart';
+import 'package:server_box/core/utils/refresh_interval.dart';
+import 'package:server_box/core/utils/server.dart';
+import 'package:server_box/data/model/server/server_private_info.dart';
+import 'package:server_box/data/res/default.dart';
+import 'package:server_box/data/res/store.dart';
 
 class SftpReq {
   final Spi spi;
@@ -11,8 +17,16 @@ class SftpReq {
   Map<String, Spi>? jumpSpisById;
   Map<String, String>? privateKeysByKeyId;
   Map<String, String>? knownHostFingerprints;
+  late final int timeoutSeconds;
+  late final int progressUpdateIntervalSeconds;
 
   SftpReq(this.spi, this.remotePath, this.localPath, this.type) {
+    timeoutSeconds = Stores.setting.timeout.fetch();
+    progressUpdateIntervalSeconds =
+        normalizeServerStatusRefreshSeconds(
+          Stores.setting.serverStatusUpdateInterval.fetch(),
+        ) ??
+        Defaults.updateInterval;
     privateKeysByKeyId = {};
 
     final keyId = spi.keyId;
@@ -26,8 +40,9 @@ class SftpReq {
     };
     jumpSpisById = collectJumpServers(spi: spi, serversById: allServers);
 
-    if (spi.jumpId != null) {
-      jumpSpi = jumpSpisById?[spi.jumpId];
+    final firstJumpId = spi.firstJumpId;
+    if (firstJumpId != null) {
+      jumpSpi = jumpSpisById?[firstJumpId];
       jumpPrivateKey = Stores.key.fetchOne(jumpSpi?.keyId)?.key;
       if (jumpSpi?.keyId case final jumpKeyId?) {
         if (jumpPrivateKey != null) {
@@ -68,67 +83,14 @@ class SftpReq {
 
 enum SftpReqType { download, upload }
 
-class SftpReqStatus {
-  final int id;
-  final SftpReq req;
-  final void Function() notifyListeners;
-  late SftpWorker worker;
-  final Completer? completer;
+class SftpTransferProgress {
+  final double percent;
+  final int transferredBytes;
 
-  String get fileName => req.localPath.split(Pfs.seperator).last;
-
-  // status of the download
-  double? progress;
-  SftpWorkerStatus? status;
-  int? size;
-  Exception? error;
-  Duration? spentTime;
-
-  SftpReqStatus({
-    required this.req,
-    required this.notifyListeners,
-    this.completer,
-  }) : id = DateTime.now().microsecondsSinceEpoch {
-    worker = SftpWorker(onNotify: onNotify, req: req)..init();
-  }
-
-  @override
-  bool operator ==(Object other) => other is SftpReqStatus && id == other.id;
-
-  @override
-  int get hashCode => id ^ super.hashCode;
-
-  void dispose() {
-    worker._dispose();
-    completer?.complete(true);
-  }
-
-  void onNotify(dynamic event) {
-    var shouldDispose = false;
-    switch (event) {
-      case final SftpWorkerStatus val:
-        status = val;
-        if (status == SftpWorkerStatus.finished) {
-          dispose();
-        }
-        break;
-      case final double val:
-        progress = val;
-        break;
-      case final int val:
-        size = val;
-        break;
-      case final Duration d:
-        spentTime = d;
-        break;
-      default:
-        error = Exception('sftp worker event: $event');
-        Loggers.app.warning(error);
-        shouldDispose = true;
-    }
-    notifyListeners();
-    if (shouldDispose) dispose();
-  }
+  const SftpTransferProgress({
+    required this.percent,
+    required this.transferredBytes,
+  });
 }
 
 enum SftpWorkerStatus { preparing, sshConnectted, loading, finished }

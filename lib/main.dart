@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
 
 import 'package:computer/computer.dart';
@@ -19,20 +17,24 @@ import 'package:server_box/data/store/server.dart';
 import 'package:server_box/hive/hive_registrar.g.dart';
 
 Future<void> main() async {
-  _runInZone(() async {
+  await _runInZone(() async {
     await _initApp();
     runApp(ProviderScope(child: const MyApp()));
   });
 }
 
-void _runInZone(void Function() body) {
+Future<void> _runInZone(Future<void> Function() body) async {
   final zoneSpec = ZoneSpecification(
     print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
       parent.print(zone, line);
     },
   );
 
-  runZonedGuarded(body, (e, s) => print('[ZONE] $e\n$s'), zoneSpecification: zoneSpec);
+  await runZonedGuarded(
+    body,
+    (e, s) => Loggers.app.warning('Zone error', e, s),
+    zoneSpecification: zoneSpec,
+  );
 }
 
 Future<void> _initApp() async {
@@ -42,7 +44,7 @@ Future<void> _initApp() async {
   _setupDebug();
   await _initWindow();
 
-  _doPlatformRelated();
+  await _doPlatformRelated();
 
   // Initialize Android session notification channel/handler
   TermSessionManager.init();
@@ -67,22 +69,26 @@ Future<void> _initData() async {
 }
 
 void _setupDebug() {
-  Logger.root.level = Level.ALL;
+  Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
     DebugProvider.addLog(record);
-    if (record.error != null) print(record.error);
-    if (record.stackTrace != null) print(record.stackTrace);
   });
 }
 
-void _doPlatformRelated() async {
+Future<void> _doPlatformRelated() async {
   if (isAndroid) {
     // try switch to highest refresh rate
-    FlutterDisplayMode.setHighRefreshRate();
+    try {
+      await FlutterDisplayMode.setHighRefreshRate();
+    } catch (e, s) {
+      Loggers.app.warning('Failed to set high refresh rate', e, s);
+    }
   }
 
   final serversCount = Stores.server.keys().length;
-  Computer.shared.turnOn(workersCount: (serversCount / 3).round() + 1); // Plus 1 to avoid 0.
+  await Computer.shared.turnOn(
+    workersCount: (serversCount / 3).round() + 1,
+  ); // Plus 1 to avoid 0.
 }
 
 // It may contains some async heavy funcs.

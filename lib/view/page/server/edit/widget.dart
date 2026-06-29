@@ -133,6 +133,7 @@ extension _Widgets on _ServerEditPageState {
     return ExpandTile(
       title: Text(l10n.more),
       children: [
+        _buildSudoPassword(),
         Input(
           controller: _logoUrlCtrl,
           type: TextInputType.url,
@@ -142,15 +143,34 @@ extension _Widgets on _ServerEditPageState {
           suggestion: false,
         ),
         _buildAltUrl(),
+        _buildProxyCommand(),
         _buildScriptDir(),
         _buildEnvs(),
         _buildPVEs(),
         _buildCustomCmds(),
+        _buildStorageCollection(),
         _buildDisabledCmdTypes(),
         _buildCustomDev(),
         _buildWOLs(),
       ],
     );
+  }
+
+  Widget _buildSudoPassword() {
+    return _hasStoredSudoPassword.listenVal((hasValue) {
+      final subtitle = switch (hasValue) {
+        true => Text(l10n.configured, style: UIs.textGrey),
+        false => Text(libL10n.empty, style: UIs.textGrey),
+        null => Text(libL10n.loadingEllipsis, style: UIs.textGrey),
+      };
+      return ListTile(
+        leading: const Icon(Icons.password),
+        title: Text(libL10n.sudoPassword),
+        subtitle: subtitle,
+        trailing: const Icon(Icons.keyboard_arrow_right),
+        onTap: _onTapSudoPassword,
+      ).cardx;
+    });
   }
 
   Widget _buildScriptDir() {
@@ -181,6 +201,18 @@ extension _Widgets on _ServerEditPageState {
           hint: 'nvme-pci-0400',
           suggestion: false,
         ),
+        ListTile(
+          leading: const Icon(MingCute.question_line),
+          title: TipText('${libL10n.temperature} (°C)', l10n.tempIsCelsiusTip),
+          trailing: _tempIsCelsius.listenVal(
+            (v) => Switch(
+              value: v,
+              onChanged: (val) {
+                _tempIsCelsius.value = val;
+              },
+            ),
+          ),
+        ).cardx,
         Input(
           controller: _netDevCtrl,
           type: TextInputType.text,
@@ -221,6 +253,7 @@ extension _Widgets on _ServerEditPageState {
       controller: _altUrlController,
       type: TextInputType.url,
       node: _alterUrlFocus,
+      onSubmitted: (_) => _focusScope.requestFocus(_proxyCommandFocus),
       label: l10n.fallbackSshDest,
       icon: MingCute.link_line,
       hint: 'user@ip:port',
@@ -228,34 +261,60 @@ extension _Widgets on _ServerEditPageState {
     );
   }
 
+  Widget _buildProxyCommand() {
+    return Input(
+      controller: _proxyCommandCtrl,
+      type: TextInputType.multiline,
+      node: _proxyCommandFocus,
+      label: 'ProxyCommand',
+      icon: MingCute.command_line,
+      hint: 'socat - PROXY:x.x.x.x:%h:%p,proxyport=5002',
+      suggestion: false,
+      maxLines: 3,
+    );
+  }
+
   Widget _buildPVEs() {
     const addr = 'https://127.0.0.1:8006';
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const CenterGreyTitle('PVE'),
-        Input(
-          controller: _pveAddrCtrl,
-          type: TextInputType.url,
-          icon: MingCute.web_line,
-          label: 'URL',
-          hint: addr,
-          suggestion: false,
-        ),
-        ListTile(
-          leading: const Icon(MingCute.certificate_line),
-          title: TipText('PVE ${l10n.ignoreCert}', l10n.pveIgnoreCertTip),
-          trailing: _pveIgnoreCert.listenVal(
-            (v) => Switch(
-              value: v,
-              onChanged: (val) {
-                _pveIgnoreCert.value = val;
-              },
-            ),
+    return _keyIdx.listenVal((v) {
+      final useKeyAuth = v != null && v >= 0;
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CenterGreyTitle('PVE'),
+          Input(
+            controller: _pveAddrCtrl,
+            type: TextInputType.url,
+            icon: MingCute.web_line,
+            label: 'URL',
+            hint: addr,
+            suggestion: false,
           ),
-        ).cardx,
-      ],
-    );
+          if (useKeyAuth)
+            Input(
+              controller: _pvePwdCtrl,
+              type: TextInputType.visiblePassword,
+              icon: MingCute.lock_line,
+              label: l10n.pvePassword,
+              hint: l10n.pvePasswordHint,
+              obscureText: true,
+              suggestion: false,
+            ),
+          ListTile(
+            leading: const Icon(MingCute.certificate_line),
+            title: TipText('PVE ${l10n.ignoreCert}', l10n.pveIgnoreCertTip),
+            trailing: _pveIgnoreCert.listenVal(
+              (v) => Switch(
+                value: v,
+                onChanged: (val) {
+                  _pveIgnoreCert.value = val;
+                },
+              ),
+            ),
+          ).cardx,
+        ],
+      );
+    });
   }
 
   Widget _buildCustomCmds() {
@@ -280,6 +339,58 @@ extension _Widgets on _ServerEditPageState {
           trailing: const Icon(Icons.open_in_new, size: 17),
           onTap: libL10n.customCmdDocUrl.launchUrl,
         ).cardx,
+      ],
+    );
+  }
+
+  Widget _buildStorageCollection() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CenterGreyTitle(libL10n.disk),
+        _disabledCmdTypes.listenVal((_) {
+          final diskInfoEnabled = !_isCmdGroupDisabled(_diskInfoCmdTypes);
+          final diskHealthEnabled = !_isCmdGroupDisabled(_diskHealthCmdTypes);
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.storage),
+                title: Text(libL10n.disk),
+                subtitle: Text(
+                  _diskInfoCmdTypes.map((e) => e.displayName).join(', '),
+                  style: UIs.textGrey,
+                ),
+                trailing: Switch(
+                  value: diskInfoEnabled,
+                  onChanged: (value) {
+                    _setCmdGroupDisabled(_diskInfoCmdTypes, !value);
+                  },
+                ),
+                onTap: () {
+                  _setCmdGroupDisabled(_diskInfoCmdTypes, diskInfoEnabled);
+                },
+              ).cardx,
+              ListTile(
+                leading: const Icon(MingCute.heartbeat_line),
+                title: Text(l10n.diskHealth),
+                subtitle: Text(
+                  _diskHealthCmdTypes.map((e) => e.displayName).join(', '),
+                  style: UIs.textGrey,
+                ),
+                trailing: Switch(
+                  value: diskHealthEnabled,
+                  onChanged: (value) {
+                    _setCmdGroupDisabled(_diskHealthCmdTypes, !value);
+                  },
+                ),
+                onTap: () {
+                  _setCmdGroupDisabled(_diskHealthCmdTypes, diskHealthEnabled);
+                },
+              ).cardx,
+            ],
+          );
+        }),
       ],
     );
   }
@@ -357,26 +468,40 @@ extension _Widgets on _ServerEditPageState {
         .where((e) => e.id != spi?.id)
         .where((e) => !_isInvalidJumpSelection(e.id))
         .toList();
-    final choice = _jumpServer.listenVal((val) {
-      final srv = srvs.firstWhereOrNull((e) => e.id == _jumpServer.value);
+    final choice = _jumpServers.listenVal((val) {
+      final selectedSrvs = <Spi>[];
+      for (final id in val) {
+        final srv = srvs.firstWhereOrNull((e) => e.id == id);
+        if (srv != null) selectedSrvs.add(srv);
+      }
       return Choice<Spi>(
-        multiple: false,
+        multiple: true,
         clearable: true,
-        value: srv != null ? [srv] : [],
+        value: selectedSrvs,
         builder: (state, _) => Wrap(
           children: List<Widget>.generate(srvs.length, (index) {
             final item = srvs[index];
+            final selectedIndex = val.indexOf(item.id);
             return ChoiceChipX<Spi>(
               key: ValueKey(item),
-              label: item.name,
+              label: selectedIndex == -1
+                  ? item.name
+                  : '${selectedIndex + 1}. ${item.name}',
               state: state,
               value: item,
               onSelected: (srv, on) {
+                final next = List<String>.from(_jumpServers.value);
                 if (on) {
-                  _jumpServer.value = srv.id;
+                  if (next.contains(srv.id)) return;
+                  if (next.length >= 2) {
+                    context.showSnackBar('${l10n.jumpServer}: 2');
+                    return;
+                  }
+                  next.add(srv.id);
                 } else {
-                  _jumpServer.value = null;
+                  next.remove(srv.id);
                 }
+                _jumpServers.value = next;
               },
             );
           }),
@@ -385,7 +510,7 @@ extension _Widgets on _ServerEditPageState {
     });
     return ExpandTile(
       leading: const Icon(Icons.map),
-      initiallyExpanded: _jumpServer.value != null,
+      initiallyExpanded: _jumpServers.value.isNotEmpty,
       childrenPadding: padding,
       title: Text(l10n.jumpServer),
       children: [choice],
@@ -408,49 +533,6 @@ extension _Widgets on _ServerEditPageState {
     );
   }
 
-  Widget _buildQrScan() {
-    return Btn.tile(
-      text: libL10n.import,
-      icon: const Icon(Icons.qr_code, color: Colors.grey),
-      onTap: () async {
-        final ret = await BarcodeScannerPage.route.go(
-          context,
-          args: const BarcodeScannerPageArgs(),
-        );
-        final code = ret?.text;
-        if (code == null) return;
-        try {
-          final spi = Spi.fromJson(json.decode(code));
-          _initWithSpi(spi);
-        } catch (e, s) {
-          context.showErrDialog(e, s);
-        }
-      },
-      textStyle: UIs.textGrey,
-      mainAxisSize: MainAxisSize.min,
-    );
-  }
-
-  Widget _buildSSHImport() {
-    return Btn.tile(
-      text: l10n.sshConfigImport,
-      icon: const Icon(Icons.settings, color: Colors.grey),
-      onTap: _onTapSSHImport,
-      textStyle: UIs.textGrey,
-      mainAxisSize: MainAxisSize.min,
-    );
-  }
-
-  Widget _buildSSHDiscovery() {
-    return Btn.tile(
-      text: l10n.discoverSshServers,
-      icon: const Icon(BoxIcons.bx_search, color: Colors.grey),
-      onTap: _onTapSSHDiscovery,
-      textStyle: UIs.textGrey,
-      mainAxisSize: MainAxisSize.min,
-    );
-  }
-
   Widget _buildDelBtn() {
     return IconButton(
       onPressed: () {
@@ -464,7 +546,8 @@ extension _Widgets on _ServerEditPageState {
           actions: Btn.ok(
             onTap: () async {
               context.pop();
-              ref.read(serversProvider.notifier).delServer(spi!.id);
+              await ref.read(serversProvider.notifier).delServer(spi!.id);
+              if (!mounted) return;
               context.pop(true);
             },
             red: true,

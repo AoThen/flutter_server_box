@@ -12,6 +12,10 @@ import 'package:server_box/view/page/home.dart';
 
 part 'intro.dart';
 
+Widget _buildHomeWithWindowFrame() {
+  return VirtualWindowFrame(title: BuildData.name, child: const HomePage());
+}
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -21,11 +25,21 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late final Future<List<IntroPageBuilder>> _introFuture = _IntroPage.builders;
+  bool _transparentNavBarConfigured = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_transparentNavBarConfigured) return;
+    _transparentNavBarConfigured = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      SystemUIs.setTransparentNavigationBar(context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    _setup(context);
-
     return ListenableBuilder(
       listenable: RNodes.app,
       builder: (context, _) {
@@ -95,7 +109,11 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Widget _buildApp(BuildContext ctx, {required ThemeData light, required ThemeData dark}) {
+  Widget _buildApp(
+    BuildContext ctx, {
+    required ThemeData light,
+    required ThemeData dark,
+  }) {
     final tMode = Stores.setting.themeMode.fetch();
     // Issue #57
     final themeMode = switch (tMode) {
@@ -107,10 +125,14 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       key: ValueKey(locale),
+      restorationScopeId: 'serverbox',
       navigatorKey: AppNavigator.key,
       builder: ResponsivePoints.builder,
       locale: locale,
-      localizationsDelegates: const [LibLocalizations.delegate, ...AppLocalizations.localizationsDelegates],
+      localizationsDelegates: const [
+        LibLocalizations.delegate,
+        ...AppLocalizations.localizationsDelegates,
+      ],
       supportedLocales: AppLocalizations.supportedLocales,
       localeListResolutionCallback: LocaleUtil.resolve,
       navigatorObservers: [AppRouteObserver.instance],
@@ -126,24 +148,25 @@ class _MyAppState extends State<MyApp> {
           if (appL10n != null) l10n = appL10n;
 
           Widget child;
+          var hasWindowFrame = false;
           if (snapshot.connectionState == ConnectionState.waiting) {
-            child = const Scaffold(body: Center(child: CircularProgressIndicator()));
+            child = const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           } else {
             final intros = snapshot.data ?? [];
             if (intros.isNotEmpty) {
               child = _IntroPage(intros);
             } else {
-              child = const HomePage();
+              child = _buildHomeWithWindowFrame();
+              hasWindowFrame = true;
             }
           }
 
+          if (hasWindowFrame) return child;
           return VirtualWindowFrame(title: BuildData.name, child: child);
         },
       ),
     );
   }
-}
-
-void _setup(BuildContext context) async {
-  SystemUIs.setTransparentNavigationBar(context);
 }

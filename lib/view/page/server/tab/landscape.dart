@@ -2,25 +2,31 @@ part of 'tab.dart';
 
 extension on _ServerPageState {
   Widget _buildLandscape() {
-    final offset = Offset(_offset, _offset);
-    return Padding(
-      // Avoid display cutout
-      padding: EdgeInsets.all(_offset.abs()),
-      child: Transform.translate(
-        offset: offset,
-        child: Stack(
-          children: [
-            _buildLandscapeBody(),
-            Positioned(
-              top: 0,
-              left: 0,
-              child: IconButton(
-                onPressed: () => SettingsPage.route.go(context),
-                icon: const Icon(Icons.settings, color: Colors.grey),
-              ),
+    return ValueListenableBuilder<double>(
+      valueListenable: _offsetNotifier,
+      builder: (context, offsetValue, child) {
+        final offset = Offset(offsetValue, offsetValue);
+        return Padding(
+          // Avoid display cutout
+          padding: EdgeInsets.all(offsetValue.abs()),
+          child: Transform.translate(
+            offset: offset,
+            child: child,
+          ),
+        );
+      },
+      child: Stack(
+        children: [
+          _buildLandscapeBody(),
+          Positioned(
+            top: 0,
+            left: 0,
+            child: IconButton(
+              onPressed: () => SettingsPage.route.go(context),
+              icon: const Icon(Icons.settings, color: Colors.grey),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -28,7 +34,7 @@ extension on _ServerPageState {
   Widget _buildLandscapeBody() {
     final serverState = ref.watch(serversProvider);
     final order = serverState.serverOrder;
-    
+
     if (order.isEmpty) {
       return Center(child: Text(libL10n.empty, textAlign: TextAlign.center));
     }
@@ -40,7 +46,10 @@ extension on _ServerPageState {
         final srv = ref.watch(serverProvider(id));
 
         final title = _buildServerCardTitle(srv);
-        final List<Widget> children = [title, _buildNormalCard(srv.status, srv.spi)];
+        final List<Widget> children = [
+          title,
+          _buildNormalCard(srv.status, srv.spi),
+        ];
 
         return _getCardNoti(id).listenVal((_) {
           return Column(

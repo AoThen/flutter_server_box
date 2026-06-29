@@ -10,11 +10,11 @@ part of 'all.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ServersNotifier)
-const serversProvider = ServersNotifierProvider._();
+final serversProvider = ServersNotifierProvider._();
 
 final class ServersNotifierProvider
     extends $NotifierProvider<ServersNotifier, ServersState> {
-  const ServersNotifierProvider._()
+  ServersNotifierProvider._()
     : super(
         from: null,
         argument: null,
@@ -41,14 +41,13 @@ final class ServersNotifierProvider
   }
 }
 
-String _$serversNotifierHash() => r'dc5da44f9bd8d8dcfba3e6e932cca3e2f379e582';
+String _$serversNotifierHash() => r'ef2a189efe38cb917189dd6f612745b78e362e79';
 
 abstract class _$ServersNotifier extends $Notifier<ServersState> {
   ServersState build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<ServersState, ServersState>;
     final element =
         ref.element
@@ -58,6 +57,6 @@ abstract class _$ServersNotifier extends $Notifier<ServersState> {
               Object?,
               Object?
             >;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

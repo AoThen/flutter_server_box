@@ -1,5 +1,8 @@
 import 'package:xml/xml.dart';
 
+int _parseFirstInt(String? s) =>
+    int.tryParse(s?.split(' ').firstOrNull ?? '0') ?? 0;
+
 /// [
 ///   {
 ///     "name": "GeForce RTX 3090",
@@ -35,26 +38,44 @@ class NvidiaSmi {
           .firstOrNull
           ?.innerText;
       final power = gpu.findElements('gpu_power_readings').firstOrNull;
-      final powerDraw = power?.findElements('power_draw').firstOrNull?.innerText;
-      final powerLimit = power?.findElements('current_power_limit').firstOrNull?.innerText;
+      final powerDraw = power
+          ?.findElements('power_draw')
+          .firstOrNull
+          ?.innerText;
+      final powerLimit = power
+          ?.findElements('current_power_limit')
+          .firstOrNull
+          ?.innerText;
       final memory = gpu.findElements('fb_memory_usage').firstOrNull;
       final memoryUsed = memory?.findElements('used').firstOrNull?.innerText;
       final memoryTotal = memory?.findElements('total').firstOrNull?.innerText;
-      final processes = gpu.findElements('processes').firstOrNull?.findElements('process_info');
-      final memoryProcesses = List<NvidiaSmiMemProcess?>.generate(processes?.length ?? 0, (index) {
-        final process = processes?.elementAt(index);
-        final pid = process?.findElements('pid').firstOrNull?.innerText;
-        final name = process?.findElements('process_name').firstOrNull?.innerText;
-        final memory = process?.findElements('used_memory').firstOrNull?.innerText;
-        if (pid != null && name != null && memory != null) {
-          return NvidiaSmiMemProcess(
-            int.tryParse(pid) ?? 0,
-            name,
-            int.tryParse(memory.split(' ').firstOrNull ?? '0') ?? 0,
-          );
-        }
-        return null;
-      });
+      final processes = gpu
+          .findElements('processes')
+          .firstOrNull
+          ?.findElements('process_info');
+      final memoryProcesses = List<NvidiaSmiMemProcess?>.generate(
+        processes?.length ?? 0,
+        (index) {
+          final process = processes?.elementAt(index);
+          final pid = process?.findElements('pid').firstOrNull?.innerText;
+          final name = process
+              ?.findElements('process_name')
+              .firstOrNull
+              ?.innerText;
+          final memory = process
+              ?.findElements('used_memory')
+              .firstOrNull
+              ?.innerText;
+          if (pid != null && name != null && memory != null) {
+            return NvidiaSmiMemProcess(
+              int.tryParse(pid) ?? 0,
+              name,
+              _parseFirstInt(memory),
+            );
+          }
+          return null;
+        },
+      );
       memoryProcesses.removeWhere((element) => element == null);
       final percent = gpu
           .findElements('utilization')
@@ -66,28 +87,26 @@ class NvidiaSmi {
       if (name != null && temp != null) {
         return NvidiaSmiItem(
           name: name,
-          uuid: gpu.findElements('uuid').firstOrNull?.innerText ?? '',
-          temp: int.tryParse(temp.split(' ').firstOrNull ?? '0') ?? 0,
-          percent: int.tryParse(percent?.split(' ').firstOrNull ?? '0') ?? 0,
+          temp: _parseFirstInt(temp),
+          percent: _parseFirstInt(percent),
           power: '$powerDraw / $powerLimit',
           memory: NvidiaSmiMem(
-            int.tryParse(memoryTotal?.split(' ').firstOrNull ?? '0') ?? 0,
-            int.tryParse(memoryUsed?.split(' ').firstOrNull ?? '0') ?? 0,
+            _parseFirstInt(memoryTotal),
+            _parseFirstInt(memoryUsed),
             'MiB',
-            List.from(memoryProcesses),
+            List<NvidiaSmiMemProcess>.from(memoryProcesses),
           ),
-          fanSpeed: int.tryParse(fanSpeed?.split(' ').firstOrNull ?? '0') ?? 0,
+          fanSpeed: _parseFirstInt(fanSpeed),
         );
       }
       return null;
     });
     result.removeWhere((element) => element == null);
-    return List.from(result);
+    return List<NvidiaSmiItem>.from(result);
   }
 }
 
 class NvidiaSmiItem {
-  final String uuid;
   final String name;
   final int temp;
   final String power;
@@ -96,7 +115,6 @@ class NvidiaSmiItem {
   final int fanSpeed;
 
   const NvidiaSmiItem({
-    required this.uuid,
     required this.name,
     required this.temp,
     required this.power,
@@ -107,7 +125,7 @@ class NvidiaSmiItem {
 
   @override
   String toString() {
-    return 'NvdiaSmiItem{name: $name, temp: $temp, power: $power, memory: $memory}';
+    return 'NvidiaSmiItem{name: $name, temp: $temp, power: $power, memory: $memory}';
   }
 }
 
@@ -121,7 +139,7 @@ class NvidiaSmiMem {
 
   @override
   String toString() {
-    return 'NvdiaSmiMem{total: $total, used: $used, unit: $unit, processes: $processes}';
+    return 'NvidiaSmiMem{total: $total, used: $used, unit: $unit, processes: $processes}';
   }
 }
 
@@ -134,6 +152,6 @@ class NvidiaSmiMemProcess {
 
   @override
   String toString() {
-    return 'NvdiaSmiMemProcess{pid: $pid, name: $name, memory: $memory}';
+    return 'NvidiaSmiMemProcess{pid: $pid, name: $name, memory: $memory}';
   }
 }

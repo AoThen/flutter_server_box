@@ -108,6 +108,7 @@
   "ignoreCert": "Abaikan sertifikat",
   "image": "Gambar",
   "imagesList": "Daftar gambar",
+  "pull": "Tarik",
   "installDockerWithUrl": "Silakan https://docs.docker.com/engine/install Docker pertama.",
   "invalid": "Tidak valid",
   "jumpServer": "Lompat server",
@@ -117,14 +118,20 @@
   "keyAuth": "Auth kunci",
   "lastFailure": "Gagal Terakhir",
   "lastSuccess": "Sukses Terakhir",
-  "letterCache": "Caching huruf",
-  "letterCacheTip": "Direkomendasikan untuk menonaktifkan, tetapi setelah dinonaktifkan, tidak mungkin untuk memasukkan karakter CJK.",
+  "letterCache": "Input keyboard biasa",
+  "letterCacheTip": "Saat diaktifkan, input akan melalui IME biasa, yang dapat menghindari prompt keyboard aman di terminal pada beberapa sistem.",
   "madeWithLove": "Dibuat dengan ❤️ oleh {myGithub}",
   "max": "Max",
   "maxConcurrency": "Konkurensi Maksimum",
   "maxRetryCount": "Jumlah penyambungan kembali server",
   "maxRetryCountEqual0": "Akan mencoba lagi lagi dan lagi.",
   "min": "Min",
+  "mismatchSystem": "Sistem tidak cocok: {system}",
+  "@mismatchSystem": {
+    "placeholders": {
+      "system": {}
+    }
+  },
   "more": "Lebih Banyak",
   "moveOutServerFuncBtnsHelp": "Aktif: dapat ditampilkan di bawah setiap kartu pada halaman Tab Server. Nonaktif: dapat ditampilkan di bagian atas halaman Rincian Server.",
   "needHomeDir": "Jika Anda pengguna Synology, [lihat di sini](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Pengguna sistem lain perlu mencari cara membuat direktori home.",
@@ -156,6 +163,7 @@
   "pveVersionLow": "Fitur ini saat ini sedang dalam tahap pengujian dan hanya diuji pada PVE 8+. Gunakan dengan hati-hati.",
   "read": "Baca",
   "recentConnections": "Koneksi Terkini",
+  "reconnecting": "Menghubungkan kembali...",
   "rememberPwdInMem": "Ingat kata sandi di dalam memori",
   "rememberPwdInMemTip": "Digunakan untuk kontainer, menangguhkan, dll.",
   "rememberWindowSize": "Ingat ukuran jendela",
@@ -217,6 +225,7 @@
   "time": "Waktu",
   "times": "Waktu",
   "trySudo": "Cobalah menggunakan sudo",
+  "sudoPromptNotFound": "Tidak ada permintaan kata sandi sudo yang aktif.",
   "unknown": "Tidak dikenal",
   "unkownConvertMode": "Mode Konversi Tidak Diketahui",
   "update": "Memperbarui",
@@ -243,5 +252,8 @@
   "write": "Tulis",
   "writeScriptFailTip": "Penulisan ke skrip gagal, mungkin karena tidak ada izin atau direktori tidak ada.",
   "writeScriptTip": "Setelah terhubung ke server, sebuah skrip akan ditulis ke `~/.config/server_box` \n | `/tmp/server_box` untuk memantau status sistem. Anda dapat meninjau konten skrip tersebut.",
-  "podmanDockerEmulationDetected": "Emulasi Podman Docker terdeteksi. Silakan beralih ke Podman di pengaturan."
+  "podmanDockerEmulationDetected": "Emulasi Podman Docker terdeteksi. Silakan beralih ke Podman di pengaturan.",
+  "sponsor": "Sponsor",
+  "portForwardBetaTitle": "Port Forward (Beta)",
+  "systemd": "Systemd"
 }

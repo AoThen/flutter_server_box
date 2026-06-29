@@ -37,24 +37,64 @@ void main() {
       expect(bootFs.usedPercent, 34);
     });
 
-    test('parse nested lsblk JSON output with parent/child relationships', () {
+    test('parse nested lsblk JSON output falls back to child filesystems', () {
       final disks = Disk.parse(_nestedJsonLsblkOutput);
       expect(disks, isNotEmpty);
 
-      // Check parent device with children
-      final parentDisk = disks.firstWhere((disk) => disk.path == '/dev/nvme0n1');
-      expect(parentDisk.children, isNotEmpty);
-      expect(parentDisk.children.length, 3);
+      expect(disks.any((disk) => disk.path == '/dev/nvme0n1'), isFalse);
 
-      // Check one of the children
-      final rootPartition = parentDisk.children.firstWhere((disk) => disk.mount == '/');
+      // Check first valid child filesystem
+      final rootPartition = disks.firstWhere((disk) => disk.mount == '/');
       expect(rootPartition.fsTyp, 'ext4');
       expect(rootPartition.path, '/dev/nvme0n1p2');
       expect(rootPartition.usedPercent, 45);
 
       // Verify we have a child partition with UUID
-      final bootPartition = parentDisk.children.firstWhere((disk) => disk.mount == '/boot');
+      final bootPartition = disks.firstWhere((disk) => disk.mount == '/boot');
       expect(bootPartition.uuid, '12345678-abcd-1234-abcd-1234567890ab');
+    });
+
+    test('preserves all descendants for intermediate containers', () {
+      final disks = Disk.parse(_nestedContainerJsonLsblkOutput);
+      expect(disks, hasLength(1));
+
+      final vg = disks.first;
+      expect(vg.path, '/dev/mapper/vg-root');
+      expect(vg.children, hasLength(2));
+      expect(
+        vg.children.map((disk) => disk.mount),
+        containsAll(['/', '/home']),
+      );
+
+      final usage = DiskUsage.parse(disks);
+      expect(usage.size, BigInt.from(3000));
+      expect(usage.used, BigInt.from(1500));
+    });
+
+    test('DiskUsage does not double-count parent and child filesystems', () {
+      final usage = DiskUsage.parse([
+        Disk(
+          path: '/dev/sda1',
+          mount: '/',
+          usedPercent: 50,
+          used: BigInt.from(100),
+          size: BigInt.from(200),
+          avail: BigInt.from(100),
+          children: [
+            Disk(
+              path: '/dev/sda1-child',
+              mount: '/child',
+              usedPercent: 50,
+              used: BigInt.from(1000),
+              size: BigInt.from(2000),
+              avail: BigInt.from(1000),
+            ),
+          ],
+        ),
+      ]);
+
+      expect(usage.used, BigInt.from(100));
+      expect(usage.size, BigInt.from(200));
     });
 
     test('DiskUsage handles zero size correctly', () {
@@ -85,27 +125,60 @@ void main() {
     test('parse df -k output (fallback mode)', () {
       final disks = Disk.parse(_dfOutput);
       expect(disks, isNotEmpty);
-      expect(disks.length, 3); // Should find 3 valid filesystems: udev, /dev/vda3, /dev/vda2
+      expect(
+        disks.length,
+        3,
+      ); // Should find 3 valid filesystems: udev, /dev/vda3, /dev/vda2
 
       // Verify root filesystem
       final rootFs = disks.firstWhere((disk) => disk.mount == '/');
       expect(rootFs.path, '/dev/vda3');
       expect(rootFs.usedPercent, 47);
-      expect(rootFs.size, BigInt.from(40910528 ~/ 1024)); // df -k output divided by 1024 = MB
-      expect(rootFs.used, BigInt.from(18067948 ~/ 1024));
-      expect(rootFs.avail, BigInt.from(20951380 ~/ 1024));
+      expect(
+        rootFs.size,
+        BigInt.from(40910528),
+      ); // df -k output is already in 1K blocks.
+      expect(rootFs.used, BigInt.from(18067948));
+      expect(rootFs.avail, BigInt.from(20951380));
 
       // Verify boot/efi filesystem
       final efiFs = disks.firstWhere((disk) => disk.mount == '/boot/efi');
       expect(efiFs.path, '/dev/vda2');
       expect(efiFs.usedPercent, 7);
-      expect(efiFs.size, BigInt.from(192559 ~/ 1024));
-      
+      expect(efiFs.size, BigInt.from(192559));
+
       // Verify udev filesystem is included (virtual filesystem)
       final udevFs = disks.firstWhere((disk) => disk.path == 'udev');
       expect(udevFs.mount, '/dev');
       expect(udevFs.usedPercent, 0);
-      expect(udevFs.size, BigInt.from(864088 ~/ 1024));
+      expect(udevFs.size, BigInt.from(864088));
+    });
+
+    test('parse ImmortalWrt df -k output without shrinking units', () {
+      final disks = Disk.parse(_immortalWrtDfOutput);
+      final dataDisk = disks.firstWhere((disk) => disk.mount == '/mnt/sda');
+
+      expect(dataDisk.path, '/dev/sda');
+      expect(dataDisk.size, BigInt.from(468851544));
+      expect(dataDisk.used, BigInt.from(465106484));
+      expect(dataDisk.avail, BigInt.from(1960492));
+      expect(dataDisk.usedPercent, 100);
+    });
+
+    test('parse Debian df -k output preserves KB values', () {
+      final disks = Disk.parse(_debianDfOutput);
+      final rootFs = disks.firstWhere((disk) => disk.mount == '/');
+
+      expect(rootFs.path, '/dev/sda2');
+      expect(rootFs.usedPercent, 36);
+      expect(rootFs.size, BigInt.from(474286144));
+      expect(rootFs.used, BigInt.from(158343564));
+      expect(rootFs.avail, BigInt.from(291776744));
+
+      final efiFs = disks.firstWhere((disk) => disk.mount == '/boot/efi');
+      expect(efiFs.path, '/dev/sda1');
+      expect(efiFs.usedPercent, 1);
+      expect(efiFs.size, BigInt.from(997432));
     });
 
     test('handle empty input gracefully', () {
@@ -121,7 +194,7 @@ void main() {
     test('handle JSON with null filesystem fields', () {
       final disks = Disk.parse(_jsonWithNullFields);
       expect(disks, isNotEmpty);
-      
+
       // Should handle null filesystem fields gracefully
       final disk = disks.firstWhere((disk) => disk.mount == '/');
       expect(disk.size, BigInt.zero);
@@ -133,7 +206,7 @@ void main() {
     test('handle JSON with string "null" values', () {
       final disks = Disk.parse(_jsonWithStringNulls);
       expect(disks, isNotEmpty);
-      
+
       // Should handle string "null" filesystem fields gracefully
       final disk = disks.firstWhere((disk) => disk.mount == '/');
       expect(disk.size, BigInt.zero);
@@ -145,7 +218,7 @@ void main() {
     test('handle JSON with empty string values', () {
       final disks = Disk.parse(_jsonWithEmptyStrings);
       expect(disks, isNotEmpty);
-      
+
       // Should handle empty string filesystem fields gracefully
       final disk = disks.firstWhere((disk) => disk.mount == '/');
       expect(disk.size, BigInt.zero);
@@ -157,7 +230,7 @@ void main() {
     test('handle JSON with invalid percentage format', () {
       final disks = Disk.parse(_jsonWithInvalidPercent);
       expect(disks, isNotEmpty);
-      
+
       // Should handle invalid percentage gracefully
       final disk = disks.firstWhere((disk) => disk.mount == '/');
       expect(disk.usedPercent, 0);
@@ -166,7 +239,7 @@ void main() {
     test('handle JSON with malformed numbers', () {
       final disks = Disk.parse(_jsonWithMalformedNumbers);
       expect(disks, isNotEmpty);
-      
+
       // Should handle malformed numbers gracefully
       final disk = disks.firstWhere((disk) => disk.mount == '/');
       expect(disk.size, BigInt.zero);
@@ -176,13 +249,16 @@ void main() {
 
     test('handle JSON parsing errors gracefully', () {
       final disks = Disk.parse(_malformedJson);
-      expect(disks, isEmpty); // Should fallback to legacy method, which also fails
+      expect(
+        disks,
+        isEmpty,
+      ); // Should fallback to legacy method, which also fails
     });
 
     test('handle df output with missing fields', () {
       final disks = Disk.parse(_dfWithMissingFields);
       expect(disks, isNotEmpty);
-      
+
       // Should handle missing fields gracefully
       final disk = disks.firstWhere((disk) => disk.mount == '/');
       expect(disk.usedPercent, 47);
@@ -191,7 +267,7 @@ void main() {
     test('handle df output with inconsistent formatting', () {
       final disks = Disk.parse(_dfWithInconsistentFormatting);
       expect(disks, isNotEmpty);
-      
+
       // Should handle inconsistent formatting
       expect(disks.length, greaterThan(0));
     });
@@ -199,7 +275,7 @@ void main() {
     test('handle lsblk with success marker', () {
       final disks = Disk.parse(_lsblkWithSuccessMarker);
       expect(disks, isNotEmpty);
-      
+
       // Should parse JSON and ignore success marker
       final rootFs = disks.firstWhere((disk) => disk.mount == '/');
       expect(rootFs.fsTyp, 'ext4');
@@ -209,7 +285,7 @@ void main() {
     test('handle malformed lsblk output fallback', () {
       final disks = Disk.parse(_malformedLsblkWithDfFallback);
       expect(disks, isNotEmpty);
-      
+
       // Should fallback to df -k parsing when lsblk output is malformed
       expect(disks.length, 3);
     });
@@ -329,6 +405,61 @@ const _nestedJsonLsblkOutput = '''
 }
 ''';
 
+const _nestedContainerJsonLsblkOutput = '''
+{
+  "blockdevices": [
+    {
+      "name": "sda",
+      "kname": "sda",
+      "path": "/dev/sda",
+      "fstype": null,
+      "mountpoint": null,
+      "fssize": null,
+      "fsused": null,
+      "fsavail": null,
+      "fsuse%": null,
+      "children": [
+        {
+          "name": "vg-root",
+          "kname": "dm-0",
+          "path": "/dev/mapper/vg-root",
+          "fstype": null,
+          "mountpoint": null,
+          "fssize": null,
+          "fsused": null,
+          "fsavail": null,
+          "fsuse%": null,
+          "children": [
+            {
+              "name": "root",
+              "kname": "dm-1",
+              "path": "/dev/mapper/root",
+              "fstype": "ext4",
+              "mountpoint": "/",
+              "fssize": "1024000",
+              "fsused": "512000",
+              "fsavail": "512000",
+              "fsuse%": "50%"
+            },
+            {
+              "name": "home",
+              "kname": "dm-2",
+              "path": "/dev/mapper/home",
+              "fstype": "ext4",
+              "mountpoint": "/home",
+              "fssize": "2048000",
+              "fsused": "1024000",
+              "fsavail": "1024000",
+              "fsuse%": "50%"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+''';
+
 const _raws = [
   //   '''
   // Filesystem     1K-blocks     Used Available Use% Mounted on
@@ -420,6 +551,36 @@ tmpfs             883612        0    883612   0% /dev/shm
 tmpfs               5120        0      5120   0% /run/lock
 /dev/vda2         192559    11807    180752   7% /boot/efi
 tmpfs             176720      104    176616   1% /run/user/1000
+''';
+
+const _immortalWrtDfOutput = '''
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/root                 9984      9984         0 100% /rom
+tmpfs                  3989112      3876   3985236   0% /tmp
+/dev/nvme0n1p4         5335040   4570160    315616  94% /overlay
+overlayfs:/overlay     5335040   4570160    315616  94% /
+/dev/nvme0n1p1           32686      8514     24172  26% /boot
+/dev/nvme0n1p1           32686      8514     24172  26% /boot
+tmpfs                      512         0       512   0% /dev
+/dev/sda             468851544 465106484   1960492 100% /mnt/sda
+overlayfs:/overlay     5335040   4570160    315616  94% /opt
+''';
+
+const _debianDfOutput = '''
+Filesystem     1K-blocks      Used Available Use% Mounted on
+udev             3879172         0   3879172   0% /dev
+tmpfs             800412      1792    798620   1% /run
+/dev/sda2      474286144 158343564 291776744  36% /
+tmpfs            4002060         0   4002060   0% /dev/shm
+efivarfs             148        57        87  40% /sys/firmware/efi/efivars
+tmpfs               5120        16      5104   1% /run/lock
+tmpfs            4002060         4   4002056   1% /tmp
+/dev/sda1         997432      8984    988448   1% /boot/efi
+tmpfs             800412        88    800324   1% /run/user/1000
+tmpfs                100         0       100   0% /var/lib/incus/shmounts
+tmpfs                100         0       100   0% /var/lib/incus/guestapi
+tmpfs               1024         0      1024   0% /run/credentials/systemd-journald.service
+tmpfs             800412        72    800340   1% /run/user/1001
 ''';
 
 // Test data for edge cases

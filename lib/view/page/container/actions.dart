@@ -7,6 +7,26 @@ extension on _ContainerPageState {
   /// Watch the current state of the container.
   ContainerState get _containerState => ref.watch(_provider);
 
+  String _errorMessage(String? message) {
+    final trimmed = message?.trim();
+    return trimmed?.isNotEmpty == true ? trimmed! : libL10n.fail;
+  }
+
+  /// Execute a container action with loading dialog and error handling.
+  Future<void> _execContainerAction(Future<ContainerErr?> Function() action) async {
+    final (result, err) = await context.showLoadingDialog(fn: action);
+    if (!mounted) return;
+    if (err != null || result != null) {
+      final e = result?.message ?? err?.toString();
+      context.showRoundDialog(
+        title: libL10n.error,
+        child: Text(_errorMessage(e)),
+      );
+    } else {
+      context.showSnackBar(libL10n.success);
+    }
+  }
+
   Future<void> _showAddFAB() async {
     final imageCtrl = TextEditingController();
     final nameCtrl = TextEditingController();
@@ -44,11 +64,18 @@ extension on _ContainerPageState {
         onTap: () async {
           context.pop();
           await _showAddCmdPreview(
-            _buildAddCmd(imageCtrl.text.trim(), nameCtrl.text.trim(), argsCtrl.text.trim()),
+            _buildAddCmd(
+              imageCtrl.text.trim(),
+              nameCtrl.text.trim(),
+              argsCtrl.text.trim(),
+            ),
           );
         },
       ).toList,
     );
+    imageCtrl.dispose();
+    nameCtrl.dispose();
+    argsCtrl.dispose();
   }
 
   Future<void> _showPruneDialog({
@@ -62,13 +89,7 @@ extension on _ContainerPageState {
       actions: Btn.ok(
         onTap: () async {
           context.pop();
-          final (result, err) = await context.showLoadingDialog(fn: onConfirm);
-          if (err != null || result != null) {
-            final e = result?.message ?? err?.toString();
-            context.showRoundDialog(title: libL10n.error, child: Text(e.toString()));
-          } else {
-            context.showSnackBar(libL10n.success);
-          }
+          await _execContainerAction(onConfirm);
         },
         red: true,
       ).toList,
@@ -84,12 +105,7 @@ extension on _ContainerPageState {
         TextButton(
           onPressed: () async {
             context.pop();
-
-            final (result, err) = await context.showLoadingDialog(fn: () => _containerNotifier.run(cmd));
-            if (err != null || result != null) {
-              final e = result?.message ?? err?.toString();
-              context.showRoundDialog(title: libL10n.error, child: Text(e.toString()));
-            }
+            await _execContainerAction(() => _containerNotifier.run(cmd));
           },
           child: Text(libL10n.run),
         ),
@@ -123,18 +139,49 @@ extension on _ContainerPageState {
   void _showImageRmDialog(ContainerImg e) {
     context.showRoundDialog(
       title: libL10n.attention,
-      child: Text(libL10n.askContinue('${libL10n.delete} Image(${e.repository})')),
+      child: Text(
+        libL10n.askContinue('${libL10n.delete} Image(${e.repository})'),
+      ),
       actions: Btn.ok(
         onTap: () async {
           context.pop();
           final result = await _containerNotifier.run('rmi ${e.id} -f');
           if (result != null) {
-            context.showSnackBar(result.message ?? 'null');
+            context.showSnackBar(_errorMessage(result.message));
           }
         },
         red: true,
       ).toList,
     );
+  }
+
+  void _onTapImageMenu(ImageMenu item, ContainerImg e) {
+    switch (item) {
+      case ImageMenu.pull:
+        final repo = e.repository;
+        if (repo == null) {
+          context.showSnackBar(libL10n.empty);
+          return;
+        }
+        final tag = e.tag ?? 'latest';
+        final imageRef = '$repo:$tag';
+        context.showRoundDialog(
+          title: libL10n.attention,
+          child: Text(
+            libL10n.askContinue('${l10n.pull} ${l10n.image}($imageRef)'),
+          ),
+          actions: Btn.ok(
+            onTap: () async {
+              context.pop();
+              await _execContainerAction(() => _containerNotifier.run('pull $imageRef'));
+            },
+          ).toList,
+        );
+        break;
+      case ImageMenu.rm:
+        _showImageRmDialog(e);
+        break;
+    }
   }
 
   void _onTapMoreBtn(ContainerMenu item, ContainerPs dItem) async {
@@ -151,13 +198,21 @@ extension on _ContainerPageState {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(libL10n.askContinue('${libL10n.delete} Container(${dItem.name})')),
+              Text(
+                libL10n.askContinue(
+                  '${libL10n.delete} Container(${dItem.name})',
+                ),
+              ),
               UIs.height13,
               Row(
                 children: [
                   StatefulBuilder(
                     builder: (_, setState) {
-                      return Checkbox(value: force, onChanged: (val) => setState(() => force = val ?? false));
+                      return Checkbox(
+                        value: force,
+                        onChanged: (val) =>
+                            setState(() => force = val ?? false),
+                      );
                     },
                   ),
                   Text(libL10n.force),
@@ -168,38 +223,19 @@ extension on _ContainerPageState {
           actions: Btn.ok(
             onTap: () async {
               context.pop();
-
-              final (result, err) = await context.showLoadingDialog(
-                fn: () => _containerNotifier.delete(id, force),
-              );
-              if (err != null || result != null) {
-                final e = result?.message ?? err?.toString();
-                context.showRoundDialog(title: libL10n.error, child: Text(e ?? 'null'));
-              }
+              await _execContainerAction(() => _containerNotifier.delete(id, force));
             },
           ).toList,
         );
         break;
       case ContainerMenu.start:
-        final (result, err) = await context.showLoadingDialog(fn: () => _containerNotifier.start(id));
-        if (err != null || result != null) {
-          final e = result?.message ?? err?.toString();
-          context.showRoundDialog(title: libL10n.error, child: Text(e ?? 'null'));
-        }
+        await _execContainerAction(() => _containerNotifier.start(id));
         break;
       case ContainerMenu.stop:
-        final (result, err) = await context.showLoadingDialog(fn: () => _containerNotifier.stop(id));
-        if (err != null || result != null) {
-          final e = result?.message ?? err?.toString();
-          context.showRoundDialog(title: libL10n.error, child: Text(e ?? 'null'));
-        }
+        await _execContainerAction(() => _containerNotifier.stop(id));
         break;
       case ContainerMenu.restart:
-        final (result, err) = await context.showLoadingDialog(fn: () => _containerNotifier.restart(id));
-        if (err != null || result != null) {
-          final e = result?.message ?? err?.toString();
-          context.showRoundDialog(title: libL10n.error, child: Text(e ?? 'null'));
-        }
+        await _execContainerAction(() => _containerNotifier.restart(id));
         break;
       case ContainerMenu.logs:
         final args = SshPageArgs(
@@ -227,14 +263,17 @@ extension on _ContainerPageState {
   }
 
   void _initAutoRefresh() {
-    if (Stores.setting.containerAutoRefresh.fetch()) {
-      Timer.periodic(Duration(seconds: Stores.setting.serverStatusUpdateInterval.fetch()), (timer) {
-        if (mounted) {
-          _containerNotifier.refresh(isAuto: true);
-        } else {
-          timer.cancel();
-        }
-      });
-    }
+    _autoRefreshTimer?.cancel();
+    _autoRefreshTimer = null;
+    if (!Stores.setting.containerAutoRefresh.fetch()) return;
+    final duration = serverStatusRefreshInterval();
+    if (duration == null) return;
+    _autoRefreshTimer = Timer.periodic(duration, (timer) {
+      if (mounted) {
+        _containerNotifier.refresh(isAuto: true);
+      } else {
+        timer.cancel();
+      }
+    });
   }
 }

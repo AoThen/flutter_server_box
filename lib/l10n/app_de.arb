@@ -108,6 +108,7 @@
   "ignoreCert": "Zertifikat ignorieren",
   "image": "Image",
   "imagesList": "Images",
+  "pull": "Pull",
   "installDockerWithUrl": "Bitte installiere docker zuerst. https://docs.docker.com/engine/install",
   "invalid": "Ungültig",
   "jumpServer": "Server springen",
@@ -117,14 +118,20 @@
   "keyAuth": "Schlüsselauthentifzierung",
   "lastFailure": "Letzter Fehler",
   "lastSuccess": "Letzter Erfolg",
-  "letterCache": "Buchstaben-Caching",
-  "letterCacheTip": "Empfohlen, zu deaktivieren, aber nach dem Deaktivieren können keine CJK-Zeichen eingegeben werden.",
+  "letterCache": "Normale Tastatureingabe",
+  "letterCacheTip": "Wenn aktiviert, läuft die Eingabe über die normale IME. Dadurch lassen sich auf manchen Systemen sichere Tastaturhinweise im Terminal vermeiden.",
   "madeWithLove": "Erstellt mit ❤️ von {myGithub}",
   "max": "max",
   "maxConcurrency": "Maximale Gleichzeitigkeit",
   "maxRetryCount": "Anzahl an Verbindungsversuchen",
   "maxRetryCountEqual0": "Unbegrenzte Verbindungsversuche zum Server",
   "min": "min",
+  "mismatchSystem": "Nicht übereinstimmendes System: {system}",
+  "@mismatchSystem": {
+    "placeholders": {
+      "system": {}
+    }
+  },
   "more": "Mehr",
   "moveOutServerFuncBtnsHelp": "Ein: kann unter jeder Karte auf der Registerkarte \"Server\" angezeigt werden. Aus: kann oben auf der Seite \"Serverdetails\" angezeigt werden.",
   "needHomeDir": "Wenn Sie ein Synology-Benutzer sind, [sehen Sie hier](https://kb.synology.com/DSM/tutorial/user_enable_home_service). Benutzer anderer Systeme müssen suchen, wie man ein Home-Verzeichnis erstellt.",
@@ -156,6 +163,7 @@
   "pveVersionLow": "Diese Funktion befindet sich derzeit in der Testphase und wurde nur auf PVE 8+ getestet. Bitte verwenden Sie sie mit Vorsicht.",
   "read": "Lesen",
   "recentConnections": "Kürzliche Verbindungen",
+  "reconnecting": "Erneut verbinden...",
   "rememberPwdInMem": "Passwort im Speicher behalten",
   "rememberPwdInMemTip": "Für Container, Aufhängen usw.",
   "rememberWindowSize": "Fenstergröße merken",
@@ -217,6 +225,7 @@
   "time": "Zeit",
   "times": "x",
   "trySudo": "Versuche es mit sudo",
+  "sudoPromptNotFound": "Aktuell wird kein sudo-Passwort-Prompt angezeigt.",
   "unknown": "Unbekannt",
   "unkownConvertMode": "Unbekannter Konvertierungsmodus",
   "update": "Update",
@@ -243,5 +252,8 @@
   "write": "Schreiben",
   "writeScriptFailTip": "Das Schreiben des Skripts ist fehlgeschlagen, möglicherweise aufgrund fehlender Berechtigungen oder das Verzeichnis existiert nicht.",
   "writeScriptTip": "Nach der Verbindung mit dem Server wird ein Skript in `~/.config/server_box` \n | `/tmp/server_box` geschrieben, um den Systemstatus zu überwachen. Sie können den Skriptinhalt überprüfen.",
-  "podmanDockerEmulationDetected": "Podman Docker-Emulation erkannt. Bitte wechseln Sie in den Einstellungen zu Podman."
+  "podmanDockerEmulationDetected": "Podman Docker-Emulation erkannt. Bitte wechseln Sie in den Einstellungen zu Podman.",
+  "sponsor": "Sponsor",
+  "portForwardBetaTitle": "Port Forwarding (Beta)",
+  "systemd": "Systemd"
 }

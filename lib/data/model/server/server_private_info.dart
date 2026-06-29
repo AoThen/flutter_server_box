@@ -11,6 +11,17 @@ import 'package:server_box/data/store/server.dart';
 part 'server_private_info.freezed.dart';
 part 'server_private_info.g.dart';
 
+enum SpiValidationError { jumpServerAndProxyCommandConflict }
+
+class SpiValidationException implements Exception {
+  const SpiValidationException(this.error);
+
+  final SpiValidationError error;
+
+  @override
+  String toString() => 'SpiValidationException($error)';
+}
+
 /// In the first version, it's called `ServerPrivateInfo` which was designed to
 /// store the private information of a server.
 ///
@@ -35,8 +46,15 @@ abstract class Spi with _$Spi {
     String? alterUrl,
     @Default(true) bool autoConnect,
 
-    /// [id] of the jump server
+    /// [id] of the first jump server.
+    ///
+    /// Kept for compatibility with old storage and imports. New code should
+    /// read [resolvedJumpIds] so failover candidates are included.
     String? jumpId,
+
+    /// Ordered jump-server candidates. At most the first two are used.
+    List<String>? jumpIds,
+    String? proxyCommand,
     ServerCustom? custom,
     WakeOnLanCfg? wolCfg,
 
@@ -64,6 +82,42 @@ abstract class Spi with _$Spi {
 }
 
 extension Spix on Spi {
+  List<String> get resolvedJumpIds {
+    final ids = <String>[];
+    void add(String? id) {
+      if (id == null || id.isEmpty || ids.contains(id)) return;
+      ids.add(id);
+    }
+
+    for (final id in jumpIds ?? const <String>[]) {
+      add(id);
+      if (ids.length >= 2) break;
+    }
+    if (ids.isEmpty) add(jumpId);
+    return ids;
+  }
+
+  String? get firstJumpId {
+    final ids = resolvedJumpIds;
+    return ids.isEmpty ? null : ids.first;
+  }
+
+  SpiValidationError? validate() {
+    final hasJumpServer = resolvedJumpIds.isNotEmpty;
+    final hasProxyCommand =
+        proxyCommand != null && proxyCommand!.trim().isNotEmpty;
+    if (hasJumpServer && hasProxyCommand) {
+      return SpiValidationError.jumpServerAndProxyCommandConflict;
+    }
+    return null;
+  }
+
+  void validateOrThrow() {
+    final validationError = validate();
+    if (validationError == null) return;
+    throw SpiValidationException(validationError);
+  }
+
   /// After upgrading to >= 1155, this field is only recommended to be used
   /// for displaying the server name.
   String get oldId => '$user@$ip:$port';
@@ -78,7 +132,7 @@ extension Spix on Spi {
   /// - The new [id] if the [id] is empty.
   String? migrateId() {
     if (id.isNotEmpty) return null;
-    ServerStore.instance.delete(oldId);
+    ServerStore.instance.deleteById(oldId);
     final newSpi = copyWith(id: ShortId.generate());
     newSpi.save();
     return newSpi.id;
@@ -94,12 +148,15 @@ extension Spix on Spi {
         port == other.port &&
         pwd == other.pwd &&
         keyId == other.keyId &&
-        jumpId == other.jumpId;
+        _sameStringList(resolvedJumpIds, other.resolvedJumpIds) &&
+        proxyCommand == other.proxyCommand;
   }
 
   /// Returns true if the connection should be re-established.
   bool shouldReconnect(Spi old) {
-    return !isSameAs(old) || alterUrl != old.alterUrl || custom?.cmds != old.custom?.cmds;
+    return !isSameAs(old) ||
+        alterUrl != old.alterUrl ||
+        custom?.cmds != old.custom?.cmds;
   }
 
   /// Parse the [alterUrl] to (ip, user, port).
@@ -137,7 +194,7 @@ extension Spix on Spi {
     tags: ['tag1', 'tag2'],
     alterUrl: 'user@ip:port',
     autoConnect: true,
-    jumpId: 'jump_server_id',
+    proxyCommand: 'socat - PROXY:proxy.example.com:%h:%p,proxyport=8080',
     custom: ServerCustom(
       pveAddr: 'http://localhost:8006',
       pveIgnoreCert: false,
@@ -150,4 +207,12 @@ extension Spix on Spi {
 
   /// Returns true if the user is 'root'.
   bool get isRoot => user == 'root';
+}
+
+bool _sameStringList(List<String> a, List<String> b) {
+  if (a.length != b.length) return false;
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] != b[i]) return false;
+  }
+  return true;
 }

@@ -7,7 +7,10 @@ sealed class ScriptBuilder {
   const ScriptBuilder();
 
   /// Generate a complete script for all shell functions
-  String buildScript(Map<String, String>? customCmds, [List<String>? disabledCmdTypes]);
+  String buildScript(
+    Map<String, String>? customCmds, [
+    List<String>? disabledCmdTypes,
+  ]);
 
   /// Get the script file name for this platform
   String get scriptFileName;
@@ -49,7 +52,9 @@ class WindowsScriptBuilder extends ScriptBuilder {
 
   @override
   String getCustomCmdsString(ShellFunc func, Map<String, String>? customCmds) {
-    if (func == ShellFunc.status && customCmds != null && customCmds.isNotEmpty) {
+    if (func == ShellFunc.status &&
+        customCmds != null &&
+        customCmds.isNotEmpty) {
       final sb = StringBuffer();
       for (final e in customCmds.entries) {
         final cmdDivider = ScriptConstants.getCustomCmdSeparator(e.key);
@@ -62,7 +67,10 @@ class WindowsScriptBuilder extends ScriptBuilder {
   }
 
   @override
-  String buildScript(Map<String, String>? customCmds, [List<String>? disabledCmdTypes]) {
+  String buildScript(
+    Map<String, String>? customCmds, [
+    List<String>? disabledCmdTypes,
+  ]) {
     final sb = StringBuffer();
     sb.write(scriptHeader);
 
@@ -95,9 +103,18 @@ switch (\$args[0]) {
   }
 
   /// Get Windows-specific command for a shell function
-  String _getWindowsCommand(ShellFunc func, [List<String>? disabledCmdTypes]) => switch (func) {
-    ShellFunc.status => _getWindowsStatusCommand(disabledCmdTypes: disabledCmdTypes ?? []),
-    ShellFunc.process => 'Get-Process | Select-Object ProcessName, Id, CPU, WorkingSet | ConvertTo-Json',
+  String _getWindowsCommand(
+    ShellFunc func, [
+    List<String>? disabledCmdTypes,
+  ]) => switch (func) {
+    ShellFunc.status => _getWindowsStatusCommand(
+      disabledCmdTypes: disabledCmdTypes ?? [],
+    ),
+    ShellFunc.process =>
+      r'''
+Get-Process | Select-Object ProcessName, Id, CPU, WorkingSet,
+    @{Name='IOReadBytes';Expression={$_.IOReadBytes}},
+    @{Name='IOWriteBytes';Expression={$_.IOWriteBytes}} | ConvertTo-Json''',
     ShellFunc.shutdown => 'Stop-Computer -Force',
     ShellFunc.reboot => 'Restart-Computer -Force',
     ShellFunc.suspend =>
@@ -106,8 +123,13 @@ switch (\$args[0]) {
 
   /// Get Windows status command with command-specific separators
   String _getWindowsStatusCommand({required List<String> disabledCmdTypes}) {
-    final cmdTypes = WindowsStatusCmdType.values.where((e) => !disabledCmdTypes.contains(e.displayName));
-    return cmdTypes.map((e) => '${e.divider}${e.cmd}').join('').trimRight(); // Remove trailing divider
+    final cmdTypes = WindowsStatusCmdType.values.where(
+      (e) => !disabledCmdTypes.contains(e.displayName),
+    );
+    return cmdTypes
+        .map((e) => '${e.divider}${e.cmd}')
+        .join('')
+        .trimRight(); // Remove trailing divider
   }
 }
 
@@ -137,7 +159,9 @@ chmod 755 $scriptPath
 
   @override
   String getCustomCmdsString(ShellFunc func, Map<String, String>? customCmds) {
-    if (func == ShellFunc.status && customCmds != null && customCmds.isNotEmpty) {
+    if (func == ShellFunc.status &&
+        customCmds != null &&
+        customCmds.isNotEmpty) {
       final sb = StringBuffer();
       for (final e in customCmds.entries) {
         final cmdDivider = ScriptConstants.getCustomCmdSeparator(e.key);
@@ -150,7 +174,10 @@ chmod 755 $scriptPath
   }
 
   @override
-  String buildScript(Map<String, String>? customCmds, [List<String>? disabledCmdTypes]) {
+  String buildScript(
+    Map<String, String>? customCmds, [
+    List<String>? disabledCmdTypes,
+  ]) {
     final sb = StringBuffer();
     sb.write(scriptHeader);
     // Write each function
@@ -185,7 +212,9 @@ esac''');
   /// Get Unix-specific command for a shell function
   String _getUnixCommand(ShellFunc func, [List<String>? disabledCmdTypes]) {
     return switch (func) {
-      ShellFunc.status => _getUnixStatusCommand(disabledCmdTypes: disabledCmdTypes ?? []),
+      ShellFunc.status => _getUnixStatusCommand(
+        disabledCmdTypes: disabledCmdTypes ?? [],
+      ),
       ShellFunc.process => _getUnixProcessCommand(),
       ShellFunc.shutdown => _getUnixShutdownCommand(),
       ShellFunc.reboot => _getUnixRebootCommand(),
@@ -199,12 +228,18 @@ esac''');
     final filteredLinuxCmdTypes = StatusCmdType.values.where(
       (e) => !disabledCmdTypes.contains(e.displayName),
     );
-    final linuxCommands = filteredLinuxCmdTypes.map((e) => '${e.divider}${e.cmd}').join('').trimRight();
+    final linuxCommands = filteredLinuxCmdTypes
+        .map((e) => '${e.divider}${e.cmd}')
+        .join('')
+        .trimRight();
 
     final filteredBsdCmdTypes = BSDStatusCmdType.values.where(
       (e) => !disabledCmdTypes.contains(e.displayName),
     );
-    final bsdCommands = filteredBsdCmdTypes.map((e) => '${e.divider}${e.cmd}').join('').trimRight();
+    final bsdCommands = filteredBsdCmdTypes
+        .map((e) => '${e.divider}${e.cmd}')
+        .join('')
+        .trimRight();
 
     return '''
 if [ "\$macSign" = "" ] && [ "\$bsdSign" = "" ]; then
@@ -221,7 +256,22 @@ if [ "\$macSign" = "" ] && [ "\$bsdSign" = "" ]; then
 \tif [ "\$isBusybox" != "" ]; then
 \t\tps w
 \telse
-\t\tps -aux
+\t\tprintf 'PID USER %%CPU %%MEM VSZ RSS TTY STAT START TIME READ_BYTES WRITE_BYTES COMMAND\\n'
+\t\tps -axo pid=,user=,%cpu=,%mem=,vsz=,rss=,tty=,stat=,start=,time=,args= | while IFS= read -r line; do
+\t\t\tset -f
+\t\t\tset -- \$line
+\t\t\tset +f
+\t\t\tpid=\$1; user=\$2; cpu=\$3; mem=\$4; vsz=\$5; rss=\$6; tty=\$7; stat=\$8; start=\$9; time=\${10}
+\t\t\tshift 10
+\t\t\tcmd=\$*
+\t\t\tread_bytes='-'
+\t\t\twrite_bytes='-'
+\t\t\tif [ -r "/proc/\$pid/io" ]; then
+\t\t\t\tread_bytes=\$(awk '/^read_bytes:/ {print \$2}' "/proc/\$pid/io")
+\t\t\t\twrite_bytes=\$(awk '/^write_bytes:/ {print \$2}' "/proc/\$pid/io")
+\t\t\tfi
+\t\t\tprintf '%s %s %s %s %s %s %s %s %s %s %s %s %s\\n' "\$pid" "\$user" "\$cpu" "\$mem" "\$vsz" "\$rss" "\$tty" "\$stat" "\$start" "\$time" "\$read_bytes" "\$write_bytes" "\$cmd"
+\t\tdone
 \tfi
 else
 \tps -ax

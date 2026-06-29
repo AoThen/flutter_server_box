@@ -30,13 +30,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get askAi => '问 AI';
 
   @override
+  String get ai => 'AI';
+
+  @override
   String get askAiApiKey => 'API 密钥';
 
   @override
   String get askAiAwaitingResponse => '等待 AI 响应...';
 
   @override
-  String get askAiBaseUrl => '基础 URL';
+  String get askAiBaseUrl => 'API 接口地址';
+
+  @override
+  String get askAiEndpointTip =>
+      '填写完整的 Chat Completions 地址，或填写服务根地址。若地址以 /v1 结尾，应用会自动补全 /chat/completions。';
 
   @override
   String get askAiCommandInserted => '命令已插入终端';
@@ -122,6 +129,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backupVersionNotMatch => '备份版本不兼容，无法恢复';
 
   @override
+  String get icloudBackupStatusTitle => '备份状态';
+
+  @override
+  String get icloudBackupStatusLoading => '正在读取 iCloud 备份状态...';
+
+  @override
+  String get icloudBackupStatusError => '无法读取 iCloud 备份元数据';
+
+  @override
+  String get icloudBackupStatusEmpty => '尚未发现 iCloud 备份文件';
+
+  @override
+  String get icloudBackupStateUploading => '上传中';
+
+  @override
+  String get icloudBackupStateConflict => '检测到冲突';
+
+  @override
+  String get icloudBackupStateUploaded => '已上传';
+
+  @override
+  String get icloudBackupStateWaiting => '等待 iCloud 同步';
+
+  @override
+  String icloudBackupStatusSummary(Object lastModified, Object remoteState) {
+    return '最后备份：$lastModified\n状态：$remoteState';
+  }
+
+  @override
   String get bgRun => '后台运行';
 
   @override
@@ -191,6 +227,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cursorType => '光标类型';
+
+  @override
+  String get configured => 'Configured';
 
   @override
   String get customCmd => '自定义命令';
@@ -325,6 +364,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fullScreenTip => '当设备旋转为横屏时，是否开启全屏模式。此选项仅作用于服务器 Tab 页。';
 
   @override
+  String get githubGist => 'GitHub Gist';
+
+  @override
+  String get githubGistIdOptional => 'Gist ID（可选）';
+
+  @override
+  String get githubGistToken => 'GitHub Gist Token';
+
+  @override
+  String get githubGistTokenEmpty => 'Token 为空';
+
+  @override
   String get goBackQ => '返回？';
 
   @override
@@ -360,6 +411,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get imagesList => '镜像列表';
 
   @override
+  String get pull => '拉取';
+
+  @override
   String get installDockerWithUrl =>
       '请先前往 https://docs.docker.com/engine/install 安装 Docker';
 
@@ -367,10 +421,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get invalid => '无效';
 
   @override
+  String get invalidUrl => 'Invalid URL';
+
+  @override
   String get invalidHostFormat => '主机格式无效，仅支持 IPv4、IPv6 和域名字符。';
 
   @override
   String get jumpServer => '跳板服务器';
+
+  @override
+  String jumpServersNotFoundFmt(Object serverName, Object jumpIds) {
+    return '未找到 $serverName 配置的跳板服务器：$jumpIds';
+  }
+
+  @override
+  String get noJumpServerAvailable => '没有可用的跳板服务器。';
+
+  @override
+  String get jumpServerAndProxyCommandCannotBeUsedTogether =>
+      '跳板服务器与 ProxyCommand 不能同时使用。';
 
   @override
   String get keepForeground => '请将应用保持在前台运行';
@@ -391,10 +460,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lastSuccess => '最后成功';
 
   @override
-  String get letterCache => '输入法字符缓存';
+  String get letterCache => '普通键盘输入';
 
   @override
-  String get letterCacheTip => '推荐关闭，但是关闭后无法输入 CJK 等文字';
+  String get letterCacheTip => '开启后，输入内容会经过普通输入法，这样可避免部分系统在终端弹出安全键盘';
 
   @override
   String madeWithLove(Object myGithub) {
@@ -415,6 +484,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get min => '最小';
+
+  @override
+  String mismatchSystem(Object system) {
+    return '系统不匹配：$system';
+  }
 
   @override
   String get more => '更多';
@@ -501,19 +575,79 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pushToken => '消息推送 Token';
 
   @override
+  String get proxyCommandOnlySupportedOnDesktop => 'ProxyCommand 仅支持桌面平台。';
+
+  @override
   String get pveIgnoreCertTip => '不推荐开启，注意安全隐患！如果你使用的 PVE 默认证书，需要开启该选项';
 
   @override
   String get pveLoginFailed => '登录失败。无法使用服务器配置中的用户名或密码通过 Linux PAM 方式认证。';
 
   @override
+  String get pveServerClientMissing => '当前服务器的 SSH 客户端不可用。';
+
+  @override
+  String get pveAddressMissing => '未配置 PVE 地址，请在服务器设置中填写。';
+
+  @override
+  String get pvePasswordRequired => '需要提供 PVE 密码，请在服务器设置中填写。';
+
+  @override
+  String get pveOtpRequired => '此 PVE 服务器已启用双因素认证，请输入 OTP 验证码。';
+
+  @override
+  String get pveOtpChallengeExpired => 'OTP 验证挑战已过期，请刷新后重试。';
+
+  @override
+  String get pveOtpCodeRequired => '请输入 OTP 验证码。';
+
+  @override
+  String get pveOtpVerificationFailed => 'OTP 验证失败，请使用最新验证码重试。';
+
+  @override
+  String get pveOtpTitle => 'OTP 验证';
+
+  @override
+  String get pveOtpLabel => 'OTP 验证码';
+
+  @override
+  String get pveInvalidResponseBody => 'PVE 登录返回了无效的响应内容。';
+
+  @override
+  String get pveInvalidResponseData => 'PVE 登录响应中缺少有效的 data 数据。';
+
+  @override
+  String get pveMissingAuthTicket => 'PVE 登录成功，但未返回认证票据。';
+
+  @override
   String get pveVersionLow => '当前该功能处于测试阶段，仅在 PVE 8+ 上测试过，请谨慎使用';
+
+  @override
+  String get pveLoadingForwarding => '正在建立 SSH 隧道...';
+
+  @override
+  String get pveLoadingLogin => '正在认证 PVE...';
+
+  @override
+  String get pveLoadingData => '正在获取集群数据...';
+
+  @override
+  String get pveLoadingConnect => '正在连接...';
+
+  @override
+  String get pvePassword => 'PVE 密码';
+
+  @override
+  String get pvePasswordHint => '使用密钥认证时需要填写';
 
   @override
   String get read => '读';
 
   @override
   String get recentConnections => '最近连接记录';
+
+  @override
+  String get reconnecting => '重连中...';
 
   @override
   String get rememberPwdInMem => '在内存中记住密码';
@@ -568,6 +702,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sftpSSHConnected => 'SFTP 已连接';
 
   @override
+  String get sftp => 'SFTP';
+
+  @override
   String get sftpShowFoldersFirst => '文件夹显示在前';
 
   @override
@@ -586,6 +723,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get specifyDevTip => '例如网络流量统计默认是所有设备，你可以在这里指定特定的设备';
 
   @override
+  String get tempIsCelsiusTip =>
+      '开启后，温度值将被视为摄氏度而非毫摄氏度。仅在温度显示不正确时开启（例如显示0.1°C而非58°C）。';
+
+  @override
   String get speed => '速度';
 
   @override
@@ -597,6 +738,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String sshConfigAllExist(Object duplicateCount) {
     return '所有服务器已存在（发现 $duplicateCount 个重复项）';
   }
+
+  @override
+  String get ssh => 'SSH';
+
+  @override
+  String get sshConnectionMode => 'SSH 连接方式';
+
+  @override
+  String get sshConnectionModeBuiltin => '内置终端';
+
+  @override
+  String get sshConnectionModeSystem => '系统 SSH';
+
+  @override
+  String get sshConnectionModeTip => '内置终端：使用应用自带的终端。系统 SSH：在外部终端中调用系统 ssh 命令。';
+
+  @override
+  String get sshConnectionModeUseBuiltin => '使用内置终端';
+
+  @override
+  String get sshConnectionModeUseSystem => '使用系统 SSH';
 
   @override
   String sshConfigDuplicatesSkipped(Object duplicateCount) {
@@ -697,6 +859,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get syncAppSettings => '同步应用设置';
+
+  @override
+  String get syncAppSettingsTip => '在自动同步中包含主题、布局、编辑器、终端等设备偏好设置。';
+
+  @override
   String get syncTip => '可能需要重新启动，某些更改才能生效。';
 
   @override
@@ -725,6 +893,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get trySudo => '尝试使用 sudo';
+
+  @override
+  String get sudoPromptNotFound => '当前没有 sudo 密码提示。';
 
   @override
   String get unknown => '未知';
@@ -793,6 +964,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get whenOpenApp => '当打开 App 时';
 
   @override
+  String get wiki => 'Wiki';
+
+  @override
   String get wolTip => '配置 WOL 后，每次连接服务器时将自动发送唤醒请求';
 
   @override
@@ -811,6 +985,68 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get podmanDockerEmulationDetected =>
       '检测到 Podman Docker 仿真。请在设置中切换到 Podman。';
+
+  @override
+  String get portForwardBeta => '此功能仍在测试阶段，不保证功能可用性。';
+
+  @override
+  String get portForward_startPrompt => '添加端口映射规则以开始使用';
+
+  @override
+  String get portForward_localHost => '本地主机';
+
+  @override
+  String get portForward_localPort => '本地端口';
+
+  @override
+  String get portForward_remoteHost => '远端主机';
+
+  @override
+  String get portForward_remotePort => '远端端口';
+
+  @override
+  String get portForward_type_local => '本地';
+
+  @override
+  String get portForward_type_remote => '远程';
+
+  @override
+  String portForward_deleteConfirmFmt(Object name) {
+    return '删除 $name？';
+  }
+
+  @override
+  String get sponsor => '赞助';
+
+  @override
+  String get sort => '排序';
+
+  @override
+  String get sortByName => '按名称';
+
+  @override
+  String get sortByJoinTime => '按加入时间';
+
+  @override
+  String get ascending => '升序';
+
+  @override
+  String get descending => '降序';
+
+  @override
+  String get searchServer => '搜索服务器';
+
+  @override
+  String get serverHistory => '服务器历史';
+
+  @override
+  String get clearHistory => '清空历史';
+
+  @override
+  String get portForwardBetaTitle => '端口映射 (Beta)';
+
+  @override
+  String get systemd => 'Systemd';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -845,7 +1081,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get askAiAwaitingResponse => '等待 AI 回應...';
 
   @override
-  String get askAiBaseUrl => '基礎 URL';
+  String get askAiBaseUrl => 'API 介面位址';
+
+  @override
+  String get askAiEndpointTip =>
+      '填寫完整的 Chat Completions 位址，或填寫服務根位址。若位址以 /v1 結尾，應用程式會自動補上 /chat/completions。';
 
   @override
   String get askAiCommandInserted => '指令已插入終端機';
@@ -929,6 +1169,35 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get backupVersionNotMatch => '備份版本不相容，無法還原';
+
+  @override
+  String get icloudBackupStatusTitle => '備份狀態';
+
+  @override
+  String get icloudBackupStatusLoading => '正在讀取 iCloud 備份狀態...';
+
+  @override
+  String get icloudBackupStatusError => '無法讀取 iCloud 備份中繼資料';
+
+  @override
+  String get icloudBackupStatusEmpty => '尚未找到 iCloud 備份檔案';
+
+  @override
+  String get icloudBackupStateUploading => '上傳中';
+
+  @override
+  String get icloudBackupStateConflict => '偵測到衝突';
+
+  @override
+  String get icloudBackupStateUploaded => '已上傳';
+
+  @override
+  String get icloudBackupStateWaiting => '等待 iCloud 同步';
+
+  @override
+  String icloudBackupStatusSummary(Object lastModified, Object remoteState) {
+    return '最後備份：$lastModified\n狀態：$remoteState';
+  }
 
   @override
   String get bgRun => '背景執行';
@@ -1134,6 +1403,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get fullScreenTip => '當設備旋轉為橫向時，是否開啟全螢幕模式？此選項僅適用於伺服器分頁。';
 
   @override
+  String get githubGist => 'GitHub Gist';
+
+  @override
+  String get githubGistIdOptional => 'Gist ID（選填）';
+
+  @override
+  String get githubGistToken => 'GitHub Gist Token';
+
+  @override
+  String get githubGistTokenEmpty => 'Token 為空';
+
+  @override
   String get goBackQ => '返回？';
 
   @override
@@ -1169,6 +1450,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get imagesList => '映像檔列表';
 
   @override
+  String get pull => '拉取';
+
+  @override
   String get installDockerWithUrl =>
       '請先前往 https://docs.docker.com/engine/install 安裝 Docker';
 
@@ -1180,6 +1464,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get jumpServer => '跳板伺服器';
+
+  @override
+  String jumpServersNotFoundFmt(Object serverName, Object jumpIds) {
+    return '未找到 $serverName 配置的跳板伺服器：$jumpIds';
+  }
+
+  @override
+  String get noJumpServerAvailable => '沒有可用的跳板伺服器。';
 
   @override
   String get keepForeground => '請讓 App 保持在前景執行';
@@ -1200,10 +1492,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get lastSuccess => '最後成功';
 
   @override
-  String get letterCache => '輸入法字符快取';
+  String get letterCache => '一般鍵盤輸入';
 
   @override
-  String get letterCacheTip => '建議關閉，但關閉後將無法輸入 CJK 等文字。';
+  String get letterCacheTip => '開啟後，輸入內容會經過一般輸入法，這樣可避免部分系統在終端彈出安全鍵盤。';
 
   @override
   String madeWithLove(Object myGithub) {
@@ -1224,6 +1516,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get min => '最小';
+
+  @override
+  String mismatchSystem(Object system) {
+    return '系統不匹配：$system';
+  }
 
   @override
   String get more => '更多';
@@ -1316,13 +1613,70 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get pveLoginFailed => '登入失敗。無法使用伺服器設定中的使用者名稱或密碼透過 Linux PAM 方式認證。';
 
   @override
+  String get pveServerClientMissing => '目前伺服器的 SSH 用戶端不可用。';
+
+  @override
+  String get pveAddressMissing => '未設定 PVE 位址，請在伺服器設定中填寫。';
+
+  @override
+  String get pvePasswordRequired => '需要提供 PVE 密碼，請在伺服器設定中填寫。';
+
+  @override
+  String get pveOtpRequired => '此 PVE 伺服器已啟用雙因素認證，請輸入 OTP 驗證碼。';
+
+  @override
+  String get pveOtpChallengeExpired => 'OTP 驗證挑戰已過期，請重新整理後再試一次。';
+
+  @override
+  String get pveOtpCodeRequired => '請輸入 OTP 驗證碼。';
+
+  @override
+  String get pveOtpVerificationFailed => 'OTP 驗證失敗，請使用最新驗證碼重試。';
+
+  @override
+  String get pveOtpTitle => 'OTP 驗證';
+
+  @override
+  String get pveOtpLabel => 'OTP 驗證碼';
+
+  @override
+  String get pveInvalidResponseBody => 'PVE 登入返回了無效的回應內容。';
+
+  @override
+  String get pveInvalidResponseData => 'PVE 登入回應中缺少有效的 data 資料。';
+
+  @override
+  String get pveMissingAuthTicket => 'PVE 登入成功，但未返回認證票據。';
+
+  @override
   String get pveVersionLow => '此功能目前處於測試階段，僅在 PVE 8+ 上進行過測試。請謹慎使用。';
+
+  @override
+  String get pveLoadingForwarding => '正在建立 SSH 隧道...';
+
+  @override
+  String get pveLoadingLogin => '正在認證 PVE...';
+
+  @override
+  String get pveLoadingData => '正在獲取集群數據...';
+
+  @override
+  String get pveLoadingConnect => '正在連接...';
+
+  @override
+  String get pvePassword => 'PVE 密碼';
+
+  @override
+  String get pvePasswordHint => '使用密鑰認證時需要填寫';
 
   @override
   String get read => '讀取';
 
   @override
   String get recentConnections => '最近連線記錄';
+
+  @override
+  String get reconnecting => '重連中...';
 
   @override
   String get rememberPwdInMem => '在記憶體中記住密碼';
@@ -1536,6 +1890,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get trySudo => '嘗試使用 sudo';
 
   @override
+  String get sudoPromptNotFound => '目前沒有 sudo 密碼提示。';
+
+  @override
   String get unknown => '未知';
 
   @override
@@ -1617,4 +1974,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get podmanDockerEmulationDetected =>
       '檢測到 Podman Docker 仿真。請在設定中切換到 Podman。';
+
+  @override
+  String get sponsor => '贊助';
+
+  @override
+  String get portForwardBetaTitle => 'Port Forward (Beta)';
+
+  @override
+  String get systemd => 'Systemd';
 }

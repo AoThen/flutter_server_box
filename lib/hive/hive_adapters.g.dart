@@ -107,6 +107,8 @@ class SpiAdapter extends TypeAdapter<Spi> {
       alterUrl: fields[7] as String?,
       autoConnect: fields[8] == null ? true : fields[8] as bool,
       jumpId: fields[9] as String?,
+      jumpIds: (fields[17] as List?)?.cast<String>(),
+      proxyCommand: fields[16] as String?,
       custom: fields[10] as ServerCustom?,
       wolCfg: fields[11] as WakeOnLanCfg?,
       envs: (fields[12] as Map?)?.cast<String, String>(),
@@ -119,7 +121,7 @@ class SpiAdapter extends TypeAdapter<Spi> {
   @override
   void write(BinaryWriter writer, Spi obj) {
     writer
-      ..writeByte(16)
+      ..writeByte(18)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -151,7 +153,11 @@ class SpiAdapter extends TypeAdapter<Spi> {
       ..writeByte(14)
       ..write(obj.customSystemType)
       ..writeByte(15)
-      ..write(obj.disabledCmdTypes);
+      ..write(obj.disabledCmdTypes)
+      ..writeByte(16)
+      ..write(obj.proxyCommand)
+      ..writeByte(17)
+      ..write(obj.jumpIds);
   }
 
   @override
@@ -262,6 +268,10 @@ class VirtKeyAdapter extends TypeAdapter<VirtKey> {
         return VirtKey.f12;
       case 44:
         return VirtKey.shift;
+      case 45:
+        return VirtKey.sudo;
+      case 46:
+        return VirtKey.tmux;
       default:
         return VirtKey.esc;
     }
@@ -360,6 +370,10 @@ class VirtKeyAdapter extends TypeAdapter<VirtKey> {
         writer.writeByte(43);
       case VirtKey.shift:
         writer.writeByte(44);
+      case VirtKey.sudo:
+        writer.writeByte(45);
+      case VirtKey.tmux:
+        writer.writeByte(46);
     }
   }
 
@@ -436,6 +450,8 @@ class ServerFuncBtnAdapter extends TypeAdapter<ServerFuncBtn> {
         return ServerFuncBtn.iperf;
       case 8:
         return ServerFuncBtn.systemd;
+      case 9:
+        return ServerFuncBtn.portForward;
       default:
         return ServerFuncBtn.terminal;
     }
@@ -458,6 +474,8 @@ class ServerFuncBtnAdapter extends TypeAdapter<ServerFuncBtn> {
         writer.writeByte(6);
       case ServerFuncBtn.systemd:
         writer.writeByte(8);
+      case ServerFuncBtn.portForward:
+        writer.writeByte(9);
     }
   }
 
@@ -485,8 +503,10 @@ class ServerCustomAdapter extends TypeAdapter<ServerCustom> {
     return ServerCustom(
       pveAddr: fields[1] as String?,
       pveIgnoreCert: fields[2] == null ? false : fields[2] as bool,
+      pvePwd: fields[8] as String?,
       cmds: (fields[3] as Map?)?.cast<String, String>(),
       preferTempDev: fields[4] as String?,
+      tempIsCelsius: fields[9] == null ? false : fields[9] as bool,
       logoUrl: fields[5] as String?,
       netDev: fields[6] as String?,
       scriptDir: fields[7] as String?,
@@ -496,7 +516,7 @@ class ServerCustomAdapter extends TypeAdapter<ServerCustom> {
   @override
   void write(BinaryWriter writer, ServerCustom obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(9)
       ..writeByte(1)
       ..write(obj.pveAddr)
       ..writeByte(2)
@@ -510,7 +530,11 @@ class ServerCustomAdapter extends TypeAdapter<ServerCustom> {
       ..writeByte(6)
       ..write(obj.netDev)
       ..writeByte(7)
-      ..write(obj.scriptDir);
+      ..write(obj.scriptDir)
+      ..writeByte(8)
+      ..write(obj.pvePwd)
+      ..writeByte(9)
+      ..write(obj.tempIsCelsius);
   }
 
   @override
@@ -601,6 +625,102 @@ class SystemTypeAdapter extends TypeAdapter<SystemType> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is SystemTypeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class PortForwardConfigAdapter extends TypeAdapter<PortForwardConfig> {
+  @override
+  final typeId = 10;
+
+  @override
+  PortForwardConfig read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return PortForwardConfig(
+      id: fields[0] as String,
+      serverId: fields[7] as String,
+      name: fields[1] as String,
+      type: fields[8] as PortForwardType,
+      localHost: fields[2] as String?,
+      localPort: fields[3] == null ? 0 : (fields[3] as num).toInt(),
+      remoteHost: fields[4] as String?,
+      remotePort: (fields[5] as num?)?.toInt(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, PortForwardConfig obj) {
+    writer
+      ..writeByte(8)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.name)
+      ..writeByte(2)
+      ..write(obj.localHost)
+      ..writeByte(3)
+      ..write(obj.localPort)
+      ..writeByte(4)
+      ..write(obj.remoteHost)
+      ..writeByte(5)
+      ..write(obj.remotePort)
+      ..writeByte(7)
+      ..write(obj.serverId)
+      ..writeByte(8)
+      ..write(obj.type);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PortForwardConfigAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class PortForwardTypeAdapter extends TypeAdapter<PortForwardType> {
+  @override
+  final typeId = 12;
+
+  @override
+  PortForwardType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return PortForwardType.local;
+      case 1:
+        return PortForwardType.remote;
+      case 2:
+        return PortForwardType.dynamic;
+      default:
+        return PortForwardType.local;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, PortForwardType obj) {
+    switch (obj) {
+      case PortForwardType.local:
+        writer.writeByte(0);
+      case PortForwardType.remote:
+        writer.writeByte(1);
+      case PortForwardType.dynamic:
+        writer.writeByte(2);
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PortForwardTypeAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

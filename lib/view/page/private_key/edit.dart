@@ -12,6 +12,9 @@ import 'package:server_box/data/provider/private_key.dart';
 import 'package:server_box/data/res/misc.dart';
 
 const _format = 'text/plain';
+final _whitespaceRegex = RegExp(r'\s+');
+final _pemBeginRegex = RegExp(r'^-----BEGIN ([A-Z0-9 ]+)-----$');
+final _pemEndRegex = RegExp(r'^-----END ([A-Z0-9 ]+)-----$');
 
 final class PrivateKeyEditPageArgs {
   final PrivateKeyInfo? pki;
@@ -25,7 +28,10 @@ class PrivateKeyEditPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<PrivateKeyEditPage> createState() => _PrivateKeyEditPageState();
 
-  static const route = AppRoute(page: PrivateKeyEditPage.new, path: '/private_key/edit');
+  static const route = AppRoute(
+    page: PrivateKeyEditPage.new,
+    path: '/private_key/edit',
+  );
 }
 
 class _PrivateKeyEditPageState extends ConsumerState<PrivateKeyEditPage> {
@@ -82,7 +88,11 @@ class _PrivateKeyEditPageState extends ConsumerState<PrivateKeyEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: _buildAppBar(), body: _buildBody(), floatingActionButton: _buildFAB());
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: _buildBody(),
+      floatingActionButton: _buildFAB(),
+    );
   }
 
   CustomAppBar _buildAppBar() {
@@ -94,7 +104,11 @@ class _PrivateKeyEditPageState extends ConsumerState<PrivateKeyEditPage> {
               onPressed: () {
                 context.showRoundDialog(
                   title: libL10n.attention,
-                  child: Text(libL10n.askContinue('${libL10n.delete} ${l10n.privateKey}(${pki.id})')),
+                  child: Text(
+                    libL10n.askContinue(
+                      '${libL10n.delete} ${l10n.privateKey}(${pki.id})',
+                    ),
+                  ),
                   actions: Btn.ok(
                     onTap: () {
                       _notifier.delete(pki);
@@ -116,8 +130,69 @@ class _PrivateKeyEditPageState extends ConsumerState<PrivateKeyEditPage> {
     return value.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
   }
 
+  /// Normalizes the private key format:
+  /// - Removes whitespace from Base64 content (spaces, tabs, etc.)
+  /// - Ensures the key ends with a newline
+  String _normalizePrivateKey(String key) {
+    final lines = key.split('\n');
+    // Guard: need at least header + body + footer (3 lines) for valid PEM
+    if (lines.length < 3) return key;
+
+    final header = lines.first;
+    final footer = lines.last;
+
+    // Validate PEM boundaries before mutating input
+    final headerMatch = _pemBeginRegex.firstMatch(header);
+    final footerMatch = _pemEndRegex.firstMatch(footer);
+    if (headerMatch == null || footerMatch == null) {
+      return key;
+    }
+
+    // Ensure header and footer labels match
+    final headerLabel = headerMatch.group(1);
+    final footerLabel = footerMatch.group(1);
+    if (headerLabel != footerLabel) {
+      return key;
+    }
+
+    // Extract Base64 content (everything between header and footer)
+    final bodyLines = lines.sublist(1, lines.length - 1);
+
+    // Check for RFC 1421 metadata headers (e.g., Proc-Type, DEK-Info)
+    // These appear in encrypted PEM keys and must be preserved
+    final hasMetadataHeaders = bodyLines.any(
+      (line) => line.contains(':') && !line.startsWith('-----'),
+    );
+
+    if (hasMetadataHeaders) {
+      // For encrypted keys, preserve structure and just ensure trailing newline
+      if (!key.endsWith('\n')) {
+        return '$key\n';
+      }
+      return key;
+    }
+
+    // Remove all whitespace from Base64 content
+    final cleanBody = bodyLines.join('').replaceAll(_whitespaceRegex, '');
+
+    // Rebuild the key with standard formatting (64 chars per line)
+    final buffer = StringBuffer();
+    buffer.writeln(header);
+    for (var i = 0; i < cleanBody.length; i += 64) {
+      final end = (i + 64 < cleanBody.length) ? i + 64 : cleanBody.length;
+      buffer.writeln(cleanBody.substring(i, end));
+    }
+    buffer.writeln(footer);
+
+    return buffer.toString();
+  }
+
   Widget _buildFAB() {
-    return FloatingActionButton(tooltip: l10n.save, onPressed: _onTapSave, child: const Icon(Icons.save));
+    return FloatingActionButton(
+      tooltip: l10n.save,
+      onPressed: _onTapSave,
+      child: const Icon(Icons.save),
+    );
   }
 
   Widget _buildBody() {
@@ -157,7 +232,11 @@ class _PrivateKeyEditPageState extends ConsumerState<PrivateKeyEditPage> {
             final size = (await file.stat()).size;
             if (size > Miscs.privateKeyMaxSize) {
               context.showSnackBar(
-                l10n.fileTooLarge(path, size.bytes2Str, Miscs.privateKeyMaxSize.bytes2Str),
+                l10n.fileTooLarge(
+                  path,
+                  size.bytes2Str,
+                  Miscs.privateKeyMaxSize.bytes2Str,
+                ),
               );
               return;
             }
@@ -179,14 +258,19 @@ class _PrivateKeyEditPageState extends ConsumerState<PrivateKeyEditPage> {
           onSubmitted: (_) => _onTapSave(),
         ),
         SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-        ValBuilder(listenable: _loading, builder: (val) => val ?? UIs.placeholder),
+        ValBuilder(
+          listenable: _loading,
+          builder: (val) => val ?? UIs.placeholder,
+        ),
       ],
     );
   }
 
   void _onTapSave() async {
     final name = _nameController.text;
-    final key = _standardizeLineSeparators(_keyController.text.trim());
+    final key = _normalizePrivateKey(
+      _standardizeLineSeparators(_keyController.text.trim()),
+    );
     final pwd = _pwdController.text;
     if (name.isEmpty || key.isEmpty) {
       context.showSnackBar(libL10n.empty);

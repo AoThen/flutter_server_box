@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:fl_lib/fl_lib.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:server_box/core/extension/context/locale.dart';
-import 'package:server_box/data/model/sftp/worker.dart';
+import 'package:server_box/core/utils/refresh_interval.dart';
+import 'package:server_box/data/model/sftp/req.dart';
+import 'package:server_box/data/model/sftp/status.dart';
 import 'package:server_box/data/provider/sftp.dart';
+import 'package:server_box/data/res/default.dart';
 import 'package:server_box/view/page/storage/local.dart';
 
 class SftpMissionPage extends ConsumerStatefulWidget {
@@ -12,10 +17,32 @@ class SftpMissionPage extends ConsumerStatefulWidget {
   @override
   ConsumerState<SftpMissionPage> createState() => _SftpMissionPageState();
 
-  static const route = AppRouteNoArg(page: SftpMissionPage.new, path: '/sftp/mission');
+  static const route = AppRouteNoArg(
+    page: SftpMissionPage.new,
+    path: '/sftp/mission',
+  );
 }
 
 class _SftpMissionPageState extends ConsumerState<SftpMissionPage> {
+  Timer? _speedRefreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    final interval =
+        serverStatusRefreshInterval() ??
+        const Duration(seconds: Defaults.updateInterval);
+    _speedRefreshTimer = Timer.periodic(interval, (_) {
+      ref.read(sftpProvider.notifier).refreshTransferSpeeds();
+    });
+  }
+
+  @override
+  void dispose() {
+    _speedRefreshTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,15 +52,15 @@ class _SftpMissionPageState extends ConsumerState<SftpMissionPage> {
   }
 
   Widget _buildBody() {
-    final status = ref.watch(sftpProvider.select((pro) => pro.requests));
-    if (status.isEmpty) {
+    final requests = ref.watch(sftpProvider).requests;
+    if (requests.isEmpty) {
       return Center(child: Text(libL10n.empty));
     }
     return ListView.builder(
       padding: const EdgeInsets.all(11),
-      itemCount: status.length,
+      itemCount: requests.length,
       itemBuilder: (context, index) {
-        return _buildItem(status[index]);
+        return _buildItem(requests[index]);
       },
     );
   }
@@ -45,7 +72,10 @@ class _SftpMissionPageState extends ConsumerState<SftpMissionPage> {
         status: status,
         subtitle: libL10n.error,
         trailing: IconButton(
-          onPressed: () => context.showRoundDialog(title: libL10n.error, child: Text(err.toString())),
+          onPressed: () => context.showRoundDialog(
+            title: libL10n.error,
+            child: Text(err.toString()),
+          ),
           icon: const Icon(Icons.error),
         ),
       );
@@ -55,7 +85,7 @@ class _SftpMissionPageState extends ConsumerState<SftpMissionPage> {
       const (SftpWorkerStatus.loading) => _buildLoading(status),
       const (SftpWorkerStatus.sshConnectted) => _buildConnected(status),
       const (SftpWorkerStatus.preparing) => _buildPreparing(status),
-      _ => _buildDefault(status),
+      null => _buildPreparing(status),
     };
   }
 
@@ -64,20 +94,6 @@ class _SftpMissionPageState extends ConsumerState<SftpMissionPage> {
       status: status,
       subtitle: l10n.sftpDlPrepare,
       trailing: _buildDelete(status.fileName, status.id),
-    );
-  }
-
-  Widget _buildDefault(SftpReqStatus status) {
-    return _wrapInCard(
-      status: status,
-      subtitle: l10n.unknown,
-      trailing: IconButton(
-        onPressed: () => context.showRoundDialog(
-          title: libL10n.error,
-          child: Text((status.error ?? l10n.unknown).toString()),
-        ),
-        icon: const Icon(Icons.error),
-      ),
     );
   }
 
@@ -91,17 +107,21 @@ class _SftpMissionPageState extends ConsumerState<SftpMissionPage> {
 
   Widget _buildLoading(SftpReqStatus status) {
     final percentStr = (status.progress ?? 0.0).toStringAsFixed(2);
+    final transferred = (status.transferredBytes ?? 0).bytes2Str;
     final size = (status.size ?? 0).bytes2Str;
+    final speed = '${(status.speedBytesPerSecond ?? 0).bytes2Str}/s';
     return _wrapInCard(
       status: status,
-      subtitle: l10n.percentOfSize(percentStr, size),
+      subtitle: '$transferred / $size - $percentStr% - ${l10n.speed}: $speed',
       trailing: _buildDelete(status.fileName, status.id),
     );
   }
 
   Widget _buildFinished(SftpReqStatus status) {
     final time = status.spentTime.toString();
-    final str = l10n.spentTime(time == 'null' ? l10n.unknown : (time.substring(0, time.length - 7)));
+    final str = l10n.spentTime(
+      time == 'null' ? l10n.unknown : (time.substring(0, time.length - 7)),
+    );
 
     final btns = Row(
       mainAxisSize: MainAxisSize.min,
@@ -110,7 +130,10 @@ class _SftpMissionPageState extends ConsumerState<SftpMissionPage> {
           onPressed: () {
             final idx = status.req.localPath.lastIndexOf(Pfs.seperator);
             final dir = status.req.localPath.substring(0, idx);
-            LocalFilePage.route.go(context, args: LocalFilePageArgs(initDir: dir));
+            LocalFilePage.route.go(
+              context,
+              args: LocalFilePageArgs(initDir: dir),
+            );
           },
           icon: const Icon(Icons.file_open),
         ),
@@ -124,12 +147,20 @@ class _SftpMissionPageState extends ConsumerState<SftpMissionPage> {
     return _wrapInCard(status: status, subtitle: str, trailing: btns);
   }
 
-  Widget _wrapInCard({required SftpReqStatus status, String? subtitle, Widget? trailing}) {
+  Widget _wrapInCard({
+    required SftpReqStatus status,
+    String? subtitle,
+    Widget? trailing,
+  }) {
     final time = DateTime.fromMicrosecondsSinceEpoch(status.id);
     return CardX(
       child: ListTile(
         leading: Text(time.hourMinute),
-        title: Text(status.fileName, overflow: TextOverflow.ellipsis, maxLines: 1),
+        title: Text(
+          status.fileName,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
         subtitle: subtitle == null ? null : Text(subtitle, style: UIs.textGrey),
         trailing: trailing,
       ),
@@ -140,7 +171,9 @@ class _SftpMissionPageState extends ConsumerState<SftpMissionPage> {
     return IconButton(
       onPressed: () => context.showRoundDialog(
         title: libL10n.attention,
-        child: Text(libL10n.askContinue('${libL10n.delete} ${libL10n.mission}($name)')),
+        child: Text(
+          libL10n.askContinue('${libL10n.delete} ${libL10n.mission}($name)'),
+        ),
         actions: Btn.ok(
           onTap: () {
             ref.read(sftpProvider.notifier).cancel(id);
